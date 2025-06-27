@@ -1,0 +1,48 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 30px 0;
+  text-align: center;
+  border-bottom: 2px solid #000;
+  margin-bottom: 40px;
+  background-color: #fff;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.header-button {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+  .header-button {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    margin-bottom: 20px;
+    align-self: flex-start;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+  .action-buttons {
+    flex-direction: column;
+  }
+} 

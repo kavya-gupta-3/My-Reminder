@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "reminders": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "$reminderId": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid",
+          ".validate": "newData.hasChildren(['personName', 'dateOfBirth', 'age', 'relationship', 'createdAt', 'userId']) && newData.child('userId').val() === auth.uid"
+        }
+      }
+    }
+  }
+} 
