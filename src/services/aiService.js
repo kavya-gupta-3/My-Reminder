@@ -49,7 +49,7 @@ class AIService {
       const prompt = `You are a friendly AI assistant that creates personalized birthday messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and celebratory\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Don't mention specific ages if the person might be sensitive about it\n- Focus on positive wishes and celebration\n\nGenerate a personalized birthday message for ${reminderData.personName}. \n      \nContext:\n- Person: ${reminderData.personName}\n- Age they are turning: ${currentAge}\n- Relationship: ${reminderData.relationship}\n- Birthday: ${reminderData.dateOfBirth}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
 
       // Use backend proxy
-      const response = await fetch('/api/generate', {
+      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ class AIService {
       `;
       
       // Use backend proxy
-      const response = await fetch('/api/generate', {
+      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -233,7 +233,7 @@ class AIService {
       }
       const systemPrompt = `You are a friendly AI assistant that creates personalized birthday messages.\n\nIMPORTANT RULES:\n- Output ONLY the birthday message, with no preamble, no explanations, and no follow-up questions.\n- Do NOT include phrases like 'Here's a message for you', 'Would you like to add or change anything', or anything similar.\n- The message must be ready to send as-is.\n- Always be warm, caring, and celebratory.\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.).\n- ${sizePrompt}\n- Make it personal and genuine.\n- Don't be overly formal or generic.\n- Don't use inappropriate humor or references.\n- Don't mention specific ages if the person might be sensitive about it.\n- Focus on positive wishes and celebration.\n- Make each message unique.\n- Random seed for variety: ${randomSeed}\n`;
       const userPrompt = `Generate a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
-      const response = await fetch('/api/generate', {
+      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
