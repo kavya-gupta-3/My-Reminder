@@ -45,4 +45,49 @@
   .action-buttons {
     flex-direction: column;
   }
+}
+@media (max-width: 600px) {
+  .header, header {
+    padding: 10px 0 !important;
+  }
+  h1, h2 {
+    font-size: 1.1rem !important;
+  }
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .action-buttons {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .action-buttons button {
+    min-width: 100px !important;
+    padding: 12px 8px !important;
+    font-size: 0.95rem !important;
+  }
+  /* Fix countdown grid for mobile */
+  .countdown-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+  }
+  .birthday-info-card, .countdown-card, .ai-message-card {
+    padding: 18px !important;
+    margin-bottom: 18px !important;
+  }
+}
+@media (max-width: 400px) {
+  .header, header {
+    padding: 4px 0 !important;
+  }
+  h1, h2 {
+    font-size: 0.95rem !important;
+  }
+  .responsive-grid {
+    gap: 4px !important;
+  }
+  .countdown-grid {
+    grid-template-columns: 1fr !important;
+  }
 } 

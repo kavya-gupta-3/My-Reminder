@@ -350,7 +350,7 @@ function ReminderDetails() {
         margin: '0 auto'
       }}>
         {/* Birthday Info Card */}
-        <div style={{
+        <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '20px',
@@ -433,7 +433,7 @@ function ReminderDetails() {
         </div>
 
         {/* Countdown Timer */}
-        <div style={{
+        <div className="countdown-card" style={{
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '20px',
@@ -451,7 +451,7 @@ function ReminderDetails() {
           }}>
             {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to Birthday</>}
           </h3>
-          <div style={{
+          <div className="countdown-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '20px',
@@ -522,7 +522,7 @@ function ReminderDetails() {
         </div>
 
         {/* AI Generated Message */}
-        <div style={{
+        <div className="ai-message-card" style={{
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '20px',

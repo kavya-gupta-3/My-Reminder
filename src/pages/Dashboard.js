@@ -5,6 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaBirthdayCake, FaGift, FaCalendarCheck } from 'react-icons/fa';
+import { signOut } from 'firebase/auth';
 
 function Dashboard() {
   const [user, loading] = useAuthState(auth);
@@ -80,6 +81,17 @@ function Dashboard() {
     return () => off(remindersRef, 'value', unsubscribe);
   }, [user]);
 
+  // Add logout handler
+  const handleLogout = async () => {
+    if (!window.confirm('Are you sure you want to log out?')) return;
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (err) {
+      alert('Logout failed.');
+    }
+  };
+
   if (loading) return (
     <div style={{
       minHeight: '100vh',
@@ -112,8 +124,39 @@ function Dashboard() {
         marginBottom: '40px',
         backgroundColor: '#fff',
         borderRadius: '0 0 20px 20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        position: 'relative'
       }}>
+        {/* Logout button top right */}
+        <button
+          onClick={handleLogout}
+          style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            background: '#000',
+            color: '#fff',
+            border: '2px solid #000',
+            borderRadius: '12px',
+            padding: '10px 18px',
+            fontWeight: 600,
+            fontSize: '1rem',
+            cursor: 'pointer',
+            zIndex: 100,
+            transition: 'all 0.3s',
+            minWidth: 80
+          }}
+          onMouseEnter={e => {
+            e.target.style.backgroundColor = '#fff';
+            e.target.style.color = '#000';
+          }}
+          onMouseLeave={e => {
+            e.target.style.backgroundColor = '#000';
+            e.target.style.color = '#fff';
+          }}
+        >
+          Logout
+        </button>
         <h1 style={{
           fontSize: '2.5rem',
           fontWeight: '700',
@@ -343,6 +386,13 @@ function Dashboard() {
         @media (max-width: 768px) {
           .dashboard-container {
             padding: 0 15px 100px 15px;
+          }
+          header button {
+            top: 10px !important;
+            right: 10px !important;
+            padding: 8px 12px !important;
+            font-size: 0.95rem !important;
+            min-width: 60px !important;
           }
         }
       `}</style>
