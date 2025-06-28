@@ -1,7 +1,3 @@
-const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
-const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
-
-
 class AIService {
   async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
     try {

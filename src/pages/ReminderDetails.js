@@ -15,7 +15,6 @@ function ReminderDetails() {
   const [aiLoading, setAiLoading] = useState(true);
   const [userContext] = useState(null);
   const [messageSize, setMessageSize] = useState('medium');
-  const [regenCount] = useState(0);
   const [regenLimitReached, setRegenLimitReached] = useState(false);
   const [showShareFallback, setShowShareFallback] = useState(false);
   const [loadError, setLoadError] = useState('');
