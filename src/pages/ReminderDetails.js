@@ -296,18 +296,19 @@ function ReminderDetails() {
       backgroundColor: '#f8f9fa',
       color: '#333',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '0 20px 40px 20px'
+      padding: '0 16px 40px 16px'
     }}>
       {/* Header */}
       <header className="header" style={{
-        padding: 'clamp(25px, 6vw, 40px) 0',
+        padding: '32px 20px',
         textAlign: 'center',
         borderBottom: '2px solid #000',
-        marginBottom: 'clamp(25px, 5vw, 40px)',
+        marginBottom: '32px',
         backgroundColor: '#fff',
-        borderRadius: '0 0 20px 20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-        margin: '0 -20px clamp(25px, 5vw, 40px) -20px'
+        borderRadius: '0 0 24px 24px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+        margin: '0 -16px 32px -16px',
+        position: 'relative'
       }}>
         <button
           onClick={() => navigate('/')}
@@ -316,16 +317,19 @@ function ReminderDetails() {
             background: '#000',
             border: '2px solid #000',
             color: '#fff',
-            padding: 'clamp(10px, 3vw, 15px) clamp(15px, 4vw, 20px)',
-            borderRadius: '12px',
+            padding: '12px 16px',
+            borderRadius: '16px',
             cursor: 'pointer',
-            fontSize: 'clamp(14px, 3vw, 16px)',
+            fontSize: '16px',
             fontWeight: '600',
             transition: 'all 0.3s ease',
             position: 'absolute',
-            left: 'clamp(15px, 4vw, 20px)',
+            left: '20px',
             top: '50%',
-            transform: 'translateY(-50%)'
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#fff';
@@ -336,18 +340,18 @@ function ReminderDetails() {
             e.target.style.color = '#fff';
           }}
         >
-          <FaArrowLeft style={{ marginRight: 'clamp(6px, 2vw, 8px)' }} /> Back
+          <FaArrowLeft /> Back
         </button>
         <h1 style={{
-          fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
+          fontSize: '28px',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
           color: '#000',
-          paddingLeft: 'clamp(80px, 20vw, 120px)',
-          paddingRight: 'clamp(20px, 5vw, 30px)'
+          paddingLeft: '100px',
+          paddingRight: '20px'
         }}>
-          <FaBirthdayCake style={{ marginRight: 'clamp(12px, 3vw, 16px)' }} /> {reminder.personName}'s Birthday
+          <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Birthday
         </h1>
       </header>
 
@@ -360,26 +364,26 @@ function ReminderDetails() {
         <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '20px',
-          padding: '40px',
-          marginBottom: '30px',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
+          borderRadius: '24px',
+          padding: '32px',
+          marginBottom: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '30px'
+            marginBottom: '24px'
           }}>
             <span style={{
-              fontSize: '3rem',
-              marginRight: '20px'
+              fontSize: '48px',
+              marginRight: '24px'
             }}>
               <FaBirthdayCake />
             </span>
             <div>
               <h2 style={{
-                fontSize: '2rem',
+                fontSize: '28px',
                 fontWeight: '700',
                 margin: '0 0 8px 0',
                 color: '#000'
@@ -387,7 +391,7 @@ function ReminderDetails() {
                 {reminder.personName}
               </h2>
               <p style={{
-                fontSize: '1.1rem',
+                fontSize: '18px',
                 color: '#666',
                 margin: '0'
               }}>
@@ -402,18 +406,18 @@ function ReminderDetails() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '20px',
-            marginBottom: '30px'
+            marginBottom: '24px'
           }}>
             <div style={{
-              padding: '20px',
+              padding: '24px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}><FaBirthdayCake /></div>
-              <div style={{ fontWeight: '600', marginBottom: '4px', color: '#000' }}>Birthday</div>
-              <div style={{ color: '#666' }}>
+              <div style={{ fontSize: '32px', marginBottom: '12px' }}><FaBirthdayCake /></div>
+              <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '18px' }}>Birthday</div>
+              <div style={{ color: '#666', fontSize: '16px' }}>
                 {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
                   month: 'long',
                   day: 'numeric',
@@ -424,14 +428,14 @@ function ReminderDetails() {
 
             {reminder.note && (
               <div style={{
-                padding: '20px',
+                padding: '24px',
                 backgroundColor: '#f8f9fa',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 border: '1px solid #000'
               }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}><FaRegCommentDots /></div>
-                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000' }}>Note</div>
-                <div style={{ color: '#666', fontSize: '0.9rem' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}><FaRegCommentDots /></div>
+                <div style={{ fontWeight: '600', marginBottom: '12px', color: '#000', fontSize: '18px' }}>Note</div>
+                <div style={{ color: '#666', fontSize: '16px' }}>
                   {reminder.note}
                 </div>
               </div>
@@ -443,87 +447,87 @@ function ReminderDetails() {
         <div className="countdown-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '20px',
-          padding: '40px',
-          marginBottom: '30px',
+          borderRadius: '24px',
+          padding: '32px',
+          marginBottom: '24px',
           textAlign: 'center',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
         }}>
           <h3 style={{
-            fontSize: '1.5rem',
+            fontSize: '24px',
             fontWeight: '600',
-            margin: '0 0 30px 0',
+            margin: '0 0 24px 0',
             color: '#000'
           }}>
-            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to Birthday</>}
+            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '12px' }} />Countdown to Birthday</>}
           </h3>
           <div className="countdown-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '20px',
+            gap: '16px',
             maxWidth: '400px',
             margin: '0 auto'
           }}>
             <div style={{
               padding: '20px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '2rem',
+                fontSize: '32px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.days}
               </div>
-              <div style={{ color: '#666', fontSize: '0.9rem' }}>Days</div>
+              <div style={{ color: '#666', fontSize: '16px' }}>Days</div>
             </div>
             <div style={{
               padding: '20px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '2rem',
+                fontSize: '32px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.hours}
               </div>
-              <div style={{ color: '#666', fontSize: '0.9rem' }}>Hours</div>
+              <div style={{ color: '#666', fontSize: '16px' }}>Hours</div>
             </div>
             <div style={{
               padding: '20px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '2rem',
+                fontSize: '32px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.minutes}
               </div>
-              <div style={{ color: '#666', fontSize: '0.9rem' }}>Minutes</div>
+              <div style={{ color: '#666', fontSize: '16px' }}>Minutes</div>
             </div>
             <div style={{
               padding: '20px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '2rem',
+                fontSize: '32px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.seconds}
               </div>
-              <div style={{ color: '#666', fontSize: '0.9rem' }}>Seconds</div>
+              <div style={{ color: '#666', fontSize: '16px' }}>Seconds</div>
             </div>
           </div>
         </div>
@@ -532,22 +536,22 @@ function ReminderDetails() {
         <div className="ai-message-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '20px',
-          padding: 'clamp(25px, 5vw, 40px)',
-          marginBottom: 'clamp(20px, 4vw, 30px)',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
+          borderRadius: '24px',
+          padding: '32px',
+          marginBottom: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: 'clamp(15px, 3vw, 20px)',
-            gap: 'clamp(12px, 3vw, 16px)',
+            marginBottom: '24px',
+            gap: '16px',
             flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginRight: 'clamp(10px, 2vw, 15px)' }}><FaRobot /></span>
+            <span style={{ fontSize: '32px', marginRight: '16px' }}><FaRobot /></span>
             <h3 style={{
-              fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+              fontSize: '24px',
               fontWeight: '600',
               margin: '0',
               color: '#000',
@@ -558,19 +562,19 @@ function ReminderDetails() {
             </h3>
             <div style={{
               display: 'flex',
-              gap: 'clamp(8px, 2vw, 12px)',
+              gap: '12px',
               flexWrap: 'wrap',
               alignItems: 'center',
-              marginTop: 'clamp(8px, 2vw, 12px)'
+              marginTop: '12px'
             }}>
               <select 
                 value={messageSize} 
                 onChange={e => setMessageSize(e.target.value)} 
                 style={{ 
-                  fontSize: 'clamp(0.9rem, 3vw, 1rem)', 
-                  borderRadius: '8px', 
+                  fontSize: '16px', 
+                  borderRadius: '12px', 
                   border: '1px solid #000', 
-                  padding: 'clamp(6px, 2vw, 8px) clamp(8px, 2vw, 12px)',
+                  padding: '8px 12px',
                   backgroundColor: '#fff',
                   minWidth: '80px'
                 }} 
@@ -587,16 +591,16 @@ function ReminderDetails() {
                   background: regenLimitReached ? '#ccc' : '#000', 
                   color: '#fff', 
                   border: 'none', 
-                  borderRadius: '8px', 
-                  padding: 'clamp(6px, 2vw, 8px) clamp(10px, 2vw, 12px)', 
+                  borderRadius: '12px', 
+                  padding: '8px 16px', 
                   cursor: aiLoading || regenLimitReached ? 'not-allowed' : 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: 'clamp(4px, 1vw, 6px)', 
+                  gap: '8px', 
                   fontWeight: 600,
-                  fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
+                  fontSize: '16px',
                   whiteSpace: 'nowrap',
-                  minHeight: '36px'
+                  minHeight: '40px'
                 }}
               >
                 <FaSyncAlt /> Regenerate
@@ -604,20 +608,20 @@ function ReminderDetails() {
             </div>
           </div>
           {regenLimitReached && (
-            <div style={{ color: '#ff6b6b', fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)', marginBottom: 'clamp(8px, 2vw, 10px)', textAlign: 'right' }}>
+            <div style={{ color: '#ff6b6b', fontSize: '16px', marginBottom: '12px', textAlign: 'right' }}>
               Daily regeneration limit reached (15/15)
             </div>
           )}
           {aiLoading ? (
             <div style={{
-              padding: 'clamp(15px, 3vw, 20px)',
+              padding: '24px',
               backgroundColor: '#f8f9fa',
-              borderRadius: '12px',
+              borderRadius: '16px',
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: 'clamp(1rem, 3vw, 1.2rem)', marginBottom: 'clamp(8px, 2vw, 10px)' }}><FaRobot /></div>
-              <p style={{ margin: '0', color: '#666', fontSize: 'clamp(0.9rem, 3vw, 1rem)' }}>Generating personalized message...</p>
+              <div style={{ fontSize: '32px', marginBottom: '16px' }}><FaRobot /></div>
+              <p style={{ margin: '0', color: '#666', fontSize: '18px' }}>Generating personalized message...</p>
             </div>
           ) : (
             <div>
@@ -626,48 +630,48 @@ function ReminderDetails() {
                   color: '#ff6b6b',
                   background: '#fff0f0',
                   border: '1px solid #ff6b6b',
-                  borderRadius: '8px',
-                  padding: 'clamp(12px, 3vw, 16px)',
-                  marginBottom: 'clamp(8px, 2vw, 10px)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginBottom: '12px',
                   textAlign: 'center',
                   fontWeight: 600,
-                  fontSize: 'clamp(0.9rem, 3vw, 1rem)'
+                  fontSize: '18px'
                 }}>{aiMessage}</div>
               ) : (
               <p style={{
-                fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                fontSize: '18px',
                 lineHeight: '1.6',
                 color: '#333',
                 margin: '0',
                 fontStyle: 'italic',
-                padding: 'clamp(15px, 3vw, 20px)',
+                padding: '24px',
                 backgroundColor: '#f8f9fa',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 border: '1px solid #000'
               }}>
                 {aiMessage}
               </p>
               )}
-              <div style={{ display: 'flex', gap: 'clamp(8px, 2vw, 12px)', margin: 'clamp(12px, 3vw, 16px) 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', margin: '20px 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button onClick={handleCopy} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: 'clamp(4px, 1vw, 6px)', 
+                  gap: '8px', 
                   background: '#000', 
                   color: '#fff', 
                   border: 'none', 
-                  borderRadius: '8px', 
-                  padding: 'clamp(8px, 2vw, 10px) clamp(12px, 3vw, 14px)', 
+                  borderRadius: '12px', 
+                  padding: '12px 20px', 
                   cursor: 'pointer', 
                   fontWeight: 600,
-                  fontSize: 'clamp(0.9rem, 3vw, 1rem)'
+                  fontSize: '16px'
                 }}><FaCopy /> Copy</button>
               </div>
               {userContext && userContext.user && (
                 <p style={{
-                  fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
+                  fontSize: '16px',
                   color: '#666',
-                  margin: 'clamp(8px, 2vw, 10px) 0 0 0',
+                  margin: '16px 0 0 0',
                   textAlign: 'center'
                 }}>
                   Personalized for {userContext.user.name} • Based on {userContext.reminders?.length || 0} existing reminders
@@ -682,32 +686,32 @@ function ReminderDetails() {
           className="action-buttons"
           style={{
           display: 'flex',
-          gap: 'clamp(15px, 3vw, 20px)',
+          gap: '16px',
           justifyContent: 'center',
           flexWrap: 'wrap',
-          padding: '0 clamp(10px, 3vw, 20px)'
+          padding: '0 20px'
         }}>
           <button
             onClick={handleEdit}
             style={{
-              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
+              padding: '16px 24px',
               backgroundColor: '#000',
               color: '#fff',
               border: '2px solid #000',
-              borderRadius: '12px',
-              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
+              borderRadius: '16px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: 'clamp(120px, 25vw, 140px)',
+              minWidth: '140px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 'clamp(6px, 2vw, 8px)'
+              gap: '8px'
             }}
             onMouseEnter={(e) => {
               e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+              e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
             }}
             onMouseLeave={(e) => {
               e.target.style.transform = 'translateY(0)';
@@ -719,20 +723,20 @@ function ReminderDetails() {
           <button
             onClick={handleDelete}
             style={{
-              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
+              padding: '16px 24px',
               backgroundColor: 'transparent',
               color: '#ff6b6b',
               border: '2px solid #ff6b6b',
-              borderRadius: '12px',
-              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
+              borderRadius: '16px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: 'clamp(120px, 25vw, 140px)',
+              minWidth: '140px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 'clamp(6px, 2vw, 8px)'
+              gap: '8px'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#ff6b6b';
@@ -748,20 +752,20 @@ function ReminderDetails() {
           <button
             onClick={handleShare}
             style={{
-              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
+              padding: '16px 24px',
               backgroundColor: '#007aff',
               color: '#fff',
               border: '2px solid #007aff',
-              borderRadius: '12px',
-              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
+              borderRadius: '16px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: 'clamp(120px, 25vw, 140px)',
+              minWidth: '140px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 'clamp(6px, 2vw, 8px)'
+              gap: '8px'
             }}
           >
             <FaShareAlt /> Share
@@ -783,21 +787,21 @@ function ReminderDetails() {
           }} onClick={closeShareFallback}>
             <div style={{
               background: '#fff',
-              borderRadius: '16px',
+              borderRadius: '20px',
               padding: '32px',
-              minWidth: '260px',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+              minWidth: '280px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
               border: '2px solid #000',
               display: 'flex',
               flexDirection: 'column',
-              gap: '18px',
+              gap: '16px',
               position: 'relative'
             }} onClick={e => e.stopPropagation()}>
-              <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1.2rem', color: '#000' }}>Share Message</h4>
-              <button onClick={handleWhatsApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 18px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}><FaWhatsapp /> WhatsApp</button>
-              <button onClick={handleEmail} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0072c6', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 18px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}><FaEnvelope /> Email</button>
-              {isMobile && <button onClick={handleSMS} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 18px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}><FaSms /> SMS</button>}
-              <button onClick={closeShareFallback} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#007aff', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Cancel</button>
+              <h4 style={{ margin: 0, fontWeight: 700, fontSize: '20px', color: '#000' }}>Share Message</h4>
+              <button onClick={handleWhatsApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 20px', cursor: 'pointer', fontWeight: 600, fontSize: '16px' }}><FaWhatsapp /> WhatsApp</button>
+              <button onClick={handleEmail} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#0072c6', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 20px', cursor: 'pointer', fontWeight: 600, fontSize: '16px' }}><FaEnvelope /> Email</button>
+              {isMobile && <button onClick={handleSMS} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 20px', cursor: 'pointer', fontWeight: 600, fontSize: '16px' }}><FaSms /> SMS</button>}
+              <button onClick={closeShareFallback} style={{ marginTop: '12px', background: 'none', border: 'none', color: '#007aff', fontWeight: 600, fontSize: '16px', cursor: 'pointer' }}>Cancel</button>
             </div>
           </div>
         )}
@@ -805,10 +809,10 @@ function ReminderDetails() {
       <style>{`
         @media (max-width: 900px) {
           .header, header {
-            padding: 18px 0 !important;
+            padding: 24px 16px !important;
           }
           h1, h2 {
-            font-size: 1.3rem !important;
+            font-size: 24px !important;
           }
           .responsive-grid {
             grid-template-columns: 1fr !important;
@@ -816,34 +820,34 @@ function ReminderDetails() {
         }
         @media (max-width: 600px) {
           .header, header {
-            padding: 10px 0 !important;
+            padding: 20px 12px !important;
           }
           h1, h2 {
-            font-size: 1.1rem !important;
+            font-size: 20px !important;
           }
           .responsive-grid {
             grid-template-columns: 1fr !important;
-            gap: 10px !important;
+            gap: 16px !important;
           }
           .action-buttons {
             flex-direction: column !important;
-            gap: 10px !important;
+            gap: 12px !important;
           }
           .action-buttons button {
-            min-width: 100px !important;
-            padding: 12px 8px !important;
-            font-size: 0.95rem !important;
+            min-width: 120px !important;
+            padding: 14px 16px !important;
+            font-size: 16px !important;
           }
         }
         @media (max-width: 400px) {
           .header, header {
-            padding: 4px 0 !important;
+            padding: 16px 8px !important;
           }
           h1, h2 {
-            font-size: 0.95rem !important;
+            font-size: 18px !important;
           }
           .responsive-grid {
-            gap: 4px !important;
+            gap: 12px !important;
           }
         }
       `}</style>

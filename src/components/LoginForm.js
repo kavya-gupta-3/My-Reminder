@@ -33,34 +33,40 @@ function LoginForm() {
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '20px',
+      padding: '16px',
       overflow: 'hidden'
     }}>
       <div style={{
         backgroundColor: '#fff',
         color: '#333',
-        borderRadius: '20px',
-        padding: 'clamp(20px, 5vw, 40px)',
-        maxWidth: '400px',
+        borderRadius: '24px',
+        padding: '32px 24px',
+        maxWidth: '360px',
         width: '100%',
         textAlign: 'center',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
         border: '2px solid #000'
       }}>
-        <div style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', marginBottom: 'clamp(10px, 3vw, 20px)' }}>🎂</div>
+        <div style={{ 
+          fontSize: '64px', 
+          marginBottom: '24px',
+          lineHeight: 1
+        }}>🎂</div>
+        
         <h1 style={{
-          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+          fontSize: '28px',
           fontWeight: '700',
-          margin: '0 0 clamp(5px, 2vw, 10px) 0',
+          margin: '0 0 8px 0',
           letterSpacing: '-0.02em',
           color: '#000'
         }}>
           Birthday Remind
         </h1>
+        
         <p style={{
           color: '#666',
-          fontSize: 'clamp(0.9rem, 3vw, 1rem)',
-          margin: '0 0 clamp(20px, 5vw, 40px) 0',
+          fontSize: '16px',
+          margin: '0 0 32px 0',
           lineHeight: '1.5'
         }}>
           Never miss a special day. Login to start managing your birthday reminders.
@@ -69,26 +75,26 @@ function LoginForm() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 'clamp(12px, 3vw, 16px)'
+          gap: '16px'
         }}>
           <button
             onClick={loginWithGoogle}
             style={{
-              padding: 'clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px)',
+              padding: '16px 20px',
               backgroundColor: '#000',
               color: '#fff',
               border: '2px solid #000',
-              borderRadius: '12px',
-              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
+              borderRadius: '16px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
+              gap: '12px',
               whiteSpace: 'nowrap',
-              minHeight: '48px'
+              minHeight: '56px'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#fff';
@@ -99,14 +105,14 @@ function LoginForm() {
               e.target.style.color = '#fff';
             }}
           >
-            <FaGoogle style={{ flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'nowrap' }}>Continue with Google</span>
+            <FaGoogle style={{ fontSize: '18px' }} />
+            <span>Continue with Google</span>
           </button>
 
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            margin: 'clamp(10px, 3vw, 20px) 0'
+            margin: '24px 0'
           }}>
             <div style={{
               flex: 1,
@@ -114,9 +120,10 @@ function LoginForm() {
               backgroundColor: '#000'
             }}></div>
             <span style={{
-              padding: '0 clamp(12px, 3vw, 16px)',
+              padding: '0 20px',
               color: '#666',
-              fontSize: '0.9rem'
+              fontSize: '14px',
+              fontWeight: '500'
             }}>or</span>
             <div style={{
               flex: 1,
@@ -128,21 +135,21 @@ function LoginForm() {
           <button
             onClick={loginAnonymously}
             style={{
-              padding: 'clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px)',
+              padding: '16px 20px',
               backgroundColor: 'transparent',
               color: '#000',
               border: '2px solid #000',
-              borderRadius: '12px',
-              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
+              borderRadius: '16px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
+              gap: '12px',
               whiteSpace: 'nowrap',
-              minHeight: '48px'
+              minHeight: '56px'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#000';
@@ -153,16 +160,16 @@ function LoginForm() {
               e.target.style.color = '#000';
             }}
           >
-            <FaUserSecret style={{ flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'nowrap' }}>Continue without account</span>
+            <FaUserSecret style={{ fontSize: '18px' }} />
+            <span>Continue without account</span>
           </button>
         </div>
 
         <p style={{
           color: '#666',
-          fontSize: 'clamp(0.8rem, 2.5vw, 0.85rem)',
-          margin: 'clamp(20px, 5vw, 30px) 0 0 0',
-          lineHeight: '1.4'
+          fontSize: '14px',
+          margin: '32px 0 0 0',
+          lineHeight: '1.5'
         }}>
           Your data will be stored locally and securely. You can always create an account later to sync across devices.
         </p>

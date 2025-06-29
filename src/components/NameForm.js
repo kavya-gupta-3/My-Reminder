@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { auth, database, ref, set, get } from '../firebase';
+import { auth, database, ref, get, set } from '../firebase';
 import { FaHandSparkles, FaUserEdit } from 'react-icons/fa';
 
 function NameForm() {
   const [name, setName] = useState('');
-  const [saved, setSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,19 +15,21 @@ function NameForm() {
           setLoading(false);
           return;
         }
-
         const userRef = ref(database, `users/${uid}`);
         const snapshot = await get(userRef);
-        
         if (snapshot.exists()) {
           const userData = snapshot.val();
           if (userData.name) {
             setName(userData.name);
-            setSaved(true);
+            setIsEditing(false);
+          } else {
+            setIsEditing(true);
           }
+        } else {
+          setIsEditing(true);
         }
-      } catch (err) {
-        console.error('Error fetching user name:', err);
+      } catch (error) {
+        console.error('Error fetching user name:', error);
       } finally {
         setLoading(false);
       }
@@ -40,63 +42,100 @@ function NameForm() {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-
     try {
-      await set(ref(database, `users/${uid}`), {
-        name: name.trim()
-      });
-      setSaved(true);
-    } catch (err) {
-      console.error('Error saving name:', err);
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const userRef = ref(database, `users/${uid}`);
+      await set(userRef, { name: name.trim() });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving name:', error);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{
-        backgroundColor: '#fff',
-        color: '#333',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-        border: '2px solid #000',
-        textAlign: 'center'
-      }}>
-        <p style={{ margin: '0', color: '#666' }}>Loading...</p>
-      </div>
-    );
-  }
+  if (loading) return null;
 
-  if (saved) {
+  if (isEditing) {
     return (
       <div style={{
         backgroundColor: '#fff',
         color: '#333',
-        borderRadius: '16px',
+        borderRadius: '20px',
         padding: '24px',
-        marginBottom: '20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-        border: '2px solid #000',
-        textAlign: 'center'
+        marginBottom: '24px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+        border: '2px solid #000'
       }}>
-        <p style={{ 
-          margin: '0', 
-          fontSize: '1.1rem',
+        <h3 style={{
+          fontSize: '20px',
           fontWeight: '600',
+          margin: '0 0 16px 0',
           color: '#000'
         }}>
-          Welcome, {name}!
-        </p>
-        <p style={{ 
-          margin: '8px 0 0 0', 
-          fontSize: '0.9rem',
-          color: '#666'
+          What's your name?
+        </h3>
+        <form onSubmit={saveName} style={{
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-end'
         }}>
-          Ready to manage your birthday reminders
-        </p>
+          <div style={{ flex: 1 }}>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                borderRadius: '16px',
+                border: '2px solid #000',
+                backgroundColor: '#f8f9fa',
+                color: '#333',
+                fontSize: '16px',
+                outline: 'none',
+                transition: 'border-color 0.3s ease'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#666';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#000';
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={!name.trim()}
+            style={{
+              padding: '16px 24px',
+              backgroundColor: name.trim() ? '#000' : '#f8f9fa',
+              color: name.trim() ? '#fff' : '#666',
+              border: '2px solid #000',
+              borderRadius: '16px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: name.trim() ? 'pointer' : 'not-allowed',
+              transition: 'all 0.3s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              if (name.trim()) {
+                e.target.style.backgroundColor = '#fff';
+                e.target.style.color = '#000';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (name.trim()) {
+                e.target.style.backgroundColor = '#000';
+                e.target.style.color = '#fff';
+              }
+            }}
+          >
+            Save
+          </button>
+        </form>
       </div>
     );
   }
@@ -105,90 +144,57 @@ function NameForm() {
     <div style={{
       backgroundColor: '#fff',
       color: '#333',
-      borderRadius: '16px',
-      padding: '24px',
-      marginBottom: '20px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-      border: '2px solid #000'
+      borderRadius: '20px',
+      padding: '20px',
+      marginBottom: '24px',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+      border: '2px solid #000',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
     }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px'
-      }}>
-        <span style={{ fontSize: '1.5rem', marginRight: '12px' }}><FaHandSparkles /></span>
+      <div>
         <h3 style={{
-          fontSize: '1.2rem',
+          fontSize: '18px',
           fontWeight: '600',
-          margin: '0',
+          margin: '0 0 4px 0',
           color: '#000'
         }}>
-          Welcome! What's your name?
+          Welcome back, {name}!
         </h3>
+        <p style={{
+          color: '#666',
+          fontSize: '16px',
+          margin: '0'
+        }}>
+          Ready to manage your birthday reminders
+        </p>
       </div>
-
-      <form onSubmit={saveName}>
-        <div style={{ marginBottom: '20px' }}>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            required
-            style={{
-              width: '100%',
-              padding: '16px 20px',
-              borderRadius: '12px',
-              border: '2px solid #000',
-              backgroundColor: '#f8f9fa',
-              color: '#333',
-              fontSize: '1rem',
-              outline: 'none',
-              transition: 'all 0.3s ease',
-              boxSizing: 'border-box'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#666';
-              e.target.style.backgroundColor = '#fff';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#000';
-              e.target.style.backgroundColor = '#f8f9fa';
-            }}
-          />
-        </div>
-        
-        <button
-          type="submit"
-          disabled={!name.trim()}
-          style={{
-            width: '100%',
-            padding: '16px 24px',
-            backgroundColor: name.trim() ? '#000' : '#f8f9fa',
-            color: name.trim() ? '#fff' : '#666',
-            border: '2px solid #000',
-            borderRadius: '12px',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: name.trim() ? 'pointer' : 'not-allowed',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            if (name.trim()) {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (name.trim()) {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }
-          }}
-        >
-          <FaUserEdit style={{ marginRight: '8px' }} /> Save & Continue
-        </button>
-      </form>
+      <button
+        onClick={() => setIsEditing(true)}
+        style={{
+          padding: '12px 16px',
+          backgroundColor: 'transparent',
+          color: '#000',
+          border: '2px solid #000',
+          borderRadius: '12px',
+          fontSize: '16px',
+          fontWeight: '600',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          whiteSpace: 'nowrap'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = '#000';
+          e.target.style.color = '#fff';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'transparent';
+          e.target.style.color = '#000';
+        }}
+      >
+        Edit
+      </button>
     </div>
   );
 }

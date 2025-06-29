@@ -115,19 +115,19 @@ function Dashboard() {
       backgroundColor: '#f8f9fa',
       color: '#333',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '0 20px 100px 20px'
+      padding: '0 16px 100px 16px'
     }}>
       {/* Header */}
       <header style={{
-        padding: 'clamp(25px, 6vw, 40px) 0',
+        padding: '32px 20px',
         textAlign: 'center',
         borderBottom: '2px solid #000',
-        marginBottom: 'clamp(25px, 5vw, 40px)',
+        marginBottom: '32px',
         backgroundColor: '#fff',
-        borderRadius: '0 0 20px 20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        borderRadius: '0 0 24px 24px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         position: 'relative',
-        margin: '0 -20px clamp(25px, 5vw, 40px) -20px'
+        margin: '0 -16px 32px -16px'
       }}>
         {/* User menu button top right */}
         <div style={{ position: 'relative' }}>
@@ -135,17 +135,17 @@ function Dashboard() {
             onClick={() => setShowUserMenu(!showUserMenu)}
             style={{
               position: 'absolute',
-              top: 'clamp(15px, 4vw, 20px)',
-              right: 'clamp(15px, 4vw, 20px)',
+              top: '20px',
+              right: '20px',
               background: '#000',
               color: '#fff',
               border: '2px solid #000',
               borderRadius: '50%',
-              padding: 'clamp(8px, 2vw, 12px)',
-              width: 'clamp(40px, 10vw, 50px)',
-              height: 'clamp(40px, 10vw, 50px)',
+              padding: '12px',
+              width: '48px',
+              height: '48px',
               fontWeight: 600,
-              fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+              fontSize: '18px',
               cursor: 'pointer',
               zIndex: 100,
               transition: 'all 0.3s',
@@ -169,15 +169,15 @@ function Dashboard() {
           {showUserMenu && (
             <div style={{
               position: 'absolute',
-              top: 'clamp(60px, 15vw, 70px)',
-              right: 'clamp(15px, 4vw, 20px)',
+              top: '70px',
+              right: '20px',
               background: '#fff',
               border: '2px solid #000',
-              borderRadius: '12px',
-              padding: '8px',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+              borderRadius: '16px',
+              padding: '12px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
               zIndex: 101,
-              minWidth: '120px'
+              minWidth: '140px'
             }}>
               <button
                 onClick={handleLogout}
@@ -185,14 +185,14 @@ function Dashboard() {
                   background: 'none',
                   border: 'none',
                   color: '#ff6b6b',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: '16px',
                   fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '12px',
                   width: '100%',
                   textAlign: 'left'
                 }}
@@ -210,39 +210,39 @@ function Dashboard() {
         </div>
         
         <h1 style={{
-          fontSize: 'clamp(2.2rem, 8vw, 3rem)',
+          fontSize: '32px',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
           color: '#000',
-          paddingRight: 'clamp(70px, 15vw, 80px)',
-          paddingLeft: 'clamp(20px, 5vw, 30px)'
+          paddingRight: '80px',
+          paddingLeft: '20px'
         }}>
           Birthday Remind
         </h1>
         <p style={{
-          margin: 'clamp(8px, 2vw, 12px) 0 0 0',
+          margin: '12px 0 0 0',
           color: '#666',
-          fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+          fontSize: '18px',
           fontWeight: '400',
-          paddingLeft: 'clamp(20px, 5vw, 30px)',
-          paddingRight: 'clamp(20px, 5vw, 30px)'
+          paddingLeft: '20px',
+          paddingRight: '20px'
         }}>
           Never miss a special day
         </p>
       </header>
 
       {/* User Name Form */}
-      <div style={{ marginBottom: '30px' }}>
+      <div style={{ marginBottom: '32px' }}>
         <NameForm />
       </div>
 
       {/* Reminders Section */}
       <section>
         <h2 style={{
-          fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+          fontSize: '24px',
           fontWeight: '600',
-          marginBottom: '25px',
+          marginBottom: '24px',
           color: '#000'
         }}>
           Upcoming Birthdays
@@ -254,18 +254,18 @@ function Dashboard() {
             padding: '60px 20px',
             color: '#666',
             backgroundColor: '#fff',
-            borderRadius: '20px',
+            borderRadius: '24px',
             border: '2px solid #000',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
           }}>
-            <div style={{ fontSize: '2rem', marginBottom: '20px' }}>⏳</div>
-            <p>Loading your reminders...</p>
+            <div style={{ fontSize: '48px', marginBottom: '24px' }}>⏳</div>
+            <p style={{ fontSize: '18px', margin: 0 }}>Loading your reminders...</p>
           </div>
         ) : (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
+            gap: '16px',
             maxWidth: '1200px',
             margin: '0 auto'
           }}>
@@ -307,9 +307,9 @@ function Dashboard() {
                   style={{
                     backgroundColor: '#fff',
                     color: '#333',
-                    borderRadius: '16px',
-                    padding: '16px 20px',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    borderRadius: '20px',
+                    padding: '20px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     border: '2px solid #000',
@@ -321,14 +321,14 @@ function Dashboard() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
-                      width: '48px',
-                      height: '48px',
+                      width: '56px',
+                      height: '56px',
                       borderRadius: '50%',
                       backgroundColor: '#f0f0f0',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.2rem',
+                      fontSize: '24px',
                       fontWeight: '600',
                       color: '#000',
                       border: '2px solid #000',
@@ -338,7 +338,7 @@ function Dashboard() {
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <h3 style={{
-                        fontSize: '1.1rem',
+                        fontSize: '18px',
                         fontWeight: '600',
                         margin: '0',
                         color: '#000',
@@ -350,7 +350,7 @@ function Dashboard() {
                       </h3>
                       <p style={{
                         color: '#666',
-                        fontSize: '0.9rem',
+                        fontSize: '16px',
                         margin: '4px 0 0 0',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -363,7 +363,7 @@ function Dashboard() {
                   
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                      <p style={{
-                        fontSize: '0.9rem',
+                        fontSize: '16px',
                         fontWeight: '600',
                         margin: '0 0 4px 0',
                         color: '#000'
@@ -375,7 +375,7 @@ function Dashboard() {
                       </p>
                       <p style={{
                         color: '#666',
-                        fontSize: '0.9rem',
+                        fontSize: '16px',
                         margin: '0'
                       }}>
                         Turns {getUpcomingAge(reminder.dateOfBirth)}
@@ -393,13 +393,13 @@ function Dashboard() {
             padding: '60px 20px',
             color: '#666',
             backgroundColor: '#fff',
-            borderRadius: '20px',
+            borderRadius: '24px',
             border: '2px solid #000',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎂</div>
-            <h3 style={{ margin: '0 0 10px 0', color: '#000' }}>No birthdays yet</h3>
-            <p style={{ margin: '0', fontSize: '1rem' }}>
+            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🎂</div>
+            <h3 style={{ margin: '0 0 12px 0', color: '#000', fontSize: '24px' }}>No birthdays yet</h3>
+            <p style={{ margin: '0', fontSize: '18px' }}>
               Add your first birthday reminder to get started!
             </p>
           </div>
@@ -411,18 +411,18 @@ function Dashboard() {
         onClick={() => navigate('/chat')}
         style={{
           position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-          width: '60px',
-          height: '60px',
+          bottom: '32px',
+          right: '32px',
+          width: '64px',
+          height: '64px',
           borderRadius: '50%',
           backgroundColor: '#000',
           color: '#fff',
           border: '2px solid #000',
-          fontSize: '28px',
+          fontSize: '32px',
           fontWeight: '300',
           cursor: 'pointer',
-          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)',
           transition: 'all 0.3s ease',
           display: 'flex',
           alignItems: 'center',
@@ -431,11 +431,11 @@ function Dashboard() {
         }}
         onMouseEnter={(e) => {
           e.target.style.transform = 'scale(1.1)';
-          e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.3)';
+          e.target.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.3)';
         }}
         onMouseLeave={(e) => {
           e.target.style.transform = 'scale(1)';
-          e.target.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.2)';
+          e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
         }}
         aria-label="Add new birthday reminder"
       >
@@ -459,23 +459,23 @@ function Dashboard() {
 
       <style jsx>{`
         .dashboard-container {
-          padding: 0 20px 100px 20px;
+          padding: 0 16px 100px 16px;
         }
         @media (max-width: 768px) {
           .dashboard-container {
-            padding: 0 15px 100px 15px;
+            padding: 0 12px 100px 12px;
           }
           header {
-            padding: 15px 0 !important;
-            margin-bottom: 20px !important;
+            padding: 24px 16px !important;
+            margin-bottom: 24px !important;
           }
         }
         @media (max-width: 480px) {
           .dashboard-container {
-            padding: 0 10px 100px 10px;
+            padding: 0 8px 100px 8px;
           }
           header {
-            padding: 10px 0 !important;
+            padding: 20px 12px !important;
           }
         }
       `}</style>

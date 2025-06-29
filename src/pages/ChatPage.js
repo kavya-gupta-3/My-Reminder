@@ -191,13 +191,13 @@ function ChatPage() {
     }}>
       {/* Header */}
       <header style={{
-        padding: 'clamp(15px, 4vw, 20px)',
+        padding: '24px 20px',
         borderBottom: '2px solid #000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: '#fff',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         position: 'sticky',
         top: 0,
         zIndex: 10,
@@ -209,12 +209,12 @@ function ChatPage() {
             background: '#000',
             border: '2px solid #000',
             color: '#fff',
-            padding: 'clamp(8px, 2vw, 10px)',
-            width: 'clamp(40px, 10vw, 44px)',
-            height: 'clamp(40px, 10vw, 44px)',
+            padding: '12px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: 'clamp(16px, 4vw, 18px)',
+            fontSize: '20px',
             fontWeight: '600',
             transition: 'all 0.3s ease',
             display: 'flex',
@@ -234,7 +234,7 @@ function ChatPage() {
           <FaArrowLeft />
         </button>
         <h1 style={{
-          fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+          fontSize: '24px',
           fontWeight: '600',
           margin: '0',
           color: '#000',
@@ -243,19 +243,19 @@ function ChatPage() {
           flex: 1,
           justifyContent: 'center'
         }}>
-          <FaRobot style={{ marginRight: 'clamp(8px, 2vw, 10px)' }} /> AI Assistant
+          <FaRobot style={{ marginRight: '12px' }} /> AI Assistant
         </h1>
-        <div style={{ width: 'clamp(40px, 10vw, 44px)', flexShrink: 0 }}></div> {/* Spacer to balance the button */}
+        <div style={{ width: '48px', flexShrink: 0 }}></div> {/* Spacer to balance the button */}
       </header>
 
       {/* Chat Messages */}
       <div className="chat-messages" style={{
         flex: 1,
-        padding: 'clamp(15px, 4vw, 20px)',
+        padding: '20px',
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 'clamp(12px, 3vw, 16px)',
+        gap: '16px',
         minHeight: 0
       }}>
         {messages.map((message) => (
@@ -265,16 +265,16 @@ function ChatPage() {
           >
             <div className="message-bubble"
               style={{
-                maxWidth: '70%',
+                maxWidth: '75%',
                 padding: '16px 20px',
-                borderRadius: '18px',
+                borderRadius: '20px',
                 backgroundColor: message.type === 'user' ? '#000' : '#fff',
                 color: message.type === 'user' ? '#fff' : '#333',
-                fontSize: '15px',
-                lineHeight: '1.4',
+                fontSize: '16px',
+                lineHeight: '1.5',
                 wordWrap: 'break-word',
                 border: message.type === 'user' ? '2px solid #000' : '2px solid #000',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
               }}>
               {message.content}
             </div>
@@ -289,15 +289,15 @@ function ChatPage() {
           }}>
             <div style={{
               padding: '16px 20px',
-              borderRadius: '18px',
+              borderRadius: '20px',
               backgroundColor: '#fff',
               color: '#333',
-              fontSize: '15px',
+              fontSize: '16px',
               border: '2px solid #000',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
             }}>
               <span style={{ animation: 'typing 1.4s infinite' }}>
-                <FaRobot style={{ marginRight: '8px' }} /> AI is thinking...
+                <FaRobot style={{ marginRight: '12px' }} /> AI is thinking...
               </span>
             </div>
           </div>
@@ -308,14 +308,14 @@ function ChatPage() {
 
       {/* Input Form */}
       <div style={{
-        padding: '15px 20px',
+        padding: '20px',
         borderTop: '2px solid #000',
         backgroundColor: '#fff',
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.12)'
       }}>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
-          gap: '10px',
+          gap: '12px',
           alignItems: 'flex-end'
         }}>
           <div style={{ flex: 1 }}>
@@ -327,12 +327,12 @@ function ChatPage() {
               disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '12px 16px',
-                borderRadius: '20px',
+                padding: '16px 20px',
+                borderRadius: '24px',
                 border: '2px solid #000',
                 backgroundColor: '#f8f9fa',
                 color: '#333',
-                fontSize: '15px',
+                fontSize: '16px',
                 outline: 'none',
                 transition: 'border-color 0.3s ease'
               }}
@@ -348,17 +348,17 @@ function ChatPage() {
             type="submit"
             disabled={!inputValue.trim() || isLoading}
             style={{
-              padding: '12px',
+              padding: '16px',
               borderRadius: '50%',
               border: '2px solid #000',
               backgroundColor: inputValue.trim() && !isLoading ? '#000' : '#f8f9fa',
               color: inputValue.trim() && !isLoading ? '#fff' : '#666',
-              fontSize: '16px',
+              fontSize: '18px',
               fontWeight: '600',
               cursor: inputValue.trim() && !isLoading ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              width: '44px',
-              height: '44px',
+              width: '56px',
+              height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
