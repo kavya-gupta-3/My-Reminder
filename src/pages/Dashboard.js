@@ -50,7 +50,7 @@ function Dashboard() {
           }
         }
 
-        // Sort reminders: today's birthdays first, then upcoming
+        // Sort reminders: today's birthdays first, then by closest upcoming date
         remindersArray.sort((a, b) => {
           const now = new Date();
           const currentYear = now.getFullYear();
@@ -58,15 +58,21 @@ function Dashboard() {
           const [monthB, dayB] = b.dateOfBirth.split('/');
           let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
           let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
-          // Today check
-          const isTodayA = birthdayA.getDate() === now.getDate() && birthdayA.getMonth() === now.getMonth();
-          const isTodayB = birthdayB.getDate() === now.getDate() && birthdayB.getMonth() === now.getMonth();
-          if (isTodayA && !isTodayB) return -1;
-          if (!isTodayA && isTodayB) return 1;
-          // Otherwise, sort by soonest
+          
+          // If birthday has passed this year, move to next year
           if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
           if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
-          return birthdayA - birthdayB;
+          
+          // Calculate days until each birthday
+          const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          
+          // Today's birthdays first (daysUntil = 0)
+          if (daysUntilA === 0 && daysUntilB !== 0) return -1;
+          if (daysUntilA !== 0 && daysUntilB === 0) return 1;
+          
+          // Then sort by closest date
+          return daysUntilA - daysUntilB;
         });
 
         setReminders(remindersArray);
@@ -135,8 +141,9 @@ function Dashboard() {
             onClick={() => setShowUserMenu(!showUserMenu)}
             style={{
               position: 'absolute',
-              top: '20px',
+              top: '50%',
               right: '20px',
+              transform: 'translateY(-50%)',
               background: '#fff',
               color: '#000',
               border: '2px solid #fff',
@@ -378,19 +385,21 @@ function Dashboard() {
                         fontSize: '15px',
                         fontWeight: '600',
                         margin: '0 0 4px 0',
-                        color: '#000'
+                        color: daysUntil === 0 ? '#ff6b6b' : '#000'
                       }}>
-                        {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
-                          month: 'long',
-                          day: 'numeric'
-                        })}
+                        {daysUntil === 0 ? '🎉 Today!' : 
+                         daysUntil === 1 ? 'Tomorrow' :
+                         `${daysUntil} days`}
                       </p>
                       <p style={{
                         color: '#666',
-                        fontSize: '15px',
+                        fontSize: '13px',
                         margin: '0'
                       }}>
-                        Turns {getUpcomingAge(reminder.dateOfBirth)}
+                        {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
                       </p>
                   </div>
                 </div>

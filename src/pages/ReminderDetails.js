@@ -409,8 +409,9 @@ function ReminderDetails() {
           margin: '0',
           letterSpacing: '-0.02em',
           color: '#fff',
-          paddingLeft: '100px',
-          paddingRight: '20px'
+          paddingLeft: '68px',
+          paddingRight: '68px',
+          textAlign: 'center'
         }}>
           <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Birthday
         </h1>
@@ -767,28 +768,27 @@ function ReminderDetails() {
         }}>
           <div style={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             marginBottom: '20px',
             gap: '16px',
             flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: '28px', marginRight: '16px' }}><FaRobot /></span>
-            <h3 style={{
-              fontSize: '22px',
-              fontWeight: '600',
-              margin: '0',
-              color: '#000',
-              flex: 1,
-              minWidth: 0
-            }}>
-              AI Birthday Message
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: '28px' }}><FaRobot /></span>
+              <h3 style={{
+                fontSize: '22px',
+                fontWeight: '600',
+                margin: '0',
+                color: '#000'
+              }}>
+                AI Birthday Message
+              </h3>
+            </div>
             <div style={{
               display: 'flex',
               gap: '12px',
-              flexWrap: 'wrap',
               alignItems: 'center',
-              marginTop: '12px'
+              flexShrink: 0
             }}>
               <select 
                 value={messageSize} 
@@ -1068,6 +1068,17 @@ function ReminderDetails() {
           }
           .ai-message-card p {
             margin-bottom: 24px !important;
+          }
+          .ai-message-card > div:first-child {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+          }
+          .ai-message-card > div:first-child > div:first-child {
+            justify-content: center !important;
+          }
+          .ai-message-card > div:first-child > div:last-child {
+            justify-content: center !important;
           }
         }
         @media (max-width: 400px) {
