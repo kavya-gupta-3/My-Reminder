@@ -40,21 +40,21 @@ function LoginForm() {
         backgroundColor: '#fff',
         color: '#333',
         borderRadius: '24px',
-        padding: '32px 24px',
-        maxWidth: '360px',
+        padding: '24px 32px',
+        maxWidth: '420px',
         width: '100%',
         textAlign: 'center',
         boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
         border: '2px solid #000'
       }}>
         <div style={{ 
-          fontSize: '64px', 
-          marginBottom: '24px',
+          fontSize: '56px', 
+          marginBottom: '20px',
           lineHeight: 1
         }}>🎂</div>
         
         <h1 style={{
-          fontSize: '28px',
+          fontSize: '26px',
           fontWeight: '700',
           margin: '0 0 8px 0',
           letterSpacing: '-0.02em',
@@ -65,8 +65,8 @@ function LoginForm() {
         
         <p style={{
           color: '#666',
-          fontSize: '16px',
-          margin: '0 0 32px 0',
+          fontSize: '15px',
+          margin: '0 0 28px 0',
           lineHeight: '1.5'
         }}>
           Never miss a special day. Login to start managing your birthday reminders.

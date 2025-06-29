@@ -94,13 +94,15 @@ function ChatPage() {
           createdAt: new Date().toISOString(),
           userId: uid
         });
-        // Send instant notification (for testing)
+        
+        // Send instant notification for new reminder creation
         try {
           // Get user's FCM token from database
           const userRef = ref(database, `users/${uid}`);
           const userSnap = await get(userRef);
           if (userSnap.exists() && userSnap.val().fcmToken) {
             const fcmToken = userSnap.val().fcmToken;
+            
             // Call backend endpoint to send notification
             await fetch('https://birthday-reminder-i1uf.onrender.com/api/send-notification', {
               method: 'POST',
@@ -108,13 +110,21 @@ function ChatPage() {
               body: JSON.stringify({
                 token: fcmToken,
                 title: `🎉 Reminder Set for ${dataWithoutId.personName}`,
-                body: `A birthday reminder for ${dataWithoutId.personName} was just created!`
+                body: `Birthday reminder for ${dataWithoutId.personName} has been created successfully! You'll be notified on their special day.`,
+                data: {
+                  reminderId: newReminderRef.key,
+                  personName: dataWithoutId.personName,
+                  type: 'reminder_created'
+                }
               })
             });
+            
+            console.log('Reminder creation notification sent');
           }
         } catch (err) {
           console.error('Instant notification error:', err);
         }
+        
         return newReminderRef.key;
       }
     } catch (error) {

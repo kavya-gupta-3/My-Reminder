@@ -365,7 +365,7 @@ function ReminderDetails() {
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '24px',
-          padding: '32px',
+          padding: '28px 32px',
           marginBottom: '24px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
@@ -373,25 +373,25 @@ function ReminderDetails() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '24px'
+            marginBottom: '20px'
           }}>
             <span style={{
-              fontSize: '48px',
-              marginRight: '24px'
+              fontSize: '44px',
+              marginRight: '20px'
             }}>
               <FaBirthdayCake />
             </span>
             <div>
               <h2 style={{
-                fontSize: '28px',
+                fontSize: '26px',
                 fontWeight: '700',
-                margin: '0 0 8px 0',
+                margin: '0 0 6px 0',
                 color: '#000'
               }}>
                 {reminder.personName}
               </h2>
               <p style={{
-                fontSize: '18px',
+                fontSize: '17px',
                 color: '#666',
                 margin: '0'
               }}>
@@ -405,19 +405,19 @@ function ReminderDetails() {
             style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '20px',
-            marginBottom: '24px'
+            gap: '16px',
+            marginBottom: '20px'
           }}>
             <div style={{
-              padding: '24px',
+              padding: '20px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}><FaBirthdayCake /></div>
-              <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '18px' }}>Birthday</div>
-              <div style={{ color: '#666', fontSize: '16px' }}>
+              <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaBirthdayCake /></div>
+              <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px' }}>Birthday</div>
+              <div style={{ color: '#666', fontSize: '15px' }}>
                 {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
                   month: 'long',
                   day: 'numeric',
@@ -428,14 +428,14 @@ function ReminderDetails() {
 
             {reminder.note && (
               <div style={{
-                padding: '24px',
+                padding: '20px',
                 backgroundColor: '#f8f9fa',
                 borderRadius: '16px',
                 border: '1px solid #000'
               }}>
-                <div style={{ fontSize: '32px', marginBottom: '12px' }}><FaRegCommentDots /></div>
-                <div style={{ fontWeight: '600', marginBottom: '12px', color: '#000', fontSize: '18px' }}>Note</div>
-                <div style={{ color: '#666', fontSize: '16px' }}>
+                <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaRegCommentDots /></div>
+                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '17px' }}>Note</div>
+                <div style={{ color: '#666', fontSize: '15px' }}>
                   {reminder.note}
                 </div>
               </div>
@@ -448,86 +448,86 @@ function ReminderDetails() {
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '24px',
-          padding: '32px',
+          padding: '28px 32px',
           marginBottom: '24px',
           textAlign: 'center',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
         }}>
           <h3 style={{
-            fontSize: '24px',
+            fontSize: '22px',
             fontWeight: '600',
-            margin: '0 0 24px 0',
+            margin: '0 0 20px 0',
             color: '#000'
           }}>
-            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '12px' }} />Countdown to Birthday</>}
+            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to Birthday</>}
           </h3>
           <div className="countdown-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px',
+            gap: '12px',
             maxWidth: '400px',
             margin: '0 auto'
           }}>
             <div style={{
-              padding: '20px',
+              padding: '16px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.days}
               </div>
-              <div style={{ color: '#666', fontSize: '16px' }}>Days</div>
+              <div style={{ color: '#666', fontSize: '15px' }}>Days</div>
             </div>
             <div style={{
-              padding: '20px',
+              padding: '16px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.hours}
               </div>
-              <div style={{ color: '#666', fontSize: '16px' }}>Hours</div>
+              <div style={{ color: '#666', fontSize: '15px' }}>Hours</div>
             </div>
             <div style={{
-              padding: '20px',
+              padding: '16px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.minutes}
               </div>
-              <div style={{ color: '#666', fontSize: '16px' }}>Minutes</div>
+              <div style={{ color: '#666', fontSize: '15px' }}>Minutes</div>
             </div>
             <div style={{
-              padding: '20px',
+              padding: '16px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               border: '1px solid #000'
             }}>
               <div style={{
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: '700',
                 color: '#000'
               }}>
                 {countdown.seconds}
               </div>
-              <div style={{ color: '#666', fontSize: '16px' }}>Seconds</div>
+              <div style={{ color: '#666', fontSize: '15px' }}>Seconds</div>
             </div>
           </div>
         </div>
@@ -537,7 +537,7 @@ function ReminderDetails() {
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '24px',
-          padding: '32px',
+          padding: '28px 32px',
           marginBottom: '24px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           border: '2px solid #000'
@@ -545,13 +545,13 @@ function ReminderDetails() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '24px',
+            marginBottom: '20px',
             gap: '16px',
             flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: '32px', marginRight: '16px' }}><FaRobot /></span>
+            <span style={{ fontSize: '28px', marginRight: '16px' }}><FaRobot /></span>
             <h3 style={{
-              fontSize: '24px',
+              fontSize: '22px',
               fontWeight: '600',
               margin: '0',
               color: '#000',
@@ -571,7 +571,7 @@ function ReminderDetails() {
                 value={messageSize} 
                 onChange={e => setMessageSize(e.target.value)} 
                 style={{ 
-                  fontSize: '16px', 
+                  fontSize: '15px', 
                   borderRadius: '12px', 
                   border: '1px solid #000', 
                   padding: '8px 12px',
@@ -598,7 +598,7 @@ function ReminderDetails() {
                   alignItems: 'center', 
                   gap: '8px', 
                   fontWeight: 600,
-                  fontSize: '16px',
+                  fontSize: '15px',
                   whiteSpace: 'nowrap',
                   minHeight: '40px'
                 }}
@@ -608,20 +608,20 @@ function ReminderDetails() {
             </div>
           </div>
           {regenLimitReached && (
-            <div style={{ color: '#ff6b6b', fontSize: '16px', marginBottom: '12px', textAlign: 'right' }}>
+            <div style={{ color: '#ff6b6b', fontSize: '15px', marginBottom: '10px', textAlign: 'right' }}>
               Daily regeneration limit reached (15/15)
             </div>
           )}
           {aiLoading ? (
             <div style={{
-              padding: '24px',
+              padding: '20px',
               backgroundColor: '#f8f9fa',
               borderRadius: '16px',
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '32px', marginBottom: '16px' }}><FaRobot /></div>
-              <p style={{ margin: '0', color: '#666', fontSize: '18px' }}>Generating personalized message...</p>
+              <div style={{ fontSize: '28px', marginBottom: '12px' }}><FaRobot /></div>
+              <p style={{ margin: '0', color: '#666', fontSize: '17px' }}>Generating personalized message...</p>
             </div>
           ) : (
             <div>
@@ -631,20 +631,20 @@ function ReminderDetails() {
                   background: '#fff0f0',
                   border: '1px solid #ff6b6b',
                   borderRadius: '12px',
-                  padding: '20px',
-                  marginBottom: '12px',
+                  padding: '16px',
+                  marginBottom: '10px',
                   textAlign: 'center',
                   fontWeight: 600,
-                  fontSize: '18px'
+                  fontSize: '17px'
                 }}>{aiMessage}</div>
               ) : (
               <p style={{
-                fontSize: '18px',
+                fontSize: '17px',
                 lineHeight: '1.6',
                 color: '#333',
                 margin: '0',
                 fontStyle: 'italic',
-                padding: '24px',
+                padding: '20px',
                 backgroundColor: '#f8f9fa',
                 borderRadius: '16px',
                 border: '1px solid #000'
@@ -652,7 +652,7 @@ function ReminderDetails() {
                 {aiMessage}
               </p>
               )}
-              <div style={{ display: 'flex', gap: '12px', margin: '20px 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', margin: '16px 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button onClick={handleCopy} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -664,14 +664,14 @@ function ReminderDetails() {
                   padding: '12px 20px', 
                   cursor: 'pointer', 
                   fontWeight: 600,
-                  fontSize: '16px'
+                  fontSize: '15px'
                 }}><FaCopy /> Copy</button>
               </div>
               {userContext && userContext.user && (
                 <p style={{
-                  fontSize: '16px',
+                  fontSize: '15px',
                   color: '#666',
-                  margin: '16px 0 0 0',
+                  margin: '12px 0 0 0',
                   textAlign: 'center'
                 }}>
                   Personalized for {userContext.user.name} • Based on {userContext.reminders?.length || 0} existing reminders

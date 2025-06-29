@@ -308,27 +308,28 @@ function Dashboard() {
                     backgroundColor: '#fff',
                     color: '#333',
                     borderRadius: '20px',
-                    padding: '20px',
+                    padding: '18px 24px',
                     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     border: '2px solid #000',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    minHeight: '80px'
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
-                      width: '56px',
-                      height: '56px',
+                      width: '52px',
+                      height: '52px',
                       borderRadius: '50%',
                       backgroundColor: '#f0f0f0',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '24px',
+                      fontSize: '22px',
                       fontWeight: '600',
                       color: '#000',
                       border: '2px solid #000',
@@ -338,7 +339,7 @@ function Dashboard() {
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <h3 style={{
-                        fontSize: '18px',
+                        fontSize: '17px',
                         fontWeight: '600',
                         margin: '0',
                         color: '#000',
@@ -350,7 +351,7 @@ function Dashboard() {
                       </h3>
                       <p style={{
                         color: '#666',
-                        fontSize: '16px',
+                        fontSize: '15px',
                         margin: '4px 0 0 0',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -363,7 +364,7 @@ function Dashboard() {
                   
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                      <p style={{
-                        fontSize: '16px',
+                        fontSize: '15px',
                         fontWeight: '600',
                         margin: '0 0 4px 0',
                         color: '#000'
@@ -375,7 +376,7 @@ function Dashboard() {
                       </p>
                       <p style={{
                         color: '#666',
-                        fontSize: '16px',
+                        fontSize: '15px',
                         margin: '0'
                       }}>
                         Turns {getUpcomingAge(reminder.dateOfBirth)}

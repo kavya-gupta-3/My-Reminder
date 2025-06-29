@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
   apiKey: "AIzaSyBTUUb_y1aP8fiVNXuIC9w-83dyGjg-qDo",
@@ -13,7 +13,72 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
-  const { title, ...options } = payload.notification;
-  self.registration.showNotification(title, options);
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
+  console.log('Background message received:', payload);
+
+  const notificationTitle = payload.notification?.title || 'Birthday Reminder';
+  const notificationOptions = {
+    body: payload.notification?.body || 'You have a birthday reminder!',
+    icon: '/birthday-cake.png',
+    badge: '/birthday-cake.png',
+    tag: 'birthday-reminder',
+    requireInteraction: true,
+    data: payload.data || {},
+    actions: [
+      {
+        action: 'view',
+        title: 'View Reminder',
+        icon: '/birthday-cake.png'
+      },
+      {
+        action: 'dismiss',
+        title: 'Dismiss'
+      }
+    ],
+    vibrate: [200, 100, 200],
+    sound: 'default'
+  };
+
+  // Show notification
+  return self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('Notification clicked:', event);
+  
+  event.notification.close();
+
+  if (event.action === 'view') {
+    // Open the app and navigate to reminders
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  } else if (event.action === 'dismiss') {
+    // Just close the notification
+    event.notification.close();
+  } else {
+    // Default action - open the app
+    event.waitUntil(
+      clients.openWindow('/')
+    );
+  }
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('Notification closed:', event);
+});
+
+// Install event
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installed');
+  self.skipWaiting();
+});
+
+// Activate event
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activated');
+  event.waitUntil(self.clients.claim());
 });
