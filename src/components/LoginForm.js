@@ -26,7 +26,7 @@ function LoginForm() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      height: '100vh',
       backgroundColor: '#f8f9fa',
       color: '#333',
       display: 'flex',
@@ -34,25 +34,24 @@ function LoginForm() {
       justifyContent: 'center',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
       padding: '20px',
-      overflowY: 'auto'
+      overflow: 'hidden'
     }}>
       <div style={{
         backgroundColor: '#fff',
         color: '#333',
         borderRadius: '20px',
-        padding: '40px 20px',
+        padding: 'clamp(20px, 5vw, 40px)',
         maxWidth: '400px',
         width: '100%',
         textAlign: 'center',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
-        border: '2px solid #000',
-        margin: '20px 0'
+        border: '2px solid #000'
       }}>
-        <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎂</div>
+        <div style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', marginBottom: 'clamp(10px, 3vw, 20px)' }}>🎂</div>
         <h1 style={{
           fontSize: 'clamp(1.5rem, 5vw, 2rem)',
           fontWeight: '700',
-          margin: '0 0 10px 0',
+          margin: '0 0 clamp(5px, 2vw, 10px) 0',
           letterSpacing: '-0.02em',
           color: '#000'
         }}>
@@ -61,7 +60,7 @@ function LoginForm() {
         <p style={{
           color: '#666',
           fontSize: 'clamp(0.9rem, 3vw, 1rem)',
-          margin: '0 0 40px 0',
+          margin: '0 0 clamp(20px, 5vw, 40px) 0',
           lineHeight: '1.5'
         }}>
           Never miss a special day. Login to start managing your birthday reminders.
@@ -70,12 +69,12 @@ function LoginForm() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: 'clamp(12px, 3vw, 16px)'
         }}>
           <button
             onClick={loginWithGoogle}
             style={{
-              padding: '16px 20px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px)',
               backgroundColor: '#000',
               color: '#fff',
               border: '2px solid #000',
@@ -107,7 +106,7 @@ function LoginForm() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            margin: '20px 0'
+            margin: 'clamp(10px, 3vw, 20px) 0'
           }}>
             <div style={{
               flex: 1,
@@ -115,7 +114,7 @@ function LoginForm() {
               backgroundColor: '#000'
             }}></div>
             <span style={{
-              padding: '0 16px',
+              padding: '0 clamp(12px, 3vw, 16px)',
               color: '#666',
               fontSize: '0.9rem'
             }}>or</span>
@@ -129,7 +128,7 @@ function LoginForm() {
           <button
             onClick={loginAnonymously}
             style={{
-              padding: '16px 20px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px)',
               backgroundColor: 'transparent',
               color: '#000',
               border: '2px solid #000',
@@ -162,7 +161,7 @@ function LoginForm() {
         <p style={{
           color: '#666',
           fontSize: 'clamp(0.8rem, 2.5vw, 0.85rem)',
-          margin: '30px 0 0 0',
+          margin: 'clamp(20px, 5vw, 30px) 0 0 0',
           lineHeight: '1.4'
         }}>
           Your data will be stored locally and securely. You can always create an account later to sync across devices.

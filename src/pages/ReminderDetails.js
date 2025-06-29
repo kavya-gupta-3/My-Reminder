@@ -300,13 +300,14 @@ function ReminderDetails() {
     }}>
       {/* Header */}
       <header className="header" style={{
-        padding: '30px 0',
+        padding: 'clamp(25px, 6vw, 40px) 0',
         textAlign: 'center',
         borderBottom: '2px solid #000',
-        marginBottom: '40px',
+        marginBottom: 'clamp(25px, 5vw, 40px)',
         backgroundColor: '#fff',
         borderRadius: '0 0 20px 20px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        margin: '0 -20px clamp(25px, 5vw, 40px) -20px'
       }}>
         <button
           onClick={() => navigate('/')}
@@ -315,12 +316,16 @@ function ReminderDetails() {
             background: '#000',
             border: '2px solid #000',
             color: '#fff',
-            padding: '10px 20px',
+            padding: 'clamp(10px, 3vw, 15px) clamp(15px, 4vw, 20px)',
             borderRadius: '12px',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: 'clamp(14px, 3vw, 16px)',
             fontWeight: '600',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            position: 'absolute',
+            left: 'clamp(15px, 4vw, 20px)',
+            top: '50%',
+            transform: 'translateY(-50%)'
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#fff';
@@ -331,16 +336,18 @@ function ReminderDetails() {
             e.target.style.color = '#fff';
           }}
         >
-          <FaArrowLeft style={{ marginRight: '8px' }} /> Back
+          <FaArrowLeft style={{ marginRight: 'clamp(6px, 2vw, 8px)' }} /> Back
         </button>
         <h1 style={{
-          fontSize: '2rem',
+          fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
-          color: '#000'
+          color: '#000',
+          paddingLeft: 'clamp(80px, 20vw, 120px)',
+          paddingRight: 'clamp(20px, 5vw, 30px)'
         }}>
-          <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Birthday
+          <FaBirthdayCake style={{ marginRight: 'clamp(12px, 3vw, 16px)' }} /> {reminder.personName}'s Birthday
         </h1>
       </header>
 
@@ -526,19 +533,19 @@ function ReminderDetails() {
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '20px',
-          padding: '40px 20px',
-          marginBottom: '30px',
+          padding: 'clamp(25px, 5vw, 40px)',
+          marginBottom: 'clamp(20px, 4vw, 30px)',
           boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
           border: '2px solid #000'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '20px',
-            gap: '16px',
+            marginBottom: 'clamp(15px, 3vw, 20px)',
+            gap: 'clamp(12px, 3vw, 16px)',
             flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: '2rem', marginRight: '15px' }}><FaRobot /></span>
+            <span style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginRight: 'clamp(10px, 2vw, 15px)' }}><FaRobot /></span>
             <h3 style={{
               fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
               fontWeight: '600',
@@ -551,9 +558,10 @@ function ReminderDetails() {
             </h3>
             <div style={{
               display: 'flex',
-              gap: '8px',
+              gap: 'clamp(8px, 2vw, 12px)',
               flexWrap: 'wrap',
-              alignItems: 'center'
+              alignItems: 'center',
+              marginTop: 'clamp(8px, 2vw, 12px)'
             }}>
               <select 
                 value={messageSize} 
@@ -562,8 +570,9 @@ function ReminderDetails() {
                   fontSize: 'clamp(0.9rem, 3vw, 1rem)', 
                   borderRadius: '8px', 
                   border: '1px solid #000', 
-                  padding: '4px 8px',
-                  backgroundColor: '#fff'
+                  padding: 'clamp(6px, 2vw, 8px) clamp(8px, 2vw, 12px)',
+                  backgroundColor: '#fff',
+                  minWidth: '80px'
                 }} 
                 disabled={aiLoading}
               >
@@ -579,14 +588,15 @@ function ReminderDetails() {
                   color: '#fff', 
                   border: 'none', 
                   borderRadius: '8px', 
-                  padding: '6px 10px', 
+                  padding: 'clamp(6px, 2vw, 8px) clamp(10px, 2vw, 12px)', 
                   cursor: aiLoading || regenLimitReached ? 'not-allowed' : 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '6px', 
+                  gap: 'clamp(4px, 1vw, 6px)', 
                   fontWeight: 600,
                   fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  minHeight: '36px'
                 }}
               >
                 <FaSyncAlt /> Regenerate
@@ -594,20 +604,20 @@ function ReminderDetails() {
             </div>
           </div>
           {regenLimitReached && (
-            <div style={{ color: '#ff6b6b', fontSize: '0.95rem', marginBottom: '10px', textAlign: 'right' }}>
+            <div style={{ color: '#ff6b6b', fontSize: 'clamp(0.85rem, 2.5vw, 0.95rem)', marginBottom: 'clamp(8px, 2vw, 10px)', textAlign: 'right' }}>
               Daily regeneration limit reached (15/15)
             </div>
           )}
           {aiLoading ? (
             <div style={{
-              padding: '20px',
+              padding: 'clamp(15px, 3vw, 20px)',
               backgroundColor: '#f8f9fa',
               borderRadius: '12px',
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '1.2rem', marginBottom: '10px' }}><FaRobot /></div>
-              <p style={{ margin: '0', color: '#666' }}>Generating personalized message...</p>
+              <div style={{ fontSize: 'clamp(1rem, 3vw, 1.2rem)', marginBottom: 'clamp(8px, 2vw, 10px)' }}><FaRobot /></div>
+              <p style={{ margin: '0', color: '#666', fontSize: 'clamp(0.9rem, 3vw, 1rem)' }}>Generating personalized message...</p>
             </div>
           ) : (
             <div>
@@ -617,34 +627,47 @@ function ReminderDetails() {
                   background: '#fff0f0',
                   border: '1px solid #ff6b6b',
                   borderRadius: '8px',
-                  padding: '16px',
-                  marginBottom: '10px',
+                  padding: 'clamp(12px, 3vw, 16px)',
+                  marginBottom: 'clamp(8px, 2vw, 10px)',
                   textAlign: 'center',
-                  fontWeight: 600
+                  fontWeight: 600,
+                  fontSize: 'clamp(0.9rem, 3vw, 1rem)'
                 }}>{aiMessage}</div>
               ) : (
-                <p style={{
-                  fontSize: '1.1rem',
-                  lineHeight: '1.6',
-                  color: '#333',
-                  margin: '0',
-                  fontStyle: 'italic',
-                  padding: '20px',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '12px',
-                  border: '1px solid #000'
-                }}>
-                  {aiMessage}
-                </p>
+              <p style={{
+                fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                lineHeight: '1.6',
+                color: '#333',
+                margin: '0',
+                fontStyle: 'italic',
+                padding: 'clamp(15px, 3vw, 20px)',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '12px',
+                border: '1px solid #000'
+              }}>
+                {aiMessage}
+              </p>
               )}
-              <div style={{ display: 'flex', gap: '12px', margin: '16px 0 0 0', flexWrap: 'wrap' }}>
-                <button onClick={handleCopy} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#000', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontWeight: 600 }}><FaCopy /> Copy</button>
+              <div style={{ display: 'flex', gap: 'clamp(8px, 2vw, 12px)', margin: 'clamp(12px, 3vw, 16px) 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button onClick={handleCopy} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 'clamp(4px, 1vw, 6px)', 
+                  background: '#000', 
+                  color: '#fff', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  padding: 'clamp(8px, 2vw, 10px) clamp(12px, 3vw, 14px)', 
+                  cursor: 'pointer', 
+                  fontWeight: 600,
+                  fontSize: 'clamp(0.9rem, 3vw, 1rem)'
+                }}><FaCopy /> Copy</button>
               </div>
               {userContext && userContext.user && (
                 <p style={{
-                  fontSize: '0.9rem',
+                  fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
                   color: '#666',
-                  margin: '10px 0 0 0',
+                  margin: 'clamp(8px, 2vw, 10px) 0 0 0',
                   textAlign: 'center'
                 }}>
                   Personalized for {userContext.user.name} • Based on {userContext.reminders?.length || 0} existing reminders
@@ -659,23 +682,28 @@ function ReminderDetails() {
           className="action-buttons"
           style={{
           display: 'flex',
-          gap: '20px',
+          gap: 'clamp(15px, 3vw, 20px)',
           justifyContent: 'center',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          padding: '0 clamp(10px, 3vw, 20px)'
         }}>
           <button
             onClick={handleEdit}
             style={{
-              padding: '16px 32px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
               backgroundColor: '#000',
               color: '#fff',
               border: '2px solid #000',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: '140px'
+              minWidth: 'clamp(120px, 25vw, 140px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 'clamp(6px, 2vw, 8px)'
             }}
             onMouseEnter={(e) => {
               e.target.style.transform = 'translateY(-2px)';
@@ -686,24 +714,25 @@ function ReminderDetails() {
               e.target.style.boxShadow = 'none';
             }}
           >
-            <FaEdit style={{ marginRight: '8px' }} /> Edit Reminder
+            <FaEdit /> Edit Reminder
           </button>
           <button
             onClick={handleDelete}
             style={{
-              padding: '16px 32px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
               backgroundColor: 'transparent',
               color: '#ff6b6b',
               border: '2px solid #ff6b6b',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: '140px',
+              minWidth: 'clamp(120px, 25vw, 140px)',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center',
+              gap: 'clamp(6px, 2vw, 8px)'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#ff6b6b';
@@ -714,24 +743,25 @@ function ReminderDetails() {
               e.target.style.color = '#ff6b6b';
             }}
           >
-            <FaTrash style={{ marginRight: '8px', color: '#ff6b6b', background: '#fff', borderRadius: '50%', border: '1px solid #ff6b6b', padding: '2px' }} /> Delete
+            <FaTrash /> Delete
           </button>
           <button
             onClick={handleShare}
             style={{
-              padding: '16px 32px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px)',
               backgroundColor: '#007aff',
               color: '#fff',
               border: '2px solid #007aff',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: '140px',
+              minWidth: 'clamp(120px, 25vw, 140px)',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center',
+              gap: 'clamp(6px, 2vw, 8px)'
             }}
           >
             <FaShareAlt /> Share

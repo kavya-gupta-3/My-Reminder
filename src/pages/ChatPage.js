@@ -186,11 +186,12 @@ function ChatPage() {
       color: '#333',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <header style={{
-        padding: '20px',
+        padding: 'clamp(15px, 4vw, 20px)',
         borderBottom: '2px solid #000',
         display: 'flex',
         alignItems: 'center',
@@ -199,7 +200,8 @@ function ChatPage() {
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
         position: 'sticky',
         top: 0,
-        zIndex: 10
+        zIndex: 10,
+        flexShrink: 0
       }}>
         <button
           onClick={() => navigate('/')}
@@ -207,17 +209,18 @@ function ChatPage() {
             background: '#000',
             border: '2px solid #000',
             color: '#fff',
-            padding: '10px',
-            width: '44px',
-            height: '44px',
+            padding: 'clamp(8px, 2vw, 10px)',
+            width: 'clamp(40px, 10vw, 44px)',
+            height: 'clamp(40px, 10vw, 44px)',
             borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '18px',
+            fontSize: 'clamp(16px, 4vw, 18px)',
             fontWeight: '600',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            flexShrink: 0
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#fff';
@@ -231,26 +234,29 @@ function ChatPage() {
           <FaArrowLeft />
         </button>
         <h1 style={{
-          fontSize: '1.5rem',
+          fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
           fontWeight: '600',
           margin: '0',
           color: '#000',
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          flex: 1,
+          justifyContent: 'center'
         }}>
-          <FaRobot style={{ marginRight: '10px' }} /> AI Assistant
+          <FaRobot style={{ marginRight: 'clamp(8px, 2vw, 10px)' }} /> AI Assistant
         </h1>
-        <div style={{ width: '44px', flexShrink: 0 }}></div> {/* Spacer to balance the button */}
+        <div style={{ width: 'clamp(40px, 10vw, 44px)', flexShrink: 0 }}></div> {/* Spacer to balance the button */}
       </header>
 
       {/* Chat Messages */}
       <div className="chat-messages" style={{
         flex: 1,
-        padding: '20px',
+        padding: 'clamp(15px, 4vw, 20px)',
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px'
+        gap: 'clamp(12px, 3vw, 16px)',
+        minHeight: 0
       }}>
         {messages.map((message) => (
           <div

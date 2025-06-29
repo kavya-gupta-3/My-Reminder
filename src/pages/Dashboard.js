@@ -119,14 +119,15 @@ function Dashboard() {
     }}>
       {/* Header */}
       <header style={{
-        padding: '20px 0',
+        padding: 'clamp(25px, 6vw, 40px) 0',
         textAlign: 'center',
         borderBottom: '2px solid #000',
-        marginBottom: '30px',
+        marginBottom: 'clamp(25px, 5vw, 40px)',
         backgroundColor: '#fff',
         borderRadius: '0 0 20px 20px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-        position: 'relative'
+        position: 'relative',
+        margin: '0 -20px clamp(25px, 5vw, 40px) -20px'
       }}>
         {/* User menu button top right */}
         <div style={{ position: 'relative' }}>
@@ -134,17 +135,17 @@ function Dashboard() {
             onClick={() => setShowUserMenu(!showUserMenu)}
             style={{
               position: 'absolute',
-              top: 10,
-              right: 10,
+              top: 'clamp(15px, 4vw, 20px)',
+              right: 'clamp(15px, 4vw, 20px)',
               background: '#000',
               color: '#fff',
               border: '2px solid #000',
               borderRadius: '50%',
-              padding: '8px',
-              width: '40px',
-              height: '40px',
+              padding: 'clamp(8px, 2vw, 12px)',
+              width: 'clamp(40px, 10vw, 50px)',
+              height: 'clamp(40px, 10vw, 50px)',
               fontWeight: 600,
-              fontSize: '1rem',
+              fontSize: 'clamp(1rem, 3vw, 1.2rem)',
               cursor: 'pointer',
               zIndex: 100,
               transition: 'all 0.3s',
@@ -168,8 +169,8 @@ function Dashboard() {
           {showUserMenu && (
             <div style={{
               position: 'absolute',
-              top: 50,
-              right: 10,
+              top: 'clamp(60px, 15vw, 70px)',
+              right: 'clamp(15px, 4vw, 20px)',
               background: '#fff',
               border: '2px solid #000',
               borderRadius: '12px',
@@ -209,20 +210,23 @@ function Dashboard() {
         </div>
         
         <h1 style={{
-          fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
+          fontSize: 'clamp(2.2rem, 8vw, 3rem)',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
           color: '#000',
-          paddingRight: '60px'
+          paddingRight: 'clamp(70px, 15vw, 80px)',
+          paddingLeft: 'clamp(20px, 5vw, 30px)'
         }}>
           Birthday Remind
         </h1>
         <p style={{
-          margin: '8px 0 0 0',
+          margin: 'clamp(8px, 2vw, 12px) 0 0 0',
           color: '#666',
-          fontSize: 'clamp(0.9rem, 3vw, 1rem)',
-          fontWeight: '400'
+          fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+          fontWeight: '400',
+          paddingLeft: 'clamp(20px, 5vw, 30px)',
+          paddingRight: 'clamp(20px, 5vw, 30px)'
         }}>
           Never miss a special day
         </p>
