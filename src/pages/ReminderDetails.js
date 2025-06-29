@@ -353,7 +353,7 @@ function ReminderDetails() {
       backgroundColor: '#f8f9fa',
       color: '#333',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '0 16px 40px 16px'
+      padding: '0 16px 60px 16px'
     }}>
       {/* Header */}
       <header className="header" style={{
@@ -760,7 +760,7 @@ function ReminderDetails() {
           color: '#333',
           borderRadius: '16px',
           padding: '20px',
-          marginBottom: '20px',
+          marginBottom: '32px',
           boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           border: '2px solid #000',
           width: '100%'
@@ -865,7 +865,7 @@ function ReminderDetails() {
                 fontSize: '17px',
                 lineHeight: '1.6',
                 color: '#333',
-                margin: '0',
+                margin: '0 0 20px 0',
                 fontStyle: 'italic',
                 padding: '20px',
                 backgroundColor: '#f8f9fa',
@@ -875,7 +875,7 @@ function ReminderDetails() {
                 {aiMessage}
               </p>
               )}
-              <div style={{ display: 'flex', gap: '12px', margin: '16px 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', margin: '20px 0 0 0', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button onClick={handleCopy} style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -912,7 +912,8 @@ function ReminderDetails() {
           gap: '16px',
           justifyContent: 'center',
           flexWrap: 'wrap',
-          padding: '0 20px'
+          padding: '0 20px',
+          marginTop: '24px'
         }}>
           <button
             onClick={handleEdit}
@@ -1055,11 +1056,18 @@ function ReminderDetails() {
           .action-buttons {
             flex-direction: column !important;
             gap: 12px !important;
+            margin-top: 40px !important;
           }
           .action-buttons button {
             min-width: 120px !important;
             padding: 14px 16px !important;
             font-size: 16px !important;
+          }
+          .ai-message-card {
+            margin-bottom: 40px !important;
+          }
+          .ai-message-card p {
+            margin-bottom: 24px !important;
           }
         }
         @media (max-width: 400px) {
@@ -1071,6 +1079,12 @@ function ReminderDetails() {
           }
           .responsive-grid {
             gap: 12px !important;
+          }
+          .action-buttons {
+            margin-top: 48px !important;
+          }
+          .ai-message-card {
+            margin-bottom: 48px !important;
           }
         }
       `}</style>
