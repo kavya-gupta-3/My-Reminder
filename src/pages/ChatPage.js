@@ -45,7 +45,7 @@ function ChatPage() {
         let initialMessage = {
           id: 1,
           type: 'ai',
-          content: "I'm here to help you create a new birthday reminder. Who is this for?"
+          content: "Hi there! 🎉 I'm here to help you create birthday reminders. Who would you like to set a reminder for? You can add as many as you'd like!"
         };
 
         if (reminderId) {
@@ -172,9 +172,17 @@ function ChatPage() {
         const confirmationMessage = {
           id: Date.now() + 2,
           type: 'ai',
-          content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Got it! I've {reminderId ? 'updated' : 'saved'} the reminder for {aiResponse.updatedData.personName}. You can go back to the dashboard now.</>
+          content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the reminder for {aiResponse.updatedData.personName}! 🎉<br/><br/>Want to add another birthday reminder? Just tell me who it's for, or ask me anything else!</>
         };
         setMessages(prev => [...prev, confirmationMessage]);
+        
+        // Reset reminder data for new reminder creation
+        setReminderData({
+          personName: '',
+          dateOfBirth: '',
+          relationship: '',
+          note: ''
+        });
       }
     } catch (error) {
       console.error('Error in chat flow:', error);

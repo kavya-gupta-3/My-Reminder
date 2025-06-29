@@ -90,12 +90,12 @@ function Dashboard() {
 
   // Add logout handler
   const handleLogout = async () => {
-    if (!window.confirm('Are you sure you want to log out?')) return;
     try {
       console.log('Attempting to log out...');
+      setShowUserMenu(false); // Close menu first
       await signOut(auth);
       console.log('Logout successful');
-      // No need to navigate manually, the auth state change will handle it
+      navigate('/'); // Force navigation
     } catch (err) {
       console.error('Logout error:', err);
       alert('Logout failed: ' + err.message);

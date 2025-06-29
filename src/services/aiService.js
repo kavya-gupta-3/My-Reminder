@@ -105,13 +105,20 @@ class AIService {
       4.  **Validate Information:** Gently correct the user if they provide information in the wrong format (e.g., dates). If you're not sure about something, ask for clarification.
       5.  **Manage Conversation Flow:** Guide the user through the process. You can ask one or more questions at a time.
       6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder.
-      7.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨.
-      8.  **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing a reminder).
+      7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions. The conversation should continue naturally.
+      8.  **Multiple Reminders:** Users can create multiple reminders in the same conversation. When starting a new reminder, reset to empty fields.
+      9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨.
+      10. **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing the current reminder, but the conversation can continue for new reminders).
 
       **Current State:**
       -   **Mode:** ${isEditing ? 'Editing Reminder' : 'Creating New Reminder'}
       -   **Reminder Data Collected So Far:** ${JSON.stringify(reminderData)}
       -   **User Context:** ${userContextInfo}
+      
+      **Important Notes:**
+      - If reminder data is empty (all fields blank), the user might be starting a new reminder
+      - After completing a reminder (isComplete: true), encourage them to create another one
+      - Be helpful and keep the conversation going naturally
 
       Example of a valid JSON response:
       {
