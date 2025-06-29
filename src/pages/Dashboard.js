@@ -92,10 +92,13 @@ function Dashboard() {
   const handleLogout = async () => {
     if (!window.confirm('Are you sure you want to log out?')) return;
     try {
+      console.log('Attempting to log out...');
       await signOut(auth);
-      navigate('/');
+      console.log('Logout successful');
+      // No need to navigate manually, the auth state change will handle it
     } catch (err) {
-      alert('Logout failed.');
+      console.error('Logout error:', err);
+      alert('Logout failed: ' + err.message);
     }
   };
 
@@ -180,20 +183,27 @@ function Dashboard() {
           
           {/* User menu dropdown */}
           {showUserMenu && (
-            <div style={{
-              position: 'absolute',
-              top: '60px',
-              right: '0px',
-              background: '#fff',
-              border: '2px solid #000',
-              borderRadius: '16px',
-              padding: '12px',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-              zIndex: 101,
-              minWidth: '140px'
-            }}>
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute',
+                top: '60px',
+                right: '0px',
+                background: '#fff',
+                border: '2px solid #000',
+                borderRadius: '16px',
+                padding: '12px',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                zIndex: 101,
+                minWidth: '140px'
+              }}>
               <button
-                onClick={handleLogout}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowUserMenu(false);
+                  handleLogout();
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
