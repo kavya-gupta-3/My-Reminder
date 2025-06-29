@@ -526,7 +526,7 @@ function ReminderDetails() {
           backgroundColor: '#fff',
           color: '#333',
           borderRadius: '20px',
-          padding: '40px',
+          padding: '40px 20px',
           marginBottom: '30px',
           boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
           border: '2px solid #000'
@@ -535,25 +535,63 @@ function ReminderDetails() {
             display: 'flex',
             alignItems: 'center',
             marginBottom: '20px',
-            gap: '16px'
+            gap: '16px',
+            flexWrap: 'wrap'
           }}>
             <span style={{ fontSize: '2rem', marginRight: '15px' }}><FaRobot /></span>
             <h3 style={{
-              fontSize: '1.5rem',
+              fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
               fontWeight: '600',
               margin: '0',
-              color: '#000'
+              color: '#000',
+              flex: 1,
+              minWidth: 0
             }}>
               AI Birthday Message
             </h3>
-            <select value={messageSize} onChange={e => setMessageSize(e.target.value)} style={{ marginLeft: 'auto', fontSize: '1rem', borderRadius: '8px', border: '1px solid #000', padding: '4px 10px' }} disabled={aiLoading}>
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
-            <button onClick={handleRegenerate} disabled={aiLoading || regenLimitReached} style={{ marginLeft: '10px', background: regenLimitReached ? '#ccc' : '#000', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 12px', cursor: aiLoading || regenLimitReached ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-              <FaSyncAlt /> Regenerate
-            </button>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap',
+              alignItems: 'center'
+            }}>
+              <select 
+                value={messageSize} 
+                onChange={e => setMessageSize(e.target.value)} 
+                style={{ 
+                  fontSize: 'clamp(0.9rem, 3vw, 1rem)', 
+                  borderRadius: '8px', 
+                  border: '1px solid #000', 
+                  padding: '4px 8px',
+                  backgroundColor: '#fff'
+                }} 
+                disabled={aiLoading}
+              >
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+              <button 
+                onClick={handleRegenerate} 
+                disabled={aiLoading || regenLimitReached} 
+                style={{ 
+                  background: regenLimitReached ? '#ccc' : '#000', 
+                  color: '#fff', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  padding: '6px 10px', 
+                  cursor: aiLoading || regenLimitReached ? 'not-allowed' : 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  fontWeight: 600,
+                  fontSize: 'clamp(0.8rem, 2.5vw, 0.9rem)',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <FaSyncAlt /> Regenerate
+              </button>
+            </div>
           </div>
           {regenLimitReached && (
             <div style={{ color: '#ff6b6b', fontSize: '0.95rem', marginBottom: '10px', textAlign: 'right' }}>

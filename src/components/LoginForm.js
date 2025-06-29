@@ -33,22 +33,24 @@ function LoginForm() {
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '20px'
+      padding: '20px',
+      overflowY: 'auto'
     }}>
       <div style={{
         backgroundColor: '#fff',
         color: '#333',
         borderRadius: '20px',
-        padding: '40px',
+        padding: '40px 20px',
         maxWidth: '400px',
         width: '100%',
         textAlign: 'center',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
-        border: '2px solid #000'
+        border: '2px solid #000',
+        margin: '20px 0'
       }}>
         <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎂</div>
         <h1 style={{
-          fontSize: '2rem',
+          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
           fontWeight: '700',
           margin: '0 0 10px 0',
           letterSpacing: '-0.02em',
@@ -58,7 +60,7 @@ function LoginForm() {
         </h1>
         <p style={{
           color: '#666',
-          fontSize: '1rem',
+          fontSize: 'clamp(0.9rem, 3vw, 1rem)',
           margin: '0 0 40px 0',
           lineHeight: '1.5'
         }}>
@@ -73,19 +75,21 @@ function LoginForm() {
           <button
             onClick={loginWithGoogle}
             style={{
-              padding: '16px 24px',
+              padding: '16px 20px',
               backgroundColor: '#000',
               color: '#fff',
               border: '2px solid #000',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '12px'
+              gap: '8px',
+              whiteSpace: 'nowrap',
+              minHeight: '48px'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#fff';
@@ -96,8 +100,8 @@ function LoginForm() {
               e.target.style.color = '#fff';
             }}
           >
-            <FaGoogle style={{ marginRight: '12px' }} />
-            Continue with Google
+            <FaGoogle style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap' }}>Continue with Google</span>
           </button>
 
           <div style={{
@@ -125,19 +129,21 @@ function LoginForm() {
           <button
             onClick={loginAnonymously}
             style={{
-              padding: '16px 24px',
+              padding: '16px 20px',
               backgroundColor: 'transparent',
               color: '#000',
               border: '2px solid #000',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.9rem, 3vw, 1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '12px'
+              gap: '8px',
+              whiteSpace: 'nowrap',
+              minHeight: '48px'
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = '#000';
@@ -148,14 +154,14 @@ function LoginForm() {
               e.target.style.color = '#000';
             }}
           >
-            <FaUserSecret style={{ marginRight: '12px' }} />
-            Continue without account
+            <FaUserSecret style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap' }}>Continue without account</span>
           </button>
         </div>
 
         <p style={{
           color: '#666',
-          fontSize: '0.85rem',
+          fontSize: 'clamp(0.8rem, 2.5vw, 0.85rem)',
           margin: '30px 0 0 0',
           lineHeight: '1.4'
         }}>

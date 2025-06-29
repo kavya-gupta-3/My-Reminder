@@ -4,7 +4,7 @@ import { auth, database, ref, onValue, off, update } from '../firebase';
 import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaBirthdayCake, FaGift, FaCalendarCheck } from 'react-icons/fa';
+import { FaPlus, FaBirthdayCake, FaGift, FaCalendarCheck, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -12,6 +12,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [reminders, setReminders] = useState([]);
   const [remindersLoading, setRemindersLoading] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -118,58 +119,109 @@ function Dashboard() {
     }}>
       {/* Header */}
       <header style={{
-        padding: '30px 0',
+        padding: '20px 0',
         textAlign: 'center',
         borderBottom: '2px solid #000',
-        marginBottom: '40px',
+        marginBottom: '30px',
         backgroundColor: '#fff',
         borderRadius: '0 0 20px 20px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
         position: 'relative'
       }}>
-        {/* Logout button top right */}
-        <button
-          onClick={handleLogout}
-          style={{
-            position: 'absolute',
-            top: 20,
-            right: 20,
-            background: '#000',
-            color: '#fff',
-            border: '2px solid #000',
-            borderRadius: '12px',
-            padding: '10px 18px',
-            fontWeight: 600,
-            fontSize: '1rem',
-            cursor: 'pointer',
-            zIndex: 100,
-            transition: 'all 0.3s',
-            minWidth: 80
-          }}
-          onMouseEnter={e => {
-            e.target.style.backgroundColor = '#fff';
-            e.target.style.color = '#000';
-          }}
-          onMouseLeave={e => {
-            e.target.style.backgroundColor = '#000';
-            e.target.style.color = '#fff';
-          }}
-        >
-          Logout
-        </button>
+        {/* User menu button top right */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              background: '#000',
+              color: '#fff',
+              border: '2px solid #000',
+              borderRadius: '50%',
+              padding: '8px',
+              width: '40px',
+              height: '40px',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              zIndex: 100,
+              transition: 'all 0.3s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={e => {
+              e.target.style.backgroundColor = '#fff';
+              e.target.style.color = '#000';
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = '#000';
+              e.target.style.color = '#fff';
+            }}
+          >
+            <FaUser />
+          </button>
+          
+          {/* User menu dropdown */}
+          {showUserMenu && (
+            <div style={{
+              position: 'absolute',
+              top: 50,
+              right: 10,
+              background: '#fff',
+              border: '2px solid #000',
+              borderRadius: '12px',
+              padding: '8px',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+              zIndex: 101,
+              minWidth: '120px'
+            }}>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#ff6b6b',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#fff0f0';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
+              >
+                <FaSignOutAlt /> Logout
+              </button>
+            </div>
+          )}
+        </div>
+        
         <h1 style={{
-          fontSize: '2.5rem',
+          fontSize: 'clamp(1.8rem, 6vw, 2.5rem)',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
-          color: '#000'
+          color: '#000',
+          paddingRight: '60px'
         }}>
           Birthday Remind
         </h1>
         <p style={{
-          margin: '10px 0 0 0',
+          margin: '8px 0 0 0',
           color: '#666',
-          fontSize: '1rem',
+          fontSize: 'clamp(0.9rem, 3vw, 1rem)',
           fontWeight: '400'
         }}>
           Never miss a special day
@@ -177,16 +229,16 @@ function Dashboard() {
       </header>
 
       {/* User Name Form */}
-      <div style={{ marginBottom: '40px' }}>
+      <div style={{ marginBottom: '30px' }}>
         <NameForm />
       </div>
 
       {/* Reminders Section */}
       <section>
         <h2 style={{
-          fontSize: '1.5rem',
+          fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
           fontWeight: '600',
-          marginBottom: '30px',
+          marginBottom: '25px',
           color: '#000'
         }}>
           Upcoming Birthdays
@@ -263,7 +315,7 @@ function Dashboard() {
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
                       width: '48px',
                       height: '48px',
@@ -275,30 +327,37 @@ function Dashboard() {
                       fontSize: '1.2rem',
                       fontWeight: '600',
                       color: '#000',
-                      border: '2px solid #000'
+                      border: '2px solid #000',
+                      flexShrink: 0
                     }}>
                       {icon}
                     </div>
-                    <div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
                       <h3 style={{
                         fontSize: '1.1rem',
                         fontWeight: '600',
                         margin: '0',
-                        color: '#000'
+                        color: '#000',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                       }}>
                         {reminder.personName}
                       </h3>
                       <p style={{
                         color: '#666',
                         fontSize: '0.9rem',
-                        margin: '4px 0 0 0'
+                        margin: '4px 0 0 0',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                       }}>
                         {reminder.relationship}
                       </p>
                     </div>
                   </div>
                   
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
                      <p style={{
                         fontSize: '0.9rem',
                         fontWeight: '600',
@@ -379,6 +438,21 @@ function Dashboard() {
         <FaPlus />
       </button>
 
+      {/* Click outside to close user menu */}
+      {showUserMenu && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 99
+          }}
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
+
       <style jsx>{`
         .dashboard-container {
           padding: 0 20px 100px 20px;
@@ -387,12 +461,17 @@ function Dashboard() {
           .dashboard-container {
             padding: 0 15px 100px 15px;
           }
-          header button {
-            top: 10px !important;
-            right: 10px !important;
-            padding: 8px 12px !important;
-            font-size: 0.95rem !important;
-            min-width: 60px !important;
+          header {
+            padding: 15px 0 !important;
+            margin-bottom: 20px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .dashboard-container {
+            padding: 0 10px 100px 10px;
+          }
+          header {
+            padding: 10px 0 !important;
           }
         }
       `}</style>

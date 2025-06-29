@@ -76,6 +76,21 @@
     padding: 18px !important;
     margin-bottom: 18px !important;
   }
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden !important;
+  }
+  /* Fix AI message section */
+  .ai-message-card .ai-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .ai-message-card .ai-controls > div {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+  }
 }
 @media (max-width: 400px) {
   .header, header {
@@ -89,5 +104,9 @@
   }
   .countdown-grid {
     grid-template-columns: 1fr !important;
+  }
+  .birthday-info-card, .countdown-card, .ai-message-card {
+    padding: 15px !important;
+    margin-bottom: 15px !important;
   }
 } 

@@ -302,14 +302,14 @@ function ChatPage() {
 
       {/* Input Form */}
       <div style={{
-        padding: '20px',
+        padding: '15px 20px',
         borderTop: '2px solid #000',
         backgroundColor: '#fff',
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)'
       }}>
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
-          gap: '12px',
+          gap: '10px',
           alignItems: 'flex-end'
         }}>
           <div style={{ flex: 1 }}>
@@ -321,8 +321,8 @@ function ChatPage() {
               disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '16px 20px',
-                borderRadius: '25px',
+                padding: '12px 16px',
+                borderRadius: '20px',
                 border: '2px solid #000',
                 backgroundColor: '#f8f9fa',
                 color: '#333',
@@ -342,16 +342,21 @@ function ChatPage() {
             type="submit"
             disabled={!inputValue.trim() || isLoading}
             style={{
-              padding: '16px 24px',
-              borderRadius: '25px',
+              padding: '12px',
+              borderRadius: '50%',
               border: '2px solid #000',
               backgroundColor: inputValue.trim() && !isLoading ? '#000' : '#f8f9fa',
               color: inputValue.trim() && !isLoading ? '#fff' : '#666',
-              fontSize: '15px',
+              fontSize: '16px',
               fontWeight: '600',
               cursor: inputValue.trim() && !isLoading ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              minWidth: '80px'
+              width: '44px',
+              height: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
             }}
             onMouseEnter={(e) => {
               if (inputValue.trim() && !isLoading) {
