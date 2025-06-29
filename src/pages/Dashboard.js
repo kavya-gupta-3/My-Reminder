@@ -136,14 +136,10 @@ function Dashboard() {
         margin: '0 -16px 32px -16px'
       }}>
         {/* User menu button top right */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '50%', right: '20px', transform: 'translateY(-50%)' }}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             style={{
-              position: 'absolute',
-              top: '50%',
-              right: '20px',
-              transform: 'translateY(-50%)',
               background: '#fff',
               color: '#000',
               border: '2px solid #fff',
@@ -186,8 +182,8 @@ function Dashboard() {
           {showUserMenu && (
             <div style={{
               position: 'absolute',
-              top: '70px',
-              right: '20px',
+              top: '60px',
+              right: '0px',
               background: '#fff',
               border: '2px solid #000',
               borderRadius: '16px',
