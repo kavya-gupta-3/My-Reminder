@@ -219,6 +219,7 @@ class AIService {
           userContextInfo = `\n\nUser's other birthday reminders: ${existingReminders}`;
         }
       }
+      
       let sizePrompt = '';
       if (size === 'small') {
         sizePrompt = 'Keep it very short (1-2 sentences, 15-25 words).';
@@ -227,8 +228,94 @@ class AIService {
       } else {
         sizePrompt = 'Keep it short and sweet (2-3 sentences, 30-40 words).';
       }
-      const systemPrompt = `You are a friendly AI assistant that creates personalized birthday messages.\n\nIMPORTANT RULES:\n- Output ONLY the birthday message, with no preamble, no explanations, and no follow-up questions.\n- Do NOT include phrases like 'Here's a message for you', 'Would you like to add or change anything', or anything similar.\n- The message must be ready to send as-is.\n- Use colloquial everyday words. Keep it casual and conversational.\n- Do not make it sound corporate or like an AI wrote it. Keep it human.\n- Write in grade 6 style (simple, clear sentences).\n- Don't use passive voice. Use active voice only.\n- Make it a bit funny and lighthearted. Add humor that feels natural.\n- Be warm, caring, and celebratory.\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 😄, 🎈, etc.).\n- ${sizePrompt}\n- Make it personal and genuine.\n- Don't be overly formal or generic.\n- Don't use inappropriate humor or references.\n- Don't mention specific ages if the person might be sensitive about it.\n- Focus on positive wishes and celebration.\n- Make each message unique.\n- Random seed for variety: ${randomSeed}\n`;
-      const userPrompt = `Generate a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
+
+      // Determine tone and approach based on relationship
+      const relationship = reminderData.relationship?.toLowerCase() || '';
+      const personName = reminderData.personName || '';
+      
+      // Categorize relationships
+      const elderRelationships = ['mom', 'mother', 'dad', 'father', 'papa', 'mama', 'uncle', 'aunt', 'aunty', 'auntie', 'grandfather', 'grandmother', 'grandpa', 'grandma', 'nana', 'nani', 'dada', 'dadi', 'boss', 'sir', 'madam', 'teacher', 'professor'];
+      const kidRelationships = ['son', 'daughter', 'nephew', 'niece', 'cousin', 'kid', 'child', 'student'];
+      const peerRelationships = ['friend', 'buddy', 'pal', 'colleague', 'coworker', 'roommate', 'neighbor', 'classmate'];
+      const romanticRelationships = ['wife', 'husband', 'girlfriend', 'boyfriend', 'partner', 'spouse', 'fiancé', 'fiancée'];
+      
+      const isElder = elderRelationships.some(elder => relationship.includes(elder));
+      const isKid = kidRelationships.some(kid => relationship.includes(kid));
+      const isPeer = peerRelationships.some(peer => relationship.includes(peer));
+      const isRomantic = romanticRelationships.some(romantic => relationship.includes(romantic));
+      
+      let toneGuidelines = '';
+      let nameUsage = '';
+      
+      if (isElder) {
+        toneGuidelines = `
+- Be respectful and warm, not overly casual
+- Use heartfelt but not too funny language
+- Show appreciation and gratitude
+- Keep it dignified but loving
+- Avoid slang or too casual expressions`;
+        nameUsage = `- Do NOT use their name directly. Instead use respectful terms like "Hope your special day", "Wishing you", "May your birthday" etc.`;
+      } else if (isKid) {
+        toneGuidelines = `
+- Be playful, fun, and energetic
+- Use simple, excited language
+- Include fun elements and enthusiasm
+- Make it feel like a celebration
+- Be encouraging and sweet`;
+        nameUsage = `- You can use their name naturally in the message`;
+      } else if (isRomantic) {
+        toneGuidelines = `
+- Be loving and sweet but not overly sappy
+- Keep it personal and intimate
+- Use warm, affectionate language
+- Make it feel special and personal
+- Balance romance with genuine care`;
+        nameUsage = `- Use their name in a loving, personal way`;
+      } else {
+        // Peers and general relationships
+        toneGuidelines = `
+- Be casual, friendly, and a bit funny
+- Use conversational, buddy-like language
+- Include light humor and warmth
+- Keep it relaxed and genuine
+- Make it feel like you're talking to a friend`;
+        nameUsage = `- Use their name casually and naturally`;
+      }
+
+      const systemPrompt = `You are creating a personalized birthday message that sounds like it's from a real person, not an AI.
+
+CRITICAL STYLE REQUIREMENTS:
+- Use colloquial everyday words (like "awesome", "super", "really", "totally")
+- Do NOT make it sound corporate or like an AI wrote it
+- Keep it human and conversational - like texting a friend
+- Write in grade 6 style (simple, clear, easy to read)
+- Don't use passive voice - use active voice only
+- Make it sound casual and natural
+- NO fancy or formal words
+- NO corporate speak or AI-like phrases
+
+RELATIONSHIP-BASED TONE:
+${toneGuidelines}
+
+NAME USAGE:
+${nameUsage}
+
+MESSAGE REQUIREMENTS:
+- Output ONLY the birthday message, no preamble or explanations
+- ${sizePrompt}
+- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 😄, 🎈, etc.)
+- Make each message unique and personal
+- Sound like a real person wrote it
+- Random seed for variety: ${randomSeed}
+
+EXAMPLES OF GOOD STYLE:
+- "Hope your day is super awesome!" (not "I hope your day will be wonderful")
+- "You're amazing!" (not "You are truly remarkable")
+- "Can't wait to celebrate!" (not "I look forward to celebrating")
+- "This is gonna be epic!" (not "This will be magnificent")`;
+
+      const userPrompt = `Create a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
+      
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -239,17 +326,20 @@ class AIService {
             { role: 'user', content: userPrompt }
           ],
           max_tokens: 200,
-          temperature: 1.0
+          temperature: 1.2
         })
       });
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
+      
       const data = await response.json();
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
         throw new Error('Invalid response structure from API');
       }
+      
       return data.choices[0].message.content.trim();
     } catch (error) {
       console.error('Error generating direct birthday message:', error);
