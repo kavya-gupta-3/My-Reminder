@@ -193,7 +193,11 @@ function Dashboard() {
           {/* User menu dropdown */}
           {showUserMenu && (
             <div 
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Dropdown container clicked');
+              }}
               style={{
                 position: 'absolute',
                 top: '60px',
@@ -207,7 +211,12 @@ function Dashboard() {
                 minWidth: '140px'
               }}>
               <button
-                onClick={handleLogout}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Dropdown logout clicked');
+                  handleLogout();
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -247,26 +256,6 @@ function Dashboard() {
         }}>
           Birthday Remind
         </h1>
-        
-        {/* Temporary logout button for testing */}
-        <button
-          onClick={handleLogout}
-          style={{
-            position: 'absolute',
-            left: '20px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: '#ff6b6b',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '8px 12px',
-            fontSize: '14px',
-            cursor: 'pointer'
-          }}
-        >
-          Test Logout
-        </button>
         <p style={{
           margin: '12px 0 0 0',
           color: '#ccc',
