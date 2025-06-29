@@ -201,12 +201,12 @@ function ChatPage() {
     }}>
       {/* Header */}
       <header style={{
-        padding: '24px 20px',
+        padding: '20px',
         borderBottom: '2px solid #000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         position: 'sticky',
         top: 0,
@@ -216,9 +216,9 @@ function ChatPage() {
         <button
           onClick={() => navigate('/')}
           style={{
-            background: '#000',
-            border: '2px solid #000',
-            color: '#fff',
+            background: '#fff',
+            border: '2px solid #fff',
+            color: '#000',
             padding: '12px',
             width: '48px',
             height: '48px',
@@ -233,12 +233,14 @@ function ChatPage() {
             flexShrink: 0
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#fff';
-            e.target.style.color = '#000';
-          }}
-          onMouseLeave={(e) => {
             e.target.style.backgroundColor = '#000';
             e.target.style.color = '#fff';
+            e.target.style.borderColor = '#fff';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#fff';
+            e.target.style.color = '#000';
+            e.target.style.borderColor = '#fff';
           }}
         >
           <FaArrowLeft />
@@ -247,7 +249,7 @@ function ChatPage() {
           fontSize: '24px',
           fontWeight: '600',
           margin: '0',
-          color: '#000',
+          color: '#fff',
           display: 'flex',
           alignItems: 'center',
           flex: 1,

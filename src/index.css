@@ -28,6 +28,23 @@ code {
     monospace;
 }
 
+/* Global header styles */
+header {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+header h1, header p {
+  color: #fff !important;
+}
+
+/* Mobile-first box styles */
+.card-box {
+  padding: 16px 20px !important;
+  min-height: auto !important;
+  width: 100% !important;
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   body {

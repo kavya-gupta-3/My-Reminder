@@ -227,7 +227,7 @@ class AIService {
       } else {
         sizePrompt = 'Keep it short and sweet (2-3 sentences, 30-40 words).';
       }
-      const systemPrompt = `You are a friendly AI assistant that creates personalized birthday messages.\n\nIMPORTANT RULES:\n- Output ONLY the birthday message, with no preamble, no explanations, and no follow-up questions.\n- Do NOT include phrases like 'Here's a message for you', 'Would you like to add or change anything', or anything similar.\n- The message must be ready to send as-is.\n- Always be warm, caring, and celebratory.\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.).\n- ${sizePrompt}\n- Make it personal and genuine.\n- Don't be overly formal or generic.\n- Don't use inappropriate humor or references.\n- Don't mention specific ages if the person might be sensitive about it.\n- Focus on positive wishes and celebration.\n- Make each message unique.\n- Random seed for variety: ${randomSeed}\n`;
+      const systemPrompt = `You are a friendly AI assistant that creates personalized birthday messages.\n\nIMPORTANT RULES:\n- Output ONLY the birthday message, with no preamble, no explanations, and no follow-up questions.\n- Do NOT include phrases like 'Here's a message for you', 'Would you like to add or change anything', or anything similar.\n- The message must be ready to send as-is.\n- Use colloquial everyday words. Keep it casual and conversational.\n- Do not make it sound corporate or like an AI wrote it. Keep it human.\n- Write in grade 6 style (simple, clear sentences).\n- Don't use passive voice. Use active voice only.\n- Make it a bit funny and lighthearted. Add humor that feels natural.\n- Be warm, caring, and celebratory.\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 😄, 🎈, etc.).\n- ${sizePrompt}\n- Make it personal and genuine.\n- Don't be overly formal or generic.\n- Don't use inappropriate humor or references.\n- Don't mention specific ages if the person might be sensitive about it.\n- Focus on positive wishes and celebration.\n- Make each message unique.\n- Random seed for variety: ${randomSeed}\n`;
       const userPrompt = `Generate a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
@@ -239,7 +239,7 @@ class AIService {
             { role: 'user', content: userPrompt }
           ],
           max_tokens: 200,
-          temperature: 0.9
+          temperature: 1.0
         })
       });
       if (!response.ok) {

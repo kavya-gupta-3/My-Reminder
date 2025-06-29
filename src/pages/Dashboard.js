@@ -119,11 +119,11 @@ function Dashboard() {
     }}>
       {/* Header */}
       <header style={{
-        padding: '32px 20px',
+        padding: '24px 20px',
         textAlign: 'center',
         borderBottom: '2px solid #000',
         marginBottom: '32px',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         borderRadius: '0 0 24px 24px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         position: 'relative',
@@ -137,9 +137,9 @@ function Dashboard() {
               position: 'absolute',
               top: '20px',
               right: '20px',
-              background: '#000',
-              color: '#fff',
-              border: '2px solid #000',
+              background: '#fff',
+              color: '#000',
+              border: '2px solid #fff',
               borderRadius: '50%',
               padding: '12px',
               width: '48px',
@@ -154,15 +154,25 @@ function Dashboard() {
               justifyContent: 'center'
             }}
             onMouseEnter={e => {
-              e.target.style.backgroundColor = '#fff';
-              e.target.style.color = '#000';
-            }}
-            onMouseLeave={e => {
               e.target.style.backgroundColor = '#000';
               e.target.style.color = '#fff';
+              e.target.style.borderColor = '#fff';
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = '#fff';
+              e.target.style.color = '#000';
+              e.target.style.borderColor = '#fff';
             }}
           >
-            <FaUser />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 448 512"
+              width="18" 
+              height="18"
+              fill="currentColor"
+            >
+              <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"/>
+            </svg>
           </button>
           
           {/* User menu dropdown */}
@@ -214,15 +224,15 @@ function Dashboard() {
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
-          color: '#000',
-          paddingRight: '80px',
+          color: '#fff',
+          paddingRight: '20px',
           paddingLeft: '20px'
         }}>
           Birthday Remind
         </h1>
         <p style={{
           margin: '12px 0 0 0',
-          color: '#666',
+          color: '#ccc',
           fontSize: '18px',
           fontWeight: '400',
           paddingLeft: '20px',
@@ -307,29 +317,30 @@ function Dashboard() {
                   style={{
                     backgroundColor: '#fff',
                     color: '#333',
-                    borderRadius: '20px',
-                    padding: '18px 24px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                    borderRadius: '16px',
+                    padding: '14px 20px',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
                     border: '2px solid #000',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    minHeight: '80px'
+                    minHeight: '64px',
+                    width: '100%'
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
-                      width: '52px',
-                      height: '52px',
+                      width: '44px',
+                      height: '44px',
                       borderRadius: '50%',
                       backgroundColor: '#f0f0f0',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '22px',
+                      fontSize: '20px',
                       fontWeight: '600',
                       color: '#000',
                       border: '2px solid #000',

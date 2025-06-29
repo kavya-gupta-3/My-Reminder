@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auth, database, ref, get, remove, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms } from 'react-icons/fa';
+import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt } from 'react-icons/fa';
 import './ReminderDetails.css';
 
 function ReminderDetails() {
@@ -18,6 +18,14 @@ function ReminderDetails() {
   const [regenLimitReached, setRegenLimitReached] = useState(false);
   const [showShareFallback, setShowShareFallback] = useState(false);
   const [loadError, setLoadError] = useState('');
+  
+  // Edit states
+  const [editingField, setEditingField] = useState(null);
+  const [editValues, setEditValues] = useState({
+    personName: '',
+    dateOfBirth: '',
+    note: ''
+  });
 
   // Helper to get today's date string
   const getToday = () => new Date().toISOString().slice(0, 10);
@@ -195,6 +203,55 @@ function ReminderDetails() {
     navigate(`/chat?edit=${id}`);
   };
 
+  // Manual edit handlers
+  const startEditing = (field) => {
+    setEditingField(field);
+    setEditValues({
+      personName: reminder.personName,
+      dateOfBirth: reminder.dateOfBirth,
+      note: reminder.note || ''
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingField(null);
+    setEditValues({
+      personName: '',
+      dateOfBirth: '',
+      note: ''
+    });
+  };
+
+  const saveEdit = async () => {
+    try {
+      const uid = auth.currentUser?.uid;
+      const reminderRef = ref(database, `reminders/${uid}/${id}`);
+      
+      // Validate date format
+      if (editingField === 'dateOfBirth') {
+        const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+        if (!dateRegex.test(editValues.dateOfBirth)) {
+          alert('Please enter date in MM/DD/YYYY format');
+          return;
+        }
+      }
+      
+      await update(reminderRef, {
+        [editingField]: editValues[editingField]
+      });
+      
+      setReminder(prev => ({
+        ...prev,
+        [editingField]: editValues[editingField]
+      }));
+      
+      setEditingField(null);
+    } catch (error) {
+      console.error('Error updating reminder:', error);
+      alert('Error updating reminder. Please try again.');
+    }
+  };
+
   const calculateAge = (dateOfBirth) => {
     const [month, day, year] = dateOfBirth.split('/');
     const birthDate = new Date(year, month - 1, day);
@@ -300,11 +357,11 @@ function ReminderDetails() {
     }}>
       {/* Header */}
       <header className="header" style={{
-        padding: '32px 20px',
+        padding: '24px 20px',
         textAlign: 'center',
         borderBottom: '2px solid #000',
         marginBottom: '32px',
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         borderRadius: '0 0 24px 24px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         margin: '0 -16px 32px -16px',
@@ -314,13 +371,13 @@ function ReminderDetails() {
           onClick={() => navigate('/')}
           className="header-button"
           style={{
-            background: '#000',
-            border: '2px solid #000',
-            color: '#fff',
-            padding: '12px 16px',
-            borderRadius: '16px',
+            background: '#fff',
+            border: '2px solid #fff',
+            color: '#000',
+            padding: '12px',
+            borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: '20px',
             fontWeight: '600',
             transition: 'all 0.3s ease',
             position: 'absolute',
@@ -329,25 +386,29 @@ function ReminderDetails() {
             transform: 'translateY(-50%)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px'
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#fff';
-            e.target.style.color = '#000';
-          }}
-          onMouseLeave={(e) => {
             e.target.style.backgroundColor = '#000';
             e.target.style.color = '#fff';
+            e.target.style.borderColor = '#fff';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#fff';
+            e.target.style.color = '#000';
+            e.target.style.borderColor = '#fff';
           }}
         >
-          <FaArrowLeft /> Back
+          <FaArrowLeft />
         </button>
         <h1 style={{
           fontSize: '28px',
           fontWeight: '700',
           margin: '0',
           letterSpacing: '-0.02em',
-          color: '#000',
+          color: '#fff',
           paddingLeft: '100px',
           paddingRight: '20px'
         }}>
@@ -364,11 +425,12 @@ function ReminderDetails() {
         <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '24px',
-          padding: '28px 32px',
-          marginBottom: '24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          border: '2px solid #000'
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          border: '2px solid #000',
+          width: '100%'
         }}>
           <div style={{
             display: 'flex',
@@ -386,9 +448,46 @@ function ReminderDetails() {
                 fontSize: '26px',
                 fontWeight: '700',
                 margin: '0 0 6px 0',
-                color: '#000'
+                color: '#000',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
               }}>
-                {reminder.personName}
+                {editingField === 'personName' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={editValues.personName}
+                      onChange={(e) => setEditValues({...editValues, personName: e.target.value})}
+                      style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        padding: '4px 8px',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        width: '200px'
+                      }}
+                      autoFocus
+                    />
+                    <button onClick={saveEdit} style={{ padding: '4px 8px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓</button>
+                    <button onClick={cancelEditing} style={{ padding: '4px 8px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                  </div>
+                ) : (
+                  <>
+                    {reminder.personName}
+                    <FaPencilAlt 
+                      onClick={() => startEditing('personName')}
+                      style={{ 
+                        fontSize: '16px', 
+                        cursor: 'pointer', 
+                        color: '#666',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#000'}
+                      onMouseLeave={(e) => e.target.style.color = '#666'}
+                    />
+                  </>
+                )}
               </h2>
               <p style={{
                 fontSize: '17px',
@@ -416,17 +515,52 @@ function ReminderDetails() {
               border: '1px solid #000'
             }}>
               <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaBirthdayCake /></div>
-              <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px' }}>Birthday</div>
+              <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                Birthday
+                <FaPencilAlt 
+                  onClick={() => startEditing('dateOfBirth')}
+                  style={{ 
+                    fontSize: '14px', 
+                    cursor: 'pointer', 
+                    color: '#666',
+                    transition: 'color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#000'}
+                  onMouseLeave={(e) => e.target.style.color = '#666'}
+                />
+              </div>
               <div style={{ color: '#666', fontSize: '15px' }}>
-                {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
+                {editingField === 'dateOfBirth' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                    <input
+                      type="text"
+                      value={editValues.dateOfBirth}
+                      onChange={(e) => setEditValues({...editValues, dateOfBirth: e.target.value})}
+                      placeholder="MM/DD/YYYY"
+                      style={{
+                        fontSize: '15px',
+                        padding: '4px 8px',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        width: '120px',
+                        textAlign: 'center'
+                      }}
+                      autoFocus
+                    />
+                    <button onClick={saveEdit} style={{ padding: '2px 6px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓</button>
+                    <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                  </div>
+                ) : (
+                  new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })
+                )}
               </div>
             </div>
 
-            {reminder.note && (
+            {reminder.note ? (
               <div style={{
                 padding: '20px',
                 backgroundColor: '#f8f9fa',
@@ -434,10 +568,97 @@ function ReminderDetails() {
                 border: '1px solid #000'
               }}>
                 <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaRegCommentDots /></div>
-                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '17px' }}>Note</div>
-                <div style={{ color: '#666', fontSize: '15px' }}>
-                  {reminder.note}
+                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  Note
+                  <FaPencilAlt 
+                    onClick={() => startEditing('note')}
+                    style={{ 
+                      fontSize: '14px', 
+                      cursor: 'pointer', 
+                      color: '#666',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#000'}
+                    onMouseLeave={(e) => e.target.style.color = '#666'}
+                  />
                 </div>
+                <div style={{ color: '#666', fontSize: '15px' }}>
+                  {editingField === 'note' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                      <textarea
+                        value={editValues.note}
+                        onChange={(e) => setEditValues({...editValues, note: e.target.value})}
+                        placeholder="Add a note..."
+                        style={{
+                          fontSize: '15px',
+                          padding: '8px',
+                          border: '2px solid #000',
+                          borderRadius: '8px',
+                          width: '100%',
+                          minHeight: '60px',
+                          resize: 'vertical'
+                        }}
+                        autoFocus
+                      />
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={saveEdit} style={{ padding: '4px 12px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓ Save</button>
+                        <button onClick={cancelEditing} style={{ padding: '4px 12px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕ Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    reminder.note || 'No note added'
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                padding: '20px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '16px',
+                border: '1px solid #000',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaRegCommentDots /></div>
+                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#000', fontSize: '17px' }}>Note</div>
+                {editingField === 'note' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                    <textarea
+                      value={editValues.note}
+                      onChange={(e) => setEditValues({...editValues, note: e.target.value})}
+                      placeholder="Add a note..."
+                      style={{
+                        fontSize: '15px',
+                        padding: '8px',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        width: '100%',
+                        minHeight: '60px',
+                        resize: 'vertical'
+                      }}
+                      autoFocus
+                    />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={saveEdit} style={{ padding: '4px 12px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓ Save</button>
+                      <button onClick={cancelEditing} style={{ padding: '4px 12px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕ Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => startEditing('note')}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#000',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  >
+                    + Add Note
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -447,12 +668,13 @@ function ReminderDetails() {
         <div className="countdown-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '24px',
-          padding: '28px 32px',
-          marginBottom: '24px',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
           textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          border: '2px solid #000'
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          border: '2px solid #000',
+          width: '100%'
         }}>
           <h3 style={{
             fontSize: '22px',
@@ -536,11 +758,12 @@ function ReminderDetails() {
         <div className="ai-message-card" style={{
           backgroundColor: '#fff',
           color: '#333',
-          borderRadius: '24px',
-          padding: '28px 32px',
-          marginBottom: '24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          border: '2px solid #000'
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          border: '2px solid #000',
+          width: '100%'
         }}>
           <div style={{
             display: 'flex',
