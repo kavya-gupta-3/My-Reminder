@@ -91,14 +91,23 @@ function Dashboard() {
   // Add logout handler
   const handleLogout = async () => {
     try {
-      console.log('Attempting to log out...');
-      setShowUserMenu(false); // Close menu first
+      console.log('Starting logout process...');
+      setShowUserMenu(false);
+      
+      // Clear any local storage or session data
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Sign out from Firebase
       await signOut(auth);
-      console.log('Logout successful');
-      navigate('/'); // Force navigation
+      console.log('Firebase signOut completed');
+      
+      // Force reload to ensure clean state
+      window.location.href = '/';
     } catch (err) {
       console.error('Logout error:', err);
-      alert('Logout failed: ' + err.message);
+      // Force reload even if signOut fails
+      window.location.href = '/';
     }
   };
 
@@ -198,12 +207,7 @@ function Dashboard() {
                 minWidth: '140px'
               }}>
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowUserMenu(false);
-                  handleLogout();
-                }}
+                onClick={handleLogout}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -243,6 +247,26 @@ function Dashboard() {
         }}>
           Birthday Remind
         </h1>
+        
+        {/* Temporary logout button for testing */}
+        <button
+          onClick={handleLogout}
+          style={{
+            position: 'absolute',
+            left: '20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: '#ff6b6b',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
+        >
+          Test Logout
+        </button>
         <p style={{
           margin: '12px 0 0 0',
           color: '#ccc',
