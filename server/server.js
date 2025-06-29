@@ -59,6 +59,13 @@ app.post('/api/send-notification', async (req, res) => {
       return res.status(400).json({ error: 'FCM token is required' });
     }
 
+    const getNotificationLink = (data) => {
+      if (data && data.reminderId) {
+        return `https://birthday-reminder-vh81.vercel.app/reminder/${data.reminderId}`;
+      }
+      return 'https://birthday-reminder-vh81.vercel.app/';
+    };
+
     const message = {
       notification: {
         title: title || 'Birthday Reminder',
@@ -106,7 +113,7 @@ app.post('/api/send-notification', async (req, res) => {
           ]
         },
         fcm_options: {
-          link: '/'
+          link: getNotificationLink(data)
         }
       },
       token: token
@@ -149,7 +156,14 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       return res.status(400).json({ error: 'No valid FCM tokens found' });
     }
 
-    const message = {
+    const getNotificationLink = (data) => {
+      if (data && data.reminderId) {
+        return `https://birthday-reminder-vh81.vercel.app/reminder/${data.reminderId}`;
+      }
+      return 'https://birthday-reminder-vh81.vercel.app/';
+    };
+
+    const multicastMessage = {
       notification: {
         title: title || 'Birthday Reminder',
         body: body || 'You have a birthday reminder!',
@@ -196,13 +210,13 @@ app.post('/api/send-notification-to-users', async (req, res) => {
           ]
         },
         fcm_options: {
-          link: '/'
+          link: getNotificationLink(data)
         }
       },
       tokens: tokens
     };
 
-    const response = await admin.messaging().sendMulticast(message);
+    const response = await admin.messaging().sendMulticast(multicastMessage);
     console.log('Multicast notification sent:', response);
     res.json({ 
       success: true, 
