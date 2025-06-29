@@ -784,7 +784,7 @@ function ReminderDetails() {
                 AI Birthday Message
               </h3>
             </div>
-            <div style={{
+            <div className="ai-controls" style={{
               display: 'flex',
               gap: '12px',
               alignItems: 'center',
@@ -1070,15 +1070,17 @@ function ReminderDetails() {
             margin-bottom: 24px !important;
           }
           .ai-message-card > div:first-child {
-            flex-direction: column !important;
-            align-items: stretch !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
             gap: 16px !important;
+            flex-wrap: wrap !important;
           }
           .ai-message-card > div:first-child > div:first-child {
-            justify-content: center !important;
+            justify-content: flex-start !important;
           }
-          .ai-message-card > div:first-child > div:last-child {
-            justify-content: center !important;
+          .ai-message-card .ai-controls {
+            justify-content: flex-end !important;
+            flex-wrap: nowrap !important;
           }
         }
         @media (max-width: 400px) {
