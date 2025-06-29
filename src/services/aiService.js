@@ -249,12 +249,12 @@ class AIService {
       
       if (isElder) {
         toneGuidelines = `
-- Be respectful and warm, not overly casual
-- Use heartfelt but not too funny language
+- Be respectful and warm but still fun and loving
+- Use heartfelt language with some gentle humor
 - Show appreciation and gratitude
-- Keep it dignified but loving
-- Avoid slang or too casual expressions`;
-        nameUsage = `- Do NOT use their name directly. Instead use respectful terms like "Hope your special day", "Wishing you", "May your birthday" etc.`;
+- Keep it dignified but not too formal
+- Make it feel genuine and caring`;
+        nameUsage = `- ALWAYS start with "Happy Birthday" followed by the relationship title (Mom, Dad, Uncle, Aunt, etc.) instead of their actual name`;
       } else if (isKid) {
         toneGuidelines = `
 - Be playful, fun, and energetic
@@ -262,7 +262,7 @@ class AIService {
 - Include fun elements and enthusiasm
 - Make it feel like a celebration
 - Be encouraging and sweet`;
-        nameUsage = `- You can use their name naturally in the message`;
+        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name`;
       } else if (isRomantic) {
         toneGuidelines = `
 - Be loving and sweet but not overly sappy
@@ -270,7 +270,7 @@ class AIService {
 - Use warm, affectionate language
 - Make it feel special and personal
 - Balance romance with genuine care`;
-        nameUsage = `- Use their name in a loving, personal way`;
+        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name in a loving way`;
       } else {
         // Peers and general relationships
         toneGuidelines = `
@@ -279,25 +279,26 @@ class AIService {
 - Include light humor and warmth
 - Keep it relaxed and genuine
 - Make it feel like you're talking to a friend`;
-        nameUsage = `- Use their name casually and naturally`;
+        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name`;
       }
 
-      const systemPrompt = `You are creating a personalized birthday message that sounds like it's from a real person, not an AI.
+      const systemPrompt = `You are creating a personalized birthday message that sounds like it's from a real human, not an AI.
 
 CRITICAL STYLE REQUIREMENTS:
-- Use colloquial everyday words (like "awesome", "super", "really", "totally")
-- Do NOT make it sound corporate or like an AI wrote it
-- Keep it human and conversational - like texting a friend
+- Use colloquial everyday words (like "awesome", "super", "really", "totally", "amazing", "fantastic")
+- Do NOT make it sound corporate, formal, or like an AI wrote it
+- Keep it human and conversational - like texting a friend or family member
 - Write in grade 6 style (simple, clear, easy to read)
 - Don't use passive voice - use active voice only
-- Make it sound casual and natural
+- Make it sound casual, natural, and FUN
 - NO fancy or formal words
 - NO corporate speak or AI-like phrases
+- Don't be too serious - add warmth and personality
 
 RELATIONSHIP-BASED TONE:
 ${toneGuidelines}
 
-NAME USAGE:
+MANDATORY OPENING FORMAT:
 ${nameUsage}
 
 MESSAGE REQUIREMENTS:
@@ -306,13 +307,21 @@ MESSAGE REQUIREMENTS:
 - Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 😄, 🎈, etc.)
 - Make each message unique and personal
 - Sound like a real person wrote it
+- Include genuine warmth and personality
+- Don't take notes too seriously - use them as inspiration but keep it natural
 - Random seed for variety: ${randomSeed}
 
 EXAMPLES OF GOOD STYLE:
-- "Hope your day is super awesome!" (not "I hope your day will be wonderful")
-- "You're amazing!" (not "You are truly remarkable")
-- "Can't wait to celebrate!" (not "I look forward to celebrating")
-- "This is gonna be epic!" (not "This will be magnificent")`;
+- "Happy Birthday Mom! Hope your day is super awesome!" 
+- "Happy Birthday Sarah! You're amazing and this is gonna be epic!"
+- "Happy Birthday Dad! Can't wait to celebrate with you!"
+- "Happy Birthday buddy! Time to party!" 
+
+AVOID THESE FORMAL STYLES:
+- "I hope your day will be wonderful"
+- "You are truly remarkable" 
+- "I look forward to celebrating"
+- "This will be magnificent"`;
 
       const userPrompt = `Create a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
       
