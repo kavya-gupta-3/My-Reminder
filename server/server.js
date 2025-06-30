@@ -70,8 +70,8 @@ app.post('/api/send-notification', async (req, res) => {
       notification: {
         title: title || 'Birthday Reminder',
         body: body || 'You have a birthday reminder!',
-        icon: '/birthday-cake.png',
-        badge: '/birthday-cake.png'
+        icon: '/logo.png',
+        badge: '/logo.png'
       },
       data: {
         ...data,
@@ -80,7 +80,7 @@ app.post('/api/send-notification', async (req, res) => {
       },
       android: {
         notification: {
-          icon: '/birthday-cake.png',
+          icon: '/logo.png',
           color: '#FF6B6B',
           priority: 'high',
           sound: 'default',
@@ -98,8 +98,8 @@ app.post('/api/send-notification', async (req, res) => {
       },
       webpush: {
         notification: {
-          icon: '/birthday-cake.png',
-          badge: '/birthday-cake.png',
+          icon: '/logo.png',
+          badge: '/logo.png',
           requireInteraction: true,
           actions: [
             {
@@ -167,8 +167,8 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       notification: {
         title: title || 'Birthday Reminder',
         body: body || 'You have a birthday reminder!',
-        icon: '/birthday-cake.png',
-        badge: '/birthday-cake.png'
+        icon: '/logo.png',
+        badge: '/logo.png'
       },
       data: {
         ...data,
@@ -177,7 +177,7 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       },
       android: {
         notification: {
-          icon: '/birthday-cake.png',
+          icon: '/logo.png',
           color: '#FF6B6B',
           priority: 'high',
           sound: 'default',
@@ -195,8 +195,8 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       },
       webpush: {
         notification: {
-          icon: '/birthday-cake.png',
-          badge: '/birthday-cake.png',
+          icon: '/logo.png',
+          badge: '/logo.png',
           requireInteraction: true,
           actions: [
             {

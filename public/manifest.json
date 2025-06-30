@@ -3,13 +3,13 @@
   "name": "Birthday Reminder - Never Miss a Special Day",
   "icons": [
     {
-      "src": "birthday-cake.png",
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -25,7 +25,7 @@
   "description": "Never miss a birthday again! Create reminders with AI-powered personalized messages.",
   "screenshots": [
     {
-      "src": "logo512.png",
+      "src": "logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -38,7 +38,7 @@
       "url": "/chat",
       "icons": [
         {
-          "src": "birthday-cake.png",
+          "src": "logo.png",
           "sizes": "192x192",
           "type": "image/png"
         }

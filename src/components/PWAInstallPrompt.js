@@ -104,7 +104,7 @@ function PWAInstallPrompt() {
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-            <FaMobile style={{ fontSize: '24px' }} />
+            <img src="/logo.png" alt="App Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
             <div>
               <div style={{ fontWeight: '600', fontSize: '16px' }}>Install Birthday Reminder</div>
               <div style={{ fontSize: '14px', opacity: 0.9 }}>Add to home screen for quick access</div>
@@ -163,7 +163,7 @@ function PWAInstallPrompt() {
           boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-            <FaBell style={{ fontSize: '24px' }} />
+            <img src="/logo.png" alt="App Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
             <div>
               <div style={{ fontWeight: '600', fontSize: '16px' }}>Enable Notifications</div>
               <div style={{ fontSize: '14px', opacity: 0.9 }}>Get reminded on birthdays</div>

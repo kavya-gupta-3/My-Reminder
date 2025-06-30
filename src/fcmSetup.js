@@ -65,8 +65,8 @@ export function useFCMToken() {
       if (Notification.permission === 'granted') {
         const notification = new Notification(payload.notification?.title || 'Birthday Reminder', {
           body: payload.notification?.body || 'You have a birthday reminder!',
-          icon: '/birthday-cake.png',
-          badge: '/birthday-cake.png',
+          icon: '/logo.png',
+          badge: '/logo.png',
           tag: 'birthday-reminder',
           requireInteraction: true,
           actions: [

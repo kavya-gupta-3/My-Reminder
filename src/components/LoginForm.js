@@ -47,11 +47,16 @@ function LoginForm() {
         boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
         border: '2px solid #000'
       }}>
-        <div style={{ 
-          fontSize: '56px', 
-          marginBottom: '20px',
-          lineHeight: 1
-        }}>🎂</div>
+        <img 
+          src="/logo.png" 
+          alt="Birthday Remind Logo" 
+          style={{ 
+            width: '80px', 
+            height: '80px', 
+            marginBottom: '20px',
+            objectFit: 'contain'
+          }} 
+        />
         
         <h1 style={{
           fontSize: '26px',

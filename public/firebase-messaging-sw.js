@@ -20,8 +20,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'Birthday Reminder';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a birthday reminder!',
-    icon: '/birthday-cake.png',
-    badge: '/birthday-cake.png',
+    icon: '/logo.png',
+    badge: '/logo.png',
     tag: 'birthday-reminder',
     requireInteraction: true,
     data: payload.data || {},
@@ -29,7 +29,7 @@ messaging.onBackgroundMessage((payload) => {
       {
         action: 'view',
         title: 'View Reminder',
-        icon: '/birthday-cake.png'
+        icon: '/logo.png'
       },
       {
         action: 'dismiss',
