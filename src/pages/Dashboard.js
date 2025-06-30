@@ -92,7 +92,6 @@ function Dashboard() {
   const handleLogout = async () => {
     try {
       console.log('Starting logout process...');
-      setShowUserMenu(false);
       
       // Clear any local storage or session data
       localStorage.clear();
@@ -205,14 +204,14 @@ function Dashboard() {
                 zIndex: 9999,
                 minWidth: '140px'
               }}>
-              <button
-                onClick={() => {
-                  console.log('Logout button clicked');
+              <div
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Logout div clicked');
                   handleLogout();
                 }}
                 style={{
-                  background: 'none',
-                  border: 'none',
                   color: '#ff6b6b',
                   padding: '12px 16px',
                   borderRadius: '12px',
@@ -225,7 +224,8 @@ function Dashboard() {
                   width: '100%',
                   textAlign: 'left',
                   transition: 'background-color 0.2s',
-                  outline: 'none'
+                  outline: 'none',
+                  userSelect: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = '#fff0f0';
@@ -235,7 +235,7 @@ function Dashboard() {
                 }}
               >
                 <FaSignOutAlt /> Logout
-              </button>
+              </div>
             </div>
           )}
         </div>
