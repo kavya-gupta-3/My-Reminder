@@ -1,25 +1,48 @@
 {
   "short_name": "Birthday Remind",
-  "name": "Birthday Remind - Never Miss a Birthday",
+  "name": "Birthday Reminder - Never Miss a Special Day",
   "icons": [
     {
       "src": "birthday-cake.png",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/png"
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "birthday-cake.png",
+      "src": "logo512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "birthday-cake.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#f8f9fa"
+  "background_color": "#f8f9fa",
+  "orientation": "portrait",
+  "scope": "/",
+  "categories": ["productivity", "lifestyle"],
+  "description": "Never miss a birthday again! Create reminders with AI-powered personalized messages.",
+  "screenshots": [
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Reminder",
+      "short_name": "Add",
+      "description": "Add a new birthday reminder",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "birthday-cake.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
 }

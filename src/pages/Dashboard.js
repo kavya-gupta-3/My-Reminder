@@ -162,7 +162,7 @@ function Dashboard() {
               fontWeight: 600,
               fontSize: '18px',
               cursor: 'pointer',
-              zIndex: 100,
+              zIndex: 10000,
               transition: 'all 0.3s',
               display: 'flex',
               alignItems: 'center',
@@ -193,11 +193,6 @@ function Dashboard() {
           {/* User menu dropdown */}
           {showUserMenu && (
             <div 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Dropdown container clicked');
-              }}
               style={{
                 position: 'absolute',
                 top: '60px',
@@ -207,14 +202,12 @@ function Dashboard() {
                 borderRadius: '16px',
                 padding: '12px',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                zIndex: 101,
+                zIndex: 9999,
                 minWidth: '140px'
               }}>
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('Dropdown logout clicked');
+                onClick={() => {
+                  console.log('Logout button clicked');
                   handleLogout();
                 }}
                 style={{
@@ -230,7 +223,9 @@ function Dashboard() {
                   alignItems: 'center',
                   gap: '12px',
                   width: '100%',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  transition: 'background-color 0.2s',
+                  outline: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = '#fff0f0';
