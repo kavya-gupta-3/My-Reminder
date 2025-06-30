@@ -157,10 +157,17 @@ function Dashboard() {
               transition: 'all 0.3s',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              touchAction: 'manipulation',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent'
             }}
             onMouseEnter={e => {
-              e.target.style.backgroundColor = '#000';
+              e.target.style.backgroundColor = '#333';
               e.target.style.color = '#fff';
               e.target.style.borderColor = '#fff';
             }}
@@ -169,6 +176,18 @@ function Dashboard() {
               e.target.style.color = '#000';
               e.target.style.borderColor = '#fff';
             }}
+            onTouchStart={e => {
+              e.target.style.backgroundColor = '#333';
+              e.target.style.color = '#fff';
+            }}
+            onTouchEnd={e => {
+              setTimeout(() => {
+                if (!showUserMenu) {
+                  e.target.style.backgroundColor = '#fff';
+                  e.target.style.color = '#000';
+                }
+              }, 150);
+            }}
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -176,6 +195,11 @@ function Dashboard() {
               width="18" 
               height="18"
               fill="currentColor"
+              style={{
+                pointerEvents: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none'
+              }}
             >
               <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"/>
             </svg>
@@ -191,9 +215,11 @@ function Dashboard() {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  zIndex: 9998
+                  zIndex: 9998,
+                  touchAction: 'manipulation'
                 }}
                 onClick={() => setShowUserMenu(false)}
+                onTouchStart={() => setShowUserMenu(false)}
               />
               <div 
                 style={{
@@ -206,14 +232,23 @@ function Dashboard() {
                   padding: '8px',
                   boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
                   zIndex: 9999,
-                  minWidth: '120px'
+                  minWidth: '120px',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none'
                 }}>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
+                    setShowUserMenu(false);
                     handleLogout();
                   }}
-                  onMouseDown={(e) => e.preventDefault()}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    e.target.style.backgroundColor = '#ffebee';
+                  }}
+                  onTouchEnd={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                  }}
                   style={{
                     color: '#ff6b6b',
                     padding: '12px 16px',
@@ -228,7 +263,11 @@ function Dashboard() {
                     textAlign: 'left',
                     transition: 'background-color 0.2s',
                     outline: 'none',
-                    userSelect: 'none'
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    touchAction: 'manipulation',
+                    WebkitTouchCallout: 'none',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = '#fff0f0';
@@ -237,7 +276,7 @@ function Dashboard() {
                     e.target.style.backgroundColor = 'transparent';
                   }}
                 >
-                  <FaSignOutAlt /> Logout
+                  <FaSignOutAlt style={{ pointerEvents: 'none' }} /> Logout
                 </div>
               </div>
             </>
