@@ -477,7 +477,7 @@ function ReminderDetails() {
                   </div>
                 ) : (
                   <>
-                    {reminder.personName}
+                {reminder.personName}
                     <FaPencilAlt 
                       onClick={() => startEditing('personName')}
                       style={{ 
@@ -556,7 +556,7 @@ function ReminderDetails() {
                 ) : (
                   /* Display only month/day for current year birthday, not birth year */
                   new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
-                    month: 'long',
+                  month: 'long',
                     day: 'numeric'
                   })
                 )}
@@ -777,14 +777,14 @@ function ReminderDetails() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
               <span style={{ fontSize: '28px' }}><FaRobot /></span>
-              <h3 style={{
+            <h3 style={{
                 fontSize: '22px',
-                fontWeight: '600',
-                margin: '0',
-                color: '#000'
-              }}>
-                AI Birthday Message
-              </h3>
+              fontWeight: '600',
+              margin: '0',
+              color: '#000'
+            }}>
+              AI Birthday Message
+            </h3>
             </div>
             <div className="ai-controls" style={{
               display: 'flex',
@@ -805,10 +805,10 @@ function ReminderDetails() {
                 }} 
                 disabled={aiLoading}
               >
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
               <button 
                 onClick={handleRegenerate} 
                 disabled={aiLoading || regenLimitReached} 
@@ -828,8 +828,8 @@ function ReminderDetails() {
                   minHeight: '40px'
                 }}
               >
-                <FaSyncAlt /> Regenerate
-              </button>
+              <FaSyncAlt /> Regenerate
+            </button>
             </div>
           </div>
           {regenLimitReached && (

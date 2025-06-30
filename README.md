@@ -99,19 +99,19 @@ Experience Birthday Remind now: **[https://birthday-reminder-vh81.vercel.app/](h
 - OpenRouter API key
 
 ### **1. Clone Repository**
-```bash
+   ```bash
 git clone https://github.com/kavya-gupta-3/Birthday-Reminder.git
 cd Birthday-Reminder
-```
+   ```
 
 ### **2. Install Dependencies**
-```bash
+   ```bash
 # Frontend dependencies
 npm install
 
 # Backend dependencies
 cd server
-npm install
+   npm install
 cd ..
 ```
 
@@ -138,8 +138,8 @@ PORT=5001
 ### **5. Run Development Servers**
 
 **Frontend:**
-```bash
-npm start
+   ```bash
+   npm start
 # Runs on http://localhost:3000
 ```
 

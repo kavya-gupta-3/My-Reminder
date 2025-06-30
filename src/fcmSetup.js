@@ -69,7 +69,6 @@ export function useFCMToken() {
           badge: '/logo.png',
           tag: 'birthday-reminder',
           requireInteraction: true,
-          silent: false, // Use default system sound
           actions: [
             {
               action: 'view',
@@ -94,39 +93,4 @@ export function useFCMToken() {
       unsubscribeMessage();
     };
   }, []);
-}
-
-// Custom sound function for foreground notifications
-function playCustomSound(soundType = 'default') {
-  try {
-    let soundUrl = '/sounds/';
-    
-    switch(soundType) {
-      case 'birthday':
-        soundUrl += 'birthday-notification.mp3';
-        break;
-      case 'reminder':
-        soundUrl += 'reminder-sound.mp3';
-        break;
-      case 'celebration':
-        soundUrl += 'celebration.mp3';
-        break;
-      case 'gentle':
-        soundUrl += 'gentle-chime.mp3';
-        break;
-      case 'urgent':
-        soundUrl += 'urgent-bell.mp3';
-        break;
-      default:
-        return;
-    }
-    
-    const audio = new Audio(soundUrl);
-    audio.volume = 0.7;
-    audio.play().catch(err => {
-      console.log('Custom sound failed:', err);
-    });
-  } catch (error) {
-    console.log('Custom sound error:', error);
-  }
 }
