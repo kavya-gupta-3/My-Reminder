@@ -14,6 +14,27 @@ function Dashboard() {
   const [remindersLoading, setRemindersLoading] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    if (!showUserMenu) return;
+
+    const handleClickOutside = (event) => {
+      setShowUserMenu(false);
+    };
+
+    const handleTouchOutside = (event) => {
+      setShowUserMenu(false);
+    };
+
+    // Add event listeners for both click and touch
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleTouchOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleTouchOutside);
+    };
+  }, [showUserMenu]);
 
   useEffect(() => {
     if (!user) {
@@ -219,7 +240,7 @@ function Dashboard() {
                   touchAction: 'manipulation'
                 }}
                 onClick={() => setShowUserMenu(false)}
-                onTouchStart={() => setShowUserMenu(false)}
+                onTouchEnd={() => setShowUserMenu(false)}
               />
               <div 
                 style={{
@@ -242,12 +263,11 @@ function Dashboard() {
                     setShowUserMenu(false);
                     handleLogout();
                   }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    e.target.style.backgroundColor = '#ffebee';
-                  }}
                   onTouchEnd={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShowUserMenu(false);
+                    handleLogout();
                   }}
                   style={{
                     color: '#ff6b6b',
