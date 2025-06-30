@@ -111,6 +111,7 @@ function ChatPage() {
                 token: fcmToken,
                 title: `🎉 Reminder Set for ${dataWithoutId.personName}`,
                 body: `Birthday reminder for ${dataWithoutId.personName} has been created successfully! You'll be notified on their special day.`,
+                soundType: 'celebration', // Use celebration sound for reminder creation
                 data: {
                   reminderId: newReminderRef.key,
                   personName: dataWithoutId.personName,

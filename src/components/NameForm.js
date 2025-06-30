@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { auth, database, ref, get, set } from '../firebase';
-import { FaHandSparkles, FaUserEdit } from 'react-icons/fa';
 
 function NameForm() {
   const [name, setName] = useState('');

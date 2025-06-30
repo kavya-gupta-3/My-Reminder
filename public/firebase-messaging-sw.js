@@ -13,6 +13,43 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Custom sound function
+function playCustomSound(soundType = 'default') {
+  try {
+    let soundUrl = '/sounds/';
+    
+    switch(soundType) {
+      case 'birthday':
+        soundUrl += 'birthday-notification.mp3';
+        break;
+      case 'reminder':
+        soundUrl += 'reminder-sound.mp3';
+        break;
+      case 'celebration':
+        soundUrl += 'celebration.mp3';
+        break;
+      case 'gentle':
+        soundUrl += 'gentle-chime.mp3';
+        break;
+      case 'urgent':
+        soundUrl += 'urgent-bell.mp3';
+        break;
+      default:
+        // Use browser default sound
+        return;
+    }
+    
+    // Create audio element and play
+    const audio = new Audio(soundUrl);
+    audio.volume = 0.7; // Adjust volume (0.0 to 1.0)
+    audio.play().catch(err => {
+      console.log('Custom sound failed, using default:', err);
+    });
+  } catch (error) {
+    console.log('Custom sound error:', error);
+  }
+}
+
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('Background message received:', payload);
@@ -37,7 +74,7 @@ messaging.onBackgroundMessage((payload) => {
       }
     ],
     vibrate: [200, 100, 200],
-    sound: 'default'
+    sound: 'default' // Use default system notification sound
   };
 
   // Show notification

@@ -53,7 +53,7 @@ app.post('/api/generate', async (req, res) => {
 // Send notification endpoint
 app.post('/api/send-notification', async (req, res) => {
   try {
-    const { token, title, body, data = {} } = req.body;
+    const { token, title, body, data = {}, soundType = 'default' } = req.body;
     
     if (!token) {
       return res.status(400).json({ error: 'FCM token is required' });
@@ -66,6 +66,26 @@ app.post('/api/send-notification', async (req, res) => {
       return 'https://birthday-reminder-vh81.vercel.app/';
     };
 
+    // Determine custom sound based on notification type
+    let customSoundUrl = null;
+    switch(soundType) {
+      case 'birthday':
+        customSoundUrl = '/sounds/birthday-notification.mp3';
+        break;
+      case 'reminder':
+        customSoundUrl = '/sounds/reminder-sound.mp3';
+        break;
+      case 'celebration':
+        customSoundUrl = '/sounds/celebration.mp3';
+        break;
+      case 'gentle':
+        customSoundUrl = '/sounds/gentle-chime.mp3';
+        break;
+      case 'urgent':
+        customSoundUrl = '/sounds/urgent-bell.mp3';
+        break;
+    }
+
     const message = {
       notification: {
         title: title || 'Birthday Reminder',
@@ -75,6 +95,8 @@ app.post('/api/send-notification', async (req, res) => {
       },
       data: {
         ...data,
+        soundType: soundType,
+        customSound: customSoundUrl,
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
         timestamp: new Date().toISOString()
       },
@@ -83,14 +105,14 @@ app.post('/api/send-notification', async (req, res) => {
           icon: '/logo.png',
           color: '#FF6B6B',
           priority: 'high',
-          sound: 'default',
+          sound: customSoundUrl ? 'custom' : 'default',
           channel_id: 'birthday-reminders'
         }
       },
       apns: {
         payload: {
           aps: {
-            sound: 'default',
+            sound: customSoundUrl ? 'custom.wav' : 'default',
             badge: 1,
             category: 'birthday-reminder'
           }
@@ -101,6 +123,7 @@ app.post('/api/send-notification', async (req, res) => {
           icon: '/logo.png',
           badge: '/logo.png',
           requireInteraction: true,
+          sound: customSoundUrl,
           actions: [
             {
               action: 'view',

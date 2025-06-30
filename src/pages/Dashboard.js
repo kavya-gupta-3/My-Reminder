@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, database, ref, onValue, off, update } from '../firebase';
+import { auth, database, ref, onValue, off } from '../firebase';
 import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
+
 import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaBirthdayCake, FaGift, FaCalendarCheck, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaPlus, FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaSpinner } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -68,31 +69,46 @@ function Dashboard() {
           ...data[key]
         }));
 
-        // REMOVED AUTO-ROLLOVER - This was causing the year bug.
-        // The original birth date should never change. Only the display logic should calculate next occurrence.
-
-        // Sort reminders: today's birthdays first, then by closest upcoming date
+        // Sort reminders: today's birthdays first, then recent birthdays (within 24h), then upcoming
         remindersArray.sort((a, b) => {
           const now = new Date();
           const currentYear = now.getFullYear();
-          
-          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format but contains actual birth year
-          const [monthA, dayA, yearA] = a.dateOfBirth.split('/');
-          const [monthB, dayB, yearB] = b.dateOfBirth.split('/');
+          const today = new Date(now.setHours(0,0,0,0));
+
+          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format
+          const [monthA, dayA] = a.dateOfBirth.split('/');
+          const [monthB, dayB] = b.dateOfBirth.split('/');
           
           // Calculate this year's birthday occurrence
           let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
           let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
           
-          // If birthday has already passed this year, move to next year for sorting only
-          if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
-          if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
+          // Check if either birthday is happening today (within 24h)
+          const birthdayStartA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA), 0, 0, 0);
+          const birthdayEndA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA), 23, 59, 59);
+          const isBirthdayTodayA = now >= birthdayStartA && now <= birthdayEndA;
+
+          const birthdayStartB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB), 0, 0, 0);
+          const birthdayEndB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB), 23, 59, 59);
+          const isBirthdayTodayB = now >= birthdayStartB && now <= birthdayEndB;
+          
+          // If birthday has passed this year and not currently celebrating, calculate for next year
+          if (birthdayA < today && !isBirthdayTodayA) {
+            birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
+          }
+          if (birthdayB < today && !isBirthdayTodayB) {
+            birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
+          }
           
           // Calculate days until each birthday
           const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
           const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
           
-          // Today's birthdays first (daysUntil = 0)
+          // Currently celebrating birthdays first
+          if (isBirthdayTodayA && !isBirthdayTodayB) return -1;
+          if (!isBirthdayTodayA && isBirthdayTodayB) return 1;
+          
+          // Then today's upcoming birthdays
           if (daysUntilA === 0 && daysUntilB !== 0) return -1;
           if (daysUntilA !== 0 && daysUntilB === 0) return 1;
           
@@ -366,7 +382,9 @@ function Dashboard() {
             border: '2px solid #000',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
           }}>
-            <div style={{ fontSize: '48px', marginBottom: '24px' }}>⏳</div>
+            <div style={{ fontSize: '48px', marginBottom: '24px', color: '#666' }}>
+              <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+            </div>
             <p style={{ fontSize: '18px', margin: 0 }}>Loading your reminders...</p>
           </div>
         ) : (
@@ -381,13 +399,18 @@ function Dashboard() {
               // Calculate days until birthday - use only month/day, not birth year
               const now = new Date();
               const currentYear = now.getFullYear();
-              const [month, day, birthYear] = reminder.dateOfBirth.split('/');
+              const [month, day] = reminder.dateOfBirth.split('/');
               
               // Calculate this year's birthday occurrence 
               let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
               
-              // If birthday has passed this year, calculate for next year
-              if (birthday < now) {
+              // Check if birthday is currently happening (within 24h)
+              const birthdayStart = new Date(currentYear, parseInt(month) - 1, parseInt(day), 0, 0, 0);
+              const birthdayEnd = new Date(currentYear, parseInt(month) - 1, parseInt(day), 23, 59, 59);
+              const isBirthdayToday = now >= birthdayStart && now <= birthdayEnd;
+              
+              // If birthday has passed this year and not currently celebrating, calculate for next year
+              if (birthday < now && !isBirthdayToday) {
                 birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
               }
               
@@ -395,9 +418,39 @@ function Dashboard() {
               const daysUntil = Math.ceil(diff / (1000 * 60 * 60 * 24));
               
               let icon = <FaBirthdayCake />;
-              if (daysUntil === 0) icon = <FaGift />;
-              else if (daysUntil <= 7) icon = <FaGift style={{ color: '#ffa726' }}/>;
-              else if (daysUntil <= 30) icon = <FaCalendarCheck style={{ color: '#4caf50' }}/>;
+              let iconColor = '#000';
+              let iconBackground = '#f0f0f0';
+              let cardBackground = '#fff';
+              let cardBorder = '2px solid #000';
+              let cardShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+              let statusText = '';
+              let statusColor = '#000';
+
+              if (isBirthdayToday) {
+                // Special birthday state - show party icon and festive colors
+                icon = <FaBirthdayCake style={{ transform: 'scale(1.2)' }} />;
+                iconColor = '#fff';
+                iconBackground = '#FF6B6B';
+                cardBackground = '#fff3e0';
+                cardBorder = '2px solid #FF6B6B';
+                cardShadow = '0 4px 24px rgba(255, 107, 107, 0.2)';
+                statusText = "Happy Birthday!";
+                statusColor = '#FF6B6B';
+              } else if (daysUntil === 0) {
+                // Starting today
+                icon = <FaGift />;
+                iconColor = '#fff';
+                iconBackground = '#ffa726';
+                cardBackground = '#fff3e0';
+                cardBorder = '2px solid #ffa726';
+                cardShadow = '0 4px 24px rgba(255, 167, 38, 0.2)';
+                statusText = "Today!";
+                statusColor = '#ffa726';
+              } else if (daysUntil <= 7) {
+                icon = <FaGift style={{ color: '#ffa726' }}/>;
+              } else if (daysUntil <= 30) {
+                icon = <FaCalendarCheck style={{ color: '#4caf50' }}/>;
+              }
 
               // Helper to calculate the age they will turn on their next birthday
               const getUpcomingAge = (dateOfBirth) => {
@@ -416,35 +469,56 @@ function Dashboard() {
                 <div
                   key={reminder.id}
                   style={{
-                    backgroundColor: '#fff',
+                    backgroundColor: cardBackground,
                     color: '#333',
                     borderRadius: '16px',
                     padding: '14px 20px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                    boxShadow: cardShadow,
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
-                    border: '2px solid #000',
+                    border: cardBorder,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     minHeight: '64px',
-                    width: '100%'
+                    width: '100%',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
+                  {(isBirthdayToday || daysUntil === 0) && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '0',
+                      right: '0',
+                      backgroundColor: statusColor,
+                      color: '#fff',
+                      padding: '4px 12px',
+                      borderRadius: '0 14px 0 12px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      zIndex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      {isBirthdayToday ? <FaBirthdayCake /> : <FaGift />} {statusText}
+                    </div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
                       width: '44px',
                       height: '44px',
                       borderRadius: '50%',
-                      backgroundColor: '#f0f0f0',
+                      backgroundColor: iconBackground,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '20px',
                       fontWeight: '600',
-                      color: '#000',
-                      border: '2px solid #000',
+                      color: iconColor,
+                      border: `2px solid ${iconColor === '#fff' ? statusColor : '#000'}`,
                       flexShrink: 0
                     }}>
                       {icon}
@@ -475,27 +549,30 @@ function Dashboard() {
                   </div>
                   
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                     <p style={{
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        margin: '0 0 4px 0',
-                        color: daysUntil === 0 ? '#ff6b6b' : '#000'
-                      }}>
-                        {daysUntil === 0 ? '🎉 Today!' : 
-                         daysUntil === 1 ? 'Tomorrow' :
-                         `${daysUntil} days`}
-                      </p>
-                      <p style={{
-                        color: '#666',
-                        fontSize: '13px',
-                        margin: '0'
-                      }}>
-                        {/* Show only month/day for next occurrence, not birth year */}
-                        {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
-                      </p>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      margin: '0 0 4px 0',
+                      color: statusColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '6px'
+                    }}>
+                      {daysUntil === 1 ? 'Tomorrow' :
+                       daysUntil > 1 ? `${daysUntil} days` : ''}
+                    </p>
+                    <p style={{
+                      color: '#666',
+                      fontSize: '13px',
+                      margin: '0'
+                    }}>
+                      {/* Show only month/day for next occurrence, not birth year */}
+                      {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
+                    </p>
                   </div>
                 </div>
               );
@@ -513,7 +590,9 @@ function Dashboard() {
             border: '2px solid #000',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
           }}>
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🎂</div>
+            <div style={{ fontSize: '64px', marginBottom: '24px', color: '#000' }}>
+              <FaBirthdayCake />
+            </div>
             <h3 style={{ margin: '0 0 12px 0', color: '#000', fontSize: '24px' }}>No birthdays yet</h3>
             <p style={{ margin: '0', fontSize: '18px' }}>
               Add your first birthday reminder to get started!
@@ -558,9 +637,11 @@ function Dashboard() {
         <FaPlus />
       </button>
 
-
-
       <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         .dashboard-container {
           padding: 0 16px 100px 16px;
         }

@@ -20,8 +20,8 @@ async function sendFCM(token, title, body, data = {}) {
       notification: { 
         title, 
         body,
-        icon: '/birthday-cake.png',
-        badge: '/birthday-cake.png',
+        icon: '/logo.png',
+        badge: '/logo.png',
         tag: 'birthday-reminder'
       },
       data: {
@@ -30,9 +30,10 @@ async function sendFCM(token, title, body, data = {}) {
       },
       android: {
         notification: {
-          icon: '/birthday-cake.png',
+          icon: '/logo.png',
           color: '#000000',
           priority: 'high',
+          sound: 'default',
           channel_id: 'birthday-reminders'
         }
       },
@@ -43,6 +44,13 @@ async function sendFCM(token, title, body, data = {}) {
             sound: 'default',
             category: 'birthday-reminder'
           }
+        }
+      },
+      webpush: {
+        notification: {
+          icon: '/logo.png',
+          badge: '/logo.png',
+          requireInteraction: true
         }
       }
     });
@@ -143,6 +151,18 @@ cron.schedule('*/5 * * * *', async () => {
           ? `🎂 Happy Birthday, ${reminder.personName}!`
           : `🎂 ${reminder.personName}'s Birthday Reminder`;
 
+        // Choose sound type based on notification timing
+        let soundType = 'reminder';
+        if (label === 'midnight') {
+          soundType = 'birthday'; // Special birthday sound for actual birthday
+        } else if (label === '1 hour') {
+          soundType = 'urgent'; // Urgent sound for 1 hour before
+        } else if (label === '1 day') {
+          soundType = 'celebration'; // Celebration sound for 1 day before
+        } else if (label === '1 week') {
+          soundType = 'gentle'; // Gentle sound for 1 week before
+        }
+
         await sendFCM(
           fcmToken,
           title,
@@ -151,7 +171,8 @@ cron.schedule('*/5 * * * *', async () => {
             reminderId: reminder.id,
             personName: reminder.personName,
             type: 'birthday-reminder'
-          }
+          },
+          soundType
         );
       }
     }
