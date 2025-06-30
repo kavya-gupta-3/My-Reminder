@@ -12,6 +12,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [reminders, setReminders] = useState([]);
   const [remindersLoading, setRemindersLoading] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
 
   useEffect(() => {
@@ -146,42 +147,111 @@ function Dashboard() {
         position: 'relative',
         margin: '0 -16px 32px -16px'
       }}>
-        {/* Direct Logout Button */}
-        <button
-          onClick={() => {
-            console.log('Direct logout button clicked');
-            handleLogout();
-          }}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            right: '20px',
-            transform: 'translateY(-50%)',
-            background: '#ff6b6b',
-            color: '#fff',
-            border: '2px solid #ff6b6b',
-            borderRadius: '12px',
-            padding: '8px 16px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            zIndex: 10000,
-            transition: 'all 0.3s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-          onMouseEnter={e => {
-            e.target.style.backgroundColor = '#fff';
-            e.target.style.color = '#ff6b6b';
-          }}
-          onMouseLeave={e => {
-            e.target.style.backgroundColor = '#ff6b6b';
-            e.target.style.color = '#fff';
-          }}
-        >
-          <FaSignOutAlt style={{ fontSize: '12px' }} /> Logout
-        </button>
+        {/* User menu button top right */}
+        <div style={{ position: 'absolute', top: '50%', right: '20px', transform: 'translateY(-50%)' }}>
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            style={{
+              background: '#fff',
+              color: '#000',
+              border: '2px solid #fff',
+              borderRadius: '50%',
+              padding: '12px',
+              width: '48px',
+              height: '48px',
+              fontWeight: 600,
+              fontSize: '18px',
+              cursor: 'pointer',
+              zIndex: 10000,
+              transition: 'all 0.3s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={e => {
+              e.target.style.backgroundColor = '#000';
+              e.target.style.color = '#fff';
+              e.target.style.borderColor = '#fff';
+            }}
+            onMouseLeave={e => {
+              e.target.style.backgroundColor = '#fff';
+              e.target.style.color = '#000';
+              e.target.style.borderColor = '#fff';
+            }}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 448 512"
+              width="18" 
+              height="18"
+              fill="currentColor"
+            >
+              <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"/>
+            </svg>
+          </button>
+          
+          {/* User menu dropdown */}
+          {showUserMenu && (
+            <>
+              <div 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 9998
+                }}
+                onClick={() => setShowUserMenu(false)}
+              />
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '60px',
+                  right: '0px',
+                  background: '#fff',
+                  border: '2px solid #000',
+                  borderRadius: '16px',
+                  padding: '8px',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                  zIndex: 9999,
+                  minWidth: '120px'
+                }}>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLogout();
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  style={{
+                    color: '#ff6b6b',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    textAlign: 'left',
+                    transition: 'background-color 0.2s',
+                    outline: 'none',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#fff0f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <FaSignOutAlt /> Logout
+                </div>
+              </div>
+            </>
+          )}
+        </div>
         
         <h1 style={{
           fontSize: '32px',

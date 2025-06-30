@@ -94,7 +94,7 @@ function PWAInstallPrompt() {
           top: 0,
           left: 0,
           right: 0,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#000',
           color: '#fff',
           padding: '16px 20px',
           zIndex: 10001,
@@ -115,7 +115,7 @@ function PWAInstallPrompt() {
               onClick={handleInstallClick}
               style={{
                 background: '#fff',
-                color: '#667eea',
+                color: '#000',
                 border: 'none',
                 padding: '8px 16px',
                 borderRadius: '20px',
