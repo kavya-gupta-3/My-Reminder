@@ -68,35 +68,34 @@ function Dashboard() {
           ...data[key]
         }));
 
-        // REMOVED AUTO-ROLLOVER - This was causing the year bug.
-        // The original birth date should never change. Only the display logic should calculate next occurrence.
-
-        // Sort reminders: today's birthdays first, then by closest upcoming date
+        // Modify sorting logic to prioritize running birthdays
         remindersArray.sort((a, b) => {
           const now = new Date();
           const currentYear = now.getFullYear();
 
-          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format but contains actual birth year
-          const [monthA, dayA, yearA] = a.dateOfBirth.split('/');
-          const [monthB, dayB, yearB] = b.dateOfBirth.split('/');
-          
+          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format
+          const [monthA, dayA] = a.dateOfBirth.split('/');
+          const [monthB, dayB] = b.dateOfBirth.split('/');
+
           // Calculate this year's birthday occurrence
           let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
           let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
-          
-          // If birthday has already passed this year, move to next year for sorting only
+
+          // Check if the birthday is running (within 24 hours after the birthday)
+          const isRunningA = now >= birthdayA && now < new Date(birthdayA.getTime() + 24 * 60 * 60 * 1000);
+          const isRunningB = now >= birthdayB && now < new Date(birthdayB.getTime() + 24 * 60 * 60 * 1000);
+
+          // Prioritize running birthdays
+          if (isRunningA && !isRunningB) return -1;
+          if (!isRunningA && isRunningB) return 1;
+
+          // If both are running or neither, sort by closest date
           if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
           if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
-          
-          // Calculate days until each birthday
+
           const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
           const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-          
-          // Today's birthdays first (daysUntil = 0)
-          if (daysUntilA === 0 && daysUntilB !== 0) return -1;
-          if (daysUntilA !== 0 && daysUntilB === 0) return 1;
-          
-          // Then sort by closest date
+
           return daysUntilA - daysUntilB;
         });
 
@@ -412,6 +411,16 @@ function Dashboard() {
                 return age;
               };
 
+              // Add visual effects for running birthday reminders
+              const runningStyle = {
+                border: '2px solid #FFD700', // Gold border
+                boxShadow: '0 0 10px #FFD700', // Gold glow
+                animation: 'pulse 2s infinite', // Pulsing effect
+              };
+
+              // Apply styles conditionally
+              const reminderStyle = now >= birthday && now < new Date(birthday.getTime() + 24 * 60 * 60 * 1000) ? runningStyle : {};
+
               return (
                 <div
                   key={reminder.id}
@@ -428,7 +437,8 @@ function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     minHeight: '64px',
-                    width: '100%'
+                    width: '100%',
+                    ...reminderStyle
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
@@ -557,8 +567,6 @@ function Dashboard() {
       >
         <FaPlus />
       </button>
-
-
 
       <style jsx>{`
         .dashboard-container {
