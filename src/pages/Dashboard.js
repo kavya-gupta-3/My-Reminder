@@ -19,11 +19,23 @@ function Dashboard() {
     if (!showUserMenu) return;
 
     const handleClickOutside = (event) => {
-      setShowUserMenu(false);
+      // Don't close if clicking on the user button or dropdown menu
+      const userMenuButton = event.target.closest('button');
+      const dropdown = event.target.closest('[data-dropdown="user-menu"]');
+      
+      if (!userMenuButton && !dropdown) {
+        setShowUserMenu(false);
+      }
     };
 
     const handleTouchOutside = (event) => {
-      setShowUserMenu(false);
+      // Don't close if touching the user button or dropdown menu
+      const userMenuButton = event.target.closest('button');
+      const dropdown = event.target.closest('[data-dropdown="user-menu"]');
+      
+      if (!userMenuButton && !dropdown) {
+        setShowUserMenu(false);
+      }
     };
 
     // Add event listeners for both click and touch
@@ -256,18 +268,20 @@ function Dashboard() {
                   minWidth: '120px',
                   userSelect: 'none',
                   WebkitUserSelect: 'none'
-                }}>
+                }}
+                data-dropdown="user-menu"
+              >
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowUserMenu(false);
-                    handleLogout();
+                    setTimeout(() => handleLogout(), 100);
                   }}
                   onTouchEnd={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     setShowUserMenu(false);
-                    handleLogout();
+                    setTimeout(() => handleLogout(), 100);
                   }}
                   style={{
                     color: '#ff6b6b',
