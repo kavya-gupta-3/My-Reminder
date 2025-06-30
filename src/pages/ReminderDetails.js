@@ -90,7 +90,9 @@ function ReminderDetails() {
     const calculateCountdown = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
-      const [month, day] = reminder.dateOfBirth.split('/');
+      const [month, day, birthYear] = reminder.dateOfBirth.split('/');
+      
+      // Calculate this year's birthday occurrence using only month/day
       let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
       
       // If birthday has passed this year, calculate for next year
@@ -552,10 +554,10 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
+                  /* Display only month/day for current year birthday, not birth year */
+                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
                     month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
+                    day: 'numeric'
                   })
                 )}
               </div>

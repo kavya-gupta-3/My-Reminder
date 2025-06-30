@@ -35,32 +35,23 @@ function Dashboard() {
           ...data[key]
         }));
 
-        // Auto-rollover: if a birthday is more than 24h in the past, update its date to next year
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        for (const reminder of remindersArray) {
-          const [month, day] = reminder.dateOfBirth.split('/');
-          let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-          // If birthday was yesterday or earlier, and not today, roll over
-          if (birthday < now && now - birthday > 24 * 60 * 60 * 1000) {
-            const newBirthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
-            const reminderRef = ref(database, `reminders/${uid}/${reminder.id}`);
-            await update(reminderRef, { dateOfBirth: `${('0'+(newBirthday.getMonth()+1)).slice(-2)}/${('0'+newBirthday.getDate()).slice(-2)}/${newBirthday.getFullYear()}` });
-            // Update in local array as well
-            reminder.dateOfBirth = `${('0'+(newBirthday.getMonth()+1)).slice(-2)}/${('0'+newBirthday.getDate()).slice(-2)}/${newBirthday.getFullYear()}`;
-          }
-        }
+        // REMOVED AUTO-ROLLOVER - This was causing the year bug.
+        // The original birth date should never change. Only the display logic should calculate next occurrence.
 
         // Sort reminders: today's birthdays first, then by closest upcoming date
         remindersArray.sort((a, b) => {
           const now = new Date();
           const currentYear = now.getFullYear();
-          const [monthA, dayA] = a.dateOfBirth.split('/');
-          const [monthB, dayB] = b.dateOfBirth.split('/');
+          
+          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format but contains actual birth year
+          const [monthA, dayA, yearA] = a.dateOfBirth.split('/');
+          const [monthB, dayB, yearB] = b.dateOfBirth.split('/');
+          
+          // Calculate this year's birthday occurrence
           let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
           let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
           
-          // If birthday has passed this year, move to next year
+          // If birthday has already passed this year, move to next year for sorting only
           if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
           if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
           
@@ -314,12 +305,15 @@ function Dashboard() {
             margin: '0 auto'
           }}>
             {reminders.map((reminder) => {
-              // Calculate days until birthday
+              // Calculate days until birthday - use only month/day, not birth year
               const now = new Date();
               const currentYear = now.getFullYear();
-              const [month, day] = reminder.dateOfBirth.split('/');
+              const [month, day, birthYear] = reminder.dateOfBirth.split('/');
+              
+              // Calculate this year's birthday occurrence 
               let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
               
+              // If birthday has passed this year, calculate for next year
               if (birthday < now) {
                 birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
               }
@@ -423,7 +417,8 @@ function Dashboard() {
                         fontSize: '13px',
                         margin: '0'
                       }}>
-                        {new Date(reminder.dateOfBirth).toLocaleDateString('en-US', {
+                        {/* Show only month/day for next occurrence, not birth year */}
+                        {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
                         })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
