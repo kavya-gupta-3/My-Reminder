@@ -76,11 +76,11 @@ function Dashboard() {
           // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format
           const [monthA, dayA] = a.dateOfBirth.split('/');
           const [monthB, dayB] = b.dateOfBirth.split('/');
-
+          
           // Calculate this year's birthday occurrence
           let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
           let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
-
+          
           // Check if the birthday is running (within 24 hours after the birthday)
           const isRunningA = now >= birthdayA && now < new Date(birthdayA.getTime() + 24 * 60 * 60 * 1000);
           const isRunningB = now >= birthdayB && now < new Date(birthdayB.getTime() + 24 * 60 * 60 * 1000);
@@ -92,10 +92,10 @@ function Dashboard() {
           // If both are running or neither, sort by closest date
           if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
           if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
-
+          
           const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
           const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-
+          
           return daysUntilA - daysUntilB;
         });
 

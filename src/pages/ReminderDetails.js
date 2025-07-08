@@ -192,7 +192,7 @@ function ReminderDetails() {
         const uid = auth.currentUser?.uid;
         const reminderRef = ref(database, `reminders/${uid}/${id}`);
         await remove(reminderRef);
-        navigate('/');
+        navigate('/dashboard');
       } catch (error) {
         console.error('Error deleting reminder:', error);
         alert('Error deleting reminder. Please try again.');
@@ -370,7 +370,7 @@ function ReminderDetails() {
         position: 'relative'
       }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className="header-button"
           style={{
             background: '#fff',

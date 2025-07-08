@@ -35,7 +35,7 @@ function ChatPage() {
       try {
         const uid = auth.currentUser?.uid;
         if (!uid) {
-          navigate('/');
+          navigate('/dashboard');
           return;
         }
 
@@ -222,7 +222,7 @@ function ChatPage() {
         flexShrink: 0
       }}>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           style={{
             background: '#fff',
             border: '2px solid #fff',
