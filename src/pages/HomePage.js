@@ -88,8 +88,8 @@ function HomePage() {
           zIndex: 2
         }}>
           <div style={{
-            fontSize: 'clamp(2.2rem, 8vw, 3.5rem)',
-            marginBottom: '16px',
+            fontSize: 'clamp(2.8rem, 10vw, 4.2rem)',
+            marginBottom: '32px',
             animation: 'bounce 2s infinite'
           }}>
             🎂
@@ -119,7 +119,7 @@ function HomePage() {
             gap: '16px',
             justifyContent: 'center',
             flexWrap: 'wrap',
-            marginBottom: '40px'
+            marginBottom: '56px'
           }}>
             <button
               onClick={handleGetStarted}
@@ -188,7 +188,7 @@ function HomePage() {
           onClick={scrollToFeatures}
           style={{
             position: 'absolute',
-            bottom: '18px',
+            bottom: '38px',
             left: '50%',
             transform: 'translateX(-50%)',
             cursor: 'pointer',
@@ -196,7 +196,7 @@ function HomePage() {
             opacity: 0.7
           }}
         >
-          <FaChevronDown size={22} />
+          <FaChevronDown size={28} />
         </div>
       </section>
 
@@ -208,8 +208,8 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(1.5rem, 7vw, 2.2rem)',
-              fontWeight: '800',
+              fontSize: 'clamp(2.1rem, 10vw, 2.8rem)',
+              fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
               letterSpacing: '-0.5px',
@@ -291,8 +291,8 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(1.5rem, 7vw, 2.2rem)',
-              fontWeight: '800',
+              fontSize: 'clamp(2.1rem, 10vw, 2.8rem)',
+              fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
               letterSpacing: '-0.5px',
@@ -431,8 +431,8 @@ function HomePage() {
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{
-            fontSize: 'clamp(1.3rem, 7vw, 2rem)',
-            fontWeight: '800',
+            fontSize: 'clamp(2.1rem, 10vw, 2.8rem)',
+            fontWeight: '900',
             marginBottom: '16px',
             color: '#000',
             letterSpacing: '-0.5px',
