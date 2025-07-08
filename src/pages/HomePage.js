@@ -8,40 +8,36 @@ import {
   FaBell, 
   FaMobile, 
   FaUsers, 
-  FaHeart,
   FaPlay,
-  FaCheckCircle,
-  FaStar,
-  FaQuoteLeft,
   FaGithub,
   FaChevronDown,
-  FaCalendarAlt,
   FaShare,
   FaPalette,
-  FaLock,
-  FaRocket
+  FaRocket,
+  FaComments,
+  FaCalendarCheck,
+  FaHeart
 } from 'react-icons/fa';
 
 function HomePage() {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const features = [
     {
       icon: <FaRobot />,
       title: "AI-Powered Messages",
-      description: "Generate personalized birthday messages using advanced AI that understands relationships and creates heartfelt content."
+      description: "Generate personalized birthday messages using advanced AI that understands relationships and creates heartfelt content tailored to each person."
     },
     {
       icon: <FaBell />,
       title: "Smart Notifications",
-      description: "Never miss a birthday with intelligent reminders sent at perfect times - 1 week, 1 day, 6 hours, and 1 hour before."
+      description: "Never miss a birthday with intelligent reminders sent at perfect times - 1 week, 1 day, 6 hours, and 1 hour before the special day."
     },
     {
       icon: <FaMobile />,
       title: "Progressive Web App",
-      description: "Install on any device and enjoy native app experience with offline support and home screen access."
+      description: "Install on any device and enjoy native app experience with offline support and home screen access across all platforms."
     },
     {
       icon: <FaUsers />,
@@ -51,56 +47,17 @@ function HomePage() {
     {
       icon: <FaShare />,
       title: "Easy Sharing",
-      description: "Share birthday messages instantly via WhatsApp, email, SMS, or copy to clipboard with one click."
+      description: "Share birthday messages instantly via WhatsApp, email, SMS, or copy to clipboard with one click for seamless communication."
     },
     {
-      icon: <FaPalette />,
-      title: "Beautiful Design",
-      description: "Modern, responsive interface that looks stunning on mobile, tablet, and desktop with intuitive navigation."
+      icon: <FaComments />,
+      title: "AI Chat Assistant",
+      description: "Add reminders through natural conversation with our AI assistant. Just chat naturally and it handles all the details."
     }
   ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Busy Professional",
-      message: "This app has saved me so many times! The AI messages are so thoughtful, nobody can tell they're generated.",
-      rating: 5
-    },
-    {
-      name: "Mike Chen",
-      role: "Family Man",
-      message: "Finally, I never forget my family's birthdays. The notifications are perfectly timed and the messages feel personal.",
-      rating: 5
-    },
-    {
-      name: "Emma Williams",
-      role: "Social Butterfly",
-      message: "Managing 50+ friends' birthdays was impossible before this. Now I'm the friend who always remembers!",
-      rating: 5
-    }
-  ];
-
-  const stats = [
-    { number: "10K+", label: "Happy Users" },
-    { number: "50K+", label: "Birthdays Remembered" },
-    { number: "99.9%", label: "Uptime" },
-    { number: "4.9/5", label: "User Rating" }
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
 
   const handleGetStarted = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/dashboard');
-    }
+    navigate('/dashboard');
   };
 
   const scrollToFeatures = () => {
@@ -115,7 +72,7 @@ function HomePage() {
     }}>
       {/* Hero Section */}
       <section style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#000',
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
@@ -125,69 +82,39 @@ function HomePage() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Animated Background Elements */}
-        <div style={{
-          position: 'absolute',
-          top: '10%',
-          left: '10%',
-          width: '60px',
-          height: '60px',
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '50%',
-          animation: 'float 6s ease-in-out infinite'
-        }} />
-        <div style={{
-          position: 'absolute',
-          top: '20%',
-          right: '15%',
-          width: '40px',
-          height: '40px',
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '50%',
-          animation: 'float 4s ease-in-out infinite reverse'
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '15%',
-          left: '20%',
-          width: '80px',
-          height: '80px',
-          background: 'rgba(255,255,255,0.05)',
-          borderRadius: '50%',
-          animation: 'float 8s ease-in-out infinite'
-        }} />
-
         <div style={{
           maxWidth: '800px',
           padding: '0 20px',
           zIndex: 2
         }}>
           <div style={{
-            fontSize: '64px',
+            fontSize: 'clamp(3rem, 8vw, 5rem)',
             marginBottom: '24px',
             animation: 'bounce 2s infinite'
           }}>
             🎂
           </div>
           <h1 style={{
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
             fontWeight: '700',
             marginBottom: '24px',
-            textShadow: '0 4px 8px rgba(0,0,0,0.2)'
+            textShadow: '0 4px 8px rgba(0,0,0,0.3)'
           }}>
             Birthday Remind
           </h1>
           <p style={{
-            fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)',
+            fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
             marginBottom: '40px',
             opacity: 0.9,
-            fontWeight: '300'
+            fontWeight: '300',
+            maxWidth: '600px',
+            margin: '0 auto 40px auto'
           }}>
-            Never miss a special day again with AI-powered birthday reminders
+            Never miss a special day again with AI-powered birthday reminders and personalized messages
           </p>
           <div style={{
             display: 'flex',
-            gap: '20px',
+            gap: '16px',
             justifyContent: 'center',
             flexWrap: 'wrap',
             marginBottom: '60px'
@@ -196,26 +123,28 @@ function HomePage() {
               onClick={handleGetStarted}
               style={{
                 background: '#fff',
-                color: '#667eea',
+                color: '#000',
                 border: 'none',
                 padding: '16px 32px',
-                borderRadius: '50px',
+                borderRadius: '8px',
                 fontSize: '18px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                boxShadow: '0 4px 16px rgba(255,255,255,0.1)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px'
+                gap: '10px',
+                minWidth: '200px',
+                justifyContent: 'center'
               }}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 12px 40px rgba(0,0,0,0.15)';
+                e.target.style.boxShadow = '0 8px 24px rgba(255,255,255,0.2)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)';
+                e.target.style.boxShadow = '0 4px 16px rgba(255,255,255,0.1)';
               }}
             >
               <FaRocket /> Get Started Free
@@ -225,55 +154,30 @@ function HomePage() {
               style={{
                 background: 'transparent',
                 color: '#fff',
-                border: '2px solid rgba(255,255,255,0.3)',
+                border: '2px solid #fff',
                 padding: '16px 32px',
-                borderRadius: '50px',
+                borderRadius: '8px',
                 fontSize: '18px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px'
+                gap: '10px',
+                minWidth: '200px',
+                justifyContent: 'center'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(255,255,255,0.1)';
-                e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                e.target.style.background = '#fff';
+                e.target.style.color = '#000';
               }}
               onMouseLeave={(e) => {
                 e.target.style.background = 'transparent';
-                e.target.style.borderColor = 'rgba(255,255,255,0.3)';
+                e.target.style.color = '#fff';
               }}
             >
               <FaPlay /> Learn More
             </button>
-          </div>
-
-          {/* Stats */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: '30px',
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
-            {stats.map((stat, index) => (
-              <div key={index} style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: '2rem',
-                  fontWeight: '700',
-                  marginBottom: '8px'
-                }}>
-                  {stat.number}
-                </div>
-                <div style={{
-                  fontSize: '0.9rem',
-                  opacity: 0.8
-                }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -296,13 +200,13 @@ function HomePage() {
 
       {/* Features Section */}
       <section id="features" style={{
-        padding: '100px 20px',
+        padding: 'clamp(60px, 10vw, 100px) 20px',
         background: '#f8f9fa'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(60px, 8vw, 80px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
               fontWeight: '700',
               marginBottom: '20px',
               color: '#000'
@@ -310,7 +214,7 @@ function HomePage() {
               Powerful Features
             </h2>
             <p style={{
-              fontSize: '1.2rem',
+              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
               color: '#666',
               maxWidth: '600px',
               margin: '0 auto'
@@ -321,41 +225,39 @@ function HomePage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-            gap: '40px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 'clamp(20px, 4vw, 40px)'
           }}>
             {features.map((feature, index) => (
               <div
                 key={index}
                 style={{
                   background: '#fff',
-                  padding: '40px',
-                  borderRadius: '20px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-                  border: '2px solid transparent',
+                  padding: 'clamp(24px, 5vw, 40px)',
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '2px solid #000',
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.12)';
-                  e.currentTarget.style.borderColor = '#667eea';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)';
-                  e.currentTarget.style.borderColor = 'transparent';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
                 }}
               >
                 <div style={{
-                  fontSize: '3rem',
-                  color: '#667eea',
+                  fontSize: 'clamp(2rem, 4vw, 3rem)',
+                  color: '#000',
                   marginBottom: '20px'
                 }}>
                   {feature.icon}
                 </div>
                 <h3 style={{
-                  fontSize: '1.5rem',
+                  fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
                   fontWeight: '600',
                   marginBottom: '16px',
                   color: '#000'
@@ -364,7 +266,8 @@ function HomePage() {
                 </h3>
                 <p style={{
                   color: '#666',
-                  lineHeight: '1.6'
+                  lineHeight: '1.6',
+                  fontSize: 'clamp(0.9rem, 2vw, 1rem)'
                 }}>
                   {feature.description}
                 </p>
@@ -376,13 +279,13 @@ function HomePage() {
 
       {/* How It Works Section */}
       <section style={{
-        padding: '100px 20px',
+        padding: 'clamp(60px, 10vw, 100px) 20px',
         background: '#fff'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(60px, 8vw, 80px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
               fontWeight: '700',
               marginBottom: '20px',
               color: '#000'
@@ -390,7 +293,7 @@ function HomePage() {
               How It Works
             </h2>
             <p style={{
-              fontSize: '1.2rem',
+              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
               color: '#666',
               maxWidth: '600px',
               margin: '0 auto'
@@ -401,20 +304,20 @@ function HomePage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '60px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 'clamp(40px, 6vw, 60px)',
             alignItems: 'center'
           }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '80px',
-                height: '80px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                width: 'clamp(60px, 8vw, 80px)',
+                height: 'clamp(60px, 8vw, 80px)',
+                background: '#000',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2rem',
+                fontSize: 'clamp(1.5rem, 3vw, 2rem)',
                 color: '#fff',
                 margin: '0 auto 24px auto',
                 fontWeight: '700'
@@ -422,7 +325,7 @@ function HomePage() {
                 1
               </div>
               <h3 style={{
-                fontSize: '1.5rem',
+                fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
                 fontWeight: '600',
                 marginBottom: '16px',
                 color: '#000'
@@ -431,22 +334,23 @@ function HomePage() {
               </h3>
               <p style={{
                 color: '#666',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
+                fontSize: 'clamp(0.9rem, 2vw, 1rem)'
               }}>
-                Simply chat with our AI assistant to add birthdays. Just tell us the name, date, and relationship.
+                Simply chat with our AI assistant to add birthdays. Just tell us the name, date, and relationship - it's that easy.
               </p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '80px',
-                height: '80px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                width: 'clamp(60px, 8vw, 80px)',
+                height: 'clamp(60px, 8vw, 80px)',
+                background: '#000',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2rem',
+                fontSize: 'clamp(1.5rem, 3vw, 2rem)',
                 color: '#fff',
                 margin: '0 auto 24px auto',
                 fontWeight: '700'
@@ -454,7 +358,7 @@ function HomePage() {
                 2
               </div>
               <h3 style={{
-                fontSize: '1.5rem',
+                fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
                 fontWeight: '600',
                 marginBottom: '16px',
                 color: '#000'
@@ -463,22 +367,23 @@ function HomePage() {
               </h3>
               <p style={{
                 color: '#666',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
+                fontSize: 'clamp(0.9rem, 2vw, 1rem)'
               }}>
-                Receive smart notifications at the perfect times - never too early, never too late.
+                Receive smart notifications at the perfect times - multiple reminders ensure you never miss a birthday.
               </p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '80px',
-                height: '80px',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                width: 'clamp(60px, 8vw, 80px)',
+                height: 'clamp(60px, 8vw, 80px)',
+                background: '#000',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '2rem',
+                fontSize: 'clamp(1.5rem, 3vw, 2rem)',
                 color: '#fff',
                 margin: '0 auto 24px auto',
                 fontWeight: '700'
@@ -486,7 +391,7 @@ function HomePage() {
                 3
               </div>
               <h3 style={{
-                fontSize: '1.5rem',
+                fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
                 fontWeight: '600',
                 marginBottom: '16px',
                 color: '#000'
@@ -495,113 +400,87 @@ function HomePage() {
               </h3>
               <p style={{
                 color: '#666',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
+                fontSize: 'clamp(0.9rem, 2vw, 1rem)'
               }}>
-                Use AI-generated personalized messages or create your own. Share instantly via any platform.
+                Use AI-generated personalized messages or create your own. Share instantly via any platform with one click.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* What You Get Section */}
       <section style={{
-        padding: '100px 20px',
+        padding: 'clamp(60px, 10vw, 100px) 20px',
         background: '#f8f9fa'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{
-            fontSize: 'clamp(2rem, 4vw, 3rem)',
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
             fontWeight: '700',
             marginBottom: '20px',
             color: '#000'
           }}>
-            What Our Users Say
+            What You Get
           </h2>
           <p style={{
-            fontSize: '1.2rem',
+            fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
             color: '#666',
             marginBottom: '60px'
           }}>
-            Join thousands of happy users who never miss a birthday
+            A complete birthday management solution that keeps your relationships strong
           </p>
 
           <div style={{
-            background: '#fff',
-            padding: '60px 40px',
-            borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-            position: 'relative',
-            minHeight: '200px'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'clamp(20px, 4vw, 40px)',
+            marginBottom: '60px'
           }}>
-            <FaQuoteLeft style={{
-              fontSize: '3rem',
-              color: '#667eea',
-              opacity: 0.3,
-              position: 'absolute',
-              top: '20px',
-              left: '20px'
-            }} />
-            
             <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginBottom: '20px'
+              background: '#fff',
+              padding: 'clamp(20px, 4vw, 30px)',
+              borderRadius: '12px',
+              border: '2px solid #000',
+              textAlign: 'center'
             }}>
-              {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                <FaStar key={i} style={{ color: '#ffc107', fontSize: '1.2rem', marginRight: '4px' }} />
-              ))}
+              <FaCalendarCheck style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', color: '#000', marginBottom: '16px' }} />
+              <h4 style={{ color: '#000', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.1rem)' }}>Smart Reminders</h4>
+              <p style={{ color: '#666', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>Multiple alerts before each birthday</p>
             </div>
-
-            <p style={{
-              fontSize: '1.3rem',
-              fontStyle: 'italic',
-              marginBottom: '30px',
-              color: '#333',
-              lineHeight: '1.6'
-            }}>
-              "{testimonials[currentTestimonial].message}"
-            </p>
-
-            <div>
-              <h4 style={{
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                marginBottom: '4px',
-                color: '#000'
-              }}>
-                {testimonials[currentTestimonial].name}
-              </h4>
-              <p style={{
-                color: '#666',
-                fontSize: '0.9rem'
-              }}>
-                {testimonials[currentTestimonial].role}
-              </p>
-            </div>
-
-            {/* Testimonial Dots */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '8px',
-              marginTop: '30px'
+              background: '#fff',
+              padding: 'clamp(20px, 4vw, 30px)',
+              borderRadius: '12px',
+              border: '2px solid #000',
+              textAlign: 'center'
             }}>
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    border: 'none',
-                    background: index === currentTestimonial ? '#667eea' : '#ddd',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-              ))}
+              <FaRobot style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', color: '#000', marginBottom: '16px' }} />
+              <h4 style={{ color: '#000', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.1rem)' }}>AI Messages</h4>
+              <p style={{ color: '#666', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>Personalized birthday messages</p>
+            </div>
+            <div style={{
+              background: '#fff',
+              padding: 'clamp(20px, 4vw, 30px)',
+              borderRadius: '12px',
+              border: '2px solid #000',
+              textAlign: 'center'
+            }}>
+              <FaMobile style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', color: '#000', marginBottom: '16px' }} />
+              <h4 style={{ color: '#000', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.1rem)' }}>Mobile App</h4>
+              <p style={{ color: '#666', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>Install on any device</p>
+            </div>
+            <div style={{
+              background: '#fff',
+              padding: 'clamp(20px, 4vw, 30px)',
+              borderRadius: '12px',
+              border: '2px solid #000',
+              textAlign: 'center'
+            }}>
+              <FaHeart style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', color: '#000', marginBottom: '16px' }} />
+              <h4 style={{ color: '#000', marginBottom: '8px', fontSize: 'clamp(1rem, 2.5vw, 1.1rem)' }}>Free Forever</h4>
+              <p style={{ color: '#666', fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>No hidden costs or subscriptions</p>
             </div>
           </div>
         </div>
@@ -609,56 +488,56 @@ function HomePage() {
 
       {/* CTA Section */}
       <section style={{
-        padding: '100px 20px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: 'clamp(60px, 10vw, 100px) 20px',
+        background: '#000',
         color: '#fff',
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{
-            fontSize: '64px',
+            fontSize: 'clamp(3rem, 8vw, 4rem)',
             marginBottom: '24px'
           }}>
             🎉
           </div>
           <h2 style={{
-            fontSize: 'clamp(2rem, 4vw, 3rem)',
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
             fontWeight: '700',
             marginBottom: '24px'
           }}>
             Ready to Get Started?
           </h2>
           <p style={{
-            fontSize: '1.2rem',
+            fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
             marginBottom: '40px',
             opacity: 0.9
           }}>
-            Join thousands of users who never miss a birthday. Start creating meaningful connections today.
+            Start remembering every birthday and creating meaningful connections today.
           </p>
           <button
             onClick={handleGetStarted}
             style={{
               background: '#fff',
-              color: '#667eea',
+              color: '#000',
               border: 'none',
               padding: '20px 40px',
-              borderRadius: '50px',
-              fontSize: '18px',
+              borderRadius: '8px',
+              fontSize: 'clamp(1rem, 3vw, 1.1rem)',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              boxShadow: '0 4px 16px rgba(255,255,255,0.2)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '12px'
             }}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-4px)';
-              e.target.style.boxShadow = '0 16px 48px rgba(0,0,0,0.3)';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 24px rgba(255,255,255,0.3)';
             }}
             onMouseLeave={(e) => {
               e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)';
+              e.target.style.boxShadow = '0 4px 16px rgba(255,255,255,0.2)';
             }}
           >
             <FaBirthdayCake /> Start Free Today
@@ -670,8 +549,9 @@ function HomePage() {
       <footer style={{
         background: '#000',
         color: '#fff',
-        padding: '60px 20px 40px',
-        textAlign: 'center'
+        padding: 'clamp(40px, 6vw, 60px) 20px clamp(20px, 4vw, 40px)',
+        textAlign: 'center',
+        borderTop: '1px solid #333'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{
@@ -679,11 +559,12 @@ function HomePage() {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '30px',
-            gap: '16px'
+            gap: '16px',
+            flexWrap: 'wrap'
           }}>
-            <FaBirthdayCake style={{ fontSize: '2rem', color: '#667eea' }} />
+            <FaBirthdayCake style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: '#fff' }} />
             <h3 style={{
-              fontSize: '1.8rem',
+              fontSize: 'clamp(1.3rem, 3vw, 1.8rem)',
               fontWeight: '700',
               margin: 0
             }}>
@@ -694,23 +575,10 @@ function HomePage() {
           <p style={{
             color: '#ccc',
             marginBottom: '30px',
-            fontSize: '1.1rem'
+            fontSize: 'clamp(0.9rem, 2vw, 1.1rem)'
           }}>
             Never miss a special day again
           </p>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '30px',
-            flexWrap: 'wrap',
-            marginBottom: '40px'
-          }}>
-            <a href="#features" style={{ color: '#ccc', textDecoration: 'none', fontSize: '1rem' }}>Features</a>
-            <a href="#" style={{ color: '#ccc', textDecoration: 'none', fontSize: '1rem' }}>Privacy</a>
-            <a href="#" style={{ color: '#ccc', textDecoration: 'none', fontSize: '1rem' }}>Terms</a>
-            <a href="#" style={{ color: '#ccc', textDecoration: 'none', fontSize: '1rem' }}>Support</a>
-          </div>
 
           <div style={{
             borderTop: '1px solid #333',
@@ -724,7 +592,7 @@ function HomePage() {
             <p style={{
               color: '#666',
               margin: 0,
-              fontSize: '0.9rem'
+              fontSize: 'clamp(0.8rem, 2vw, 0.9rem)'
             }}>
               © 2024 Birthday Remind. All rights reserved.
             </p>
@@ -739,10 +607,10 @@ function HomePage() {
                 rel="noopener noreferrer"
                 style={{
                   color: '#ccc',
-                  fontSize: '1.5rem',
+                  fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
                   transition: 'color 0.3s ease'
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#667eea'}
+                onMouseEnter={(e) => e.target.style.color = '#fff'}
                 onMouseLeave={(e) => e.target.style.color = '#ccc'}
               >
                 <FaGithub />
@@ -754,29 +622,22 @@ function HomePage() {
 
       {/* CSS Animations */}
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
         @keyframes bounce {
           0%, 20%, 60%, 100% { transform: translateY(0); }
           40%, 80% { transform: translateY(-10px); }
         }
+        
         @media (max-width: 768px) {
-          .hero-buttons {
-            flex-direction: column;
-            align-items: center;
+          section {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
           }
-          .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-          }
-          .features-grid {
-            grid-template-columns: 1fr;
-          }
-          .how-it-works-grid {
-            grid-template-columns: 1fr;
-            gap: 40px;
+        }
+        
+        @media (max-width: 480px) {
+          section {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
           }
         }
       `}</style>

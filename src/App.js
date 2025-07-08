@@ -4,7 +4,6 @@ import HomePage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
 import ChatPage from './pages/ChatPage';
 import ReminderDetails from './pages/ReminderDetails';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
 import { useFCMToken } from './fcmSetup';
 
 function App() {
@@ -12,7 +11,6 @@ function App() {
 
   return (
     <Router>
-      <PWAInstallPrompt />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
