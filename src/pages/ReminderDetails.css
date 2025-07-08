@@ -1,9 +1,9 @@
-* {
+.reminder-details-page * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-.header {
+.reminder-details-page .header {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,24 +16,24 @@
   border-radius: 0 0 20px 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
-.responsive-grid {
+.reminder-details-page .responsive-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
-.header-button {
+.reminder-details-page .header-button {
   position: absolute;
   left: 20px;
   top: 50%;
   transform: translateY(-50%);
 }
 @media (max-width: 768px) {
-  .header {
+  .reminder-details-page .header {
     flex-direction: column;
     padding: 20px;
     text-align: center;
   }
-  .header-button {
+  .reminder-details-page .header-button {
     position: relative;
     left: 0;
     top: 0;
@@ -41,76 +41,76 @@
     margin-bottom: 20px;
     align-self: flex-start;
   }
-  .header h1 {
+  .reminder-details-page .header h1 {
     font-size: 1.8rem;
   }
-  .responsive-grid {
+  .reminder-details-page .responsive-grid {
     grid-template-columns: 1fr;
   }
-  .action-buttons {
+  .reminder-details-page .action-buttons {
     flex-direction: column;
   }
 }
 @media (max-width: 600px) {
-  .header, header {
+  .reminder-details-page .header, .reminder-details-page header {
     padding: 10px 0 !important;
   }
-  h1, h2 {
+  .reminder-details-page h1, .reminder-details-page h2 {
     font-size: 1.1rem !important;
   }
-  .responsive-grid {
+  .reminder-details-page .responsive-grid {
     grid-template-columns: 1fr !important;
     gap: 10px !important;
   }
-  .action-buttons {
+  .reminder-details-page .action-buttons {
     flex-direction: column !important;
     gap: 10px !important;
   }
-  .action-buttons button {
+  .reminder-details-page .action-buttons button {
     min-width: 100px !important;
     padding: 12px 8px !important;
     font-size: 0.95rem !important;
   }
   /* Fix countdown grid for mobile */
-  .countdown-grid {
+  .reminder-details-page .countdown-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
     max-width: 100% !important;
   }
-  .birthday-info-card, .countdown-card, .ai-message-card {
+  .reminder-details-page .birthday-info-card, .reminder-details-page .countdown-card, .reminder-details-page .ai-message-card {
     padding: 18px !important;
     margin-bottom: 18px !important;
   }
   /* Prevent horizontal scrolling */
-  body {
+  .reminder-details-page {
     overflow-x: hidden !important;
   }
   /* Fix AI message section */
-  .ai-message-card .ai-controls {
+  .reminder-details-page .ai-message-card .ai-controls {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 10px !important;
   }
-  .ai-message-card .ai-controls > div {
+  .reminder-details-page .ai-message-card .ai-controls > div {
     display: flex !important;
     gap: 8px !important;
     justify-content: center !important;
   }
 }
 @media (max-width: 400px) {
-  .header, header {
+  .reminder-details-page .header, .reminder-details-page header {
     padding: 4px 0 !important;
   }
-  h1, h2 {
+  .reminder-details-page h1, .reminder-details-page h2 {
     font-size: 0.95rem !important;
   }
-  .responsive-grid {
+  .reminder-details-page .responsive-grid {
     gap: 4px !important;
   }
-  .countdown-grid {
+  .reminder-details-page .countdown-grid {
     grid-template-columns: 1fr !important;
   }
-  .birthday-info-card, .countdown-card, .ai-message-card {
+  .reminder-details-page .birthday-info-card, .reminder-details-page .countdown-card, .reminder-details-page .ai-message-card {
     padding: 15px !important;
     margin-bottom: 15px !important;
   }

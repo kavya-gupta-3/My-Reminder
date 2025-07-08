@@ -303,7 +303,7 @@ function ReminderDetails() {
 
   if (loading) {
     return (
-      <div style={{
+      <div className="reminder-details-page" style={{
         minHeight: '100vh',
         backgroundColor: '#f8f9fa',
         color: '#333',
@@ -319,7 +319,7 @@ function ReminderDetails() {
 
   if (loadError) {
     return (
-      <div style={{
+      <div className="reminder-details-page" style={{
         minHeight: '100vh',
         backgroundColor: '#f8f9fa',
         color: '#333',
@@ -350,7 +350,7 @@ function ReminderDetails() {
   const isToday = countdown.days === 0 && countdown.hours === 0 && countdown.minutes === 0;
 
   return (
-    <div style={{
+    <div className="reminder-details-page" style={{
       minHeight: '100vh',
       backgroundColor: '#f8f9fa',
       color: '#333',
