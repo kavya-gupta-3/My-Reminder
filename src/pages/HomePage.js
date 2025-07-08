@@ -182,22 +182,6 @@ function HomePage() {
             </button>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div 
-          onClick={scrollToFeatures}
-          style={{
-            position: 'absolute',
-            bottom: '38px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            cursor: 'pointer',
-            animation: 'bounce 2s infinite',
-            opacity: 0.7
-          }}
-        >
-          <FaChevronDown size={28} />
-        </div>
       </section>
 
       {/* Features Section */}
