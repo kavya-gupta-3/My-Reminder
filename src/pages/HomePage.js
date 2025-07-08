@@ -182,22 +182,6 @@ function HomePage() {
             </button>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div 
-          onClick={scrollToFeatures}
-          style={{
-            position: 'absolute',
-            bottom: '18px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            cursor: 'pointer',
-            animation: 'bounce 2s infinite',
-            opacity: 0.7
-          }}
-        >
-          <FaChevronDown size={22} />
-        </div>
       </section>
 
       {/* Features Section */}
@@ -208,7 +192,7 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2.2rem, 10vw, 2.8rem)',
+              fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
               fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
@@ -291,7 +275,7 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2.2rem, 10vw, 2.8rem)',
+              fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
               fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
@@ -431,7 +415,7 @@ function HomePage() {
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{
-            fontSize: 'clamp(2.2rem, 10vw, 2.8rem)',
+            fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
             fontWeight: '900',
             marginBottom: '16px',
             color: '#000',
