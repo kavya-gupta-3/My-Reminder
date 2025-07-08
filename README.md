@@ -6,8 +6,8 @@
 
 **A modern, AI-powered birthday reminder app that ensures you never forget another special day!**
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://birthday-reminder-vh81.vercel.app/)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-blue?style=for-the-badge)](https://birthday-reminder-vh81.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://myreminder.xyz/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-blue?style=for-the-badge)](https://myreminder.xyz/)
 [![Mobile Friendly](https://img.shields.io/badge/Mobile-Friendly-orange?style=for-the-badge)](#)
 
 </div>
@@ -52,7 +52,7 @@
 
 ## 🚀 Live Demo
 
-Experience Birthday Remind now: **[https://birthday-reminder-vh81.vercel.app/](https://birthday-reminder-vh81.vercel.app/)**
+Experience Birthday Remind now: **[https://myreminder.xyz/](https://myreminder.xyz/)**
 
 ### Install as PWA:
 1. **Mobile (iOS/Android)**: Visit the link and tap "Add to Home Screen"
@@ -246,7 +246,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Live App**: [https://birthday-reminder-vh81.vercel.app/](https://birthday-reminder-vh81.vercel.app/)
+- **Live App**: [https://myreminder.xyz/](https://myreminder.xyz/)
 - **GitHub Repository**: [https://github.com/kavya-gupta-3/Birthday-Reminder](https://github.com/kavya-gupta-3/Birthday-Reminder)
 - **Backend API**: [https://birthday-reminder-i1uf.onrender.com](https://birthday-reminder-i1uf.onrender.com)
 

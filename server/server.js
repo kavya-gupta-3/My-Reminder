@@ -61,9 +61,9 @@ app.post('/api/send-notification', async (req, res) => {
 
     const getNotificationLink = (data) => {
       if (data && data.reminderId) {
-        return `https://birthday-reminder-vh81.vercel.app/reminder/${data.reminderId}`;
+        return `https://myreminder.xyz/reminder/${data.reminderId}`;
       }
-      return 'https://birthday-reminder-vh81.vercel.app/';
+      return 'https://myreminder.xyz/';
     };
 
     const message = {
@@ -158,9 +158,9 @@ app.post('/api/send-notification-to-users', async (req, res) => {
 
     const getNotificationLink = (data) => {
       if (data && data.reminderId) {
-        return `https://birthday-reminder-vh81.vercel.app/reminder/${data.reminderId}`;
+        return `https://myreminder.xyz/reminder/${data.reminderId}`;
       }
-      return 'https://birthday-reminder-vh81.vercel.app/';
+      return 'https://myreminder.xyz/';
     };
 
     const multicastMessage = {
