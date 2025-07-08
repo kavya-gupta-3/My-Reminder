@@ -95,7 +95,7 @@ function HomePage() {
             🎂
           </div>
           <h1 style={{
-            fontSize: 'clamp(2.8rem, 10vw, 3.2rem)',
+            fontSize: 'clamp(2rem, 6vw, 2.5rem)',
             fontWeight: '800',
             marginBottom: '16px',
             textShadow: '0 4px 8px rgba(0,0,0,0.3)',
@@ -192,7 +192,7 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
+              fontSize: 'clamp(2rem, 6vw, 2.5rem)',
               fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
@@ -245,7 +245,7 @@ function HomePage() {
                   {feature.icon}
                 </div>
                 <h3 style={{
-                  fontSize: 'clamp(1.1rem, 5vw, 1.4rem)',
+                  fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
                   fontWeight: '700',
                   marginBottom: '10px',
                   color: '#000',
@@ -275,7 +275,7 @@ function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
             <h2 style={{
-              fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
+              fontSize: 'clamp(2rem, 6vw, 2.5rem)',
               fontWeight: '900',
               marginBottom: '16px',
               color: '#000',
@@ -317,7 +317,7 @@ function HomePage() {
                 1
               </div>
               <h3 style={{
-                fontSize: 'clamp(1.05rem, 5vw, 1.25rem)',
+                fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
                 fontWeight: '700',
                 marginBottom: '10px',
                 color: '#000',
@@ -352,7 +352,7 @@ function HomePage() {
                 2
               </div>
               <h3 style={{
-                fontSize: 'clamp(1.05rem, 5vw, 1.25rem)',
+                fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
                 fontWeight: '700',
                 marginBottom: '10px',
                 color: '#000',
@@ -387,7 +387,7 @@ function HomePage() {
                 3
               </div>
               <h3 style={{
-                fontSize: 'clamp(1.05rem, 5vw, 1.25rem)',
+                fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
                 fontWeight: '700',
                 marginBottom: '10px',
                 color: '#000',
@@ -415,7 +415,7 @@ function HomePage() {
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{
-            fontSize: 'clamp(2.5rem, 8vw, 3.2rem)',
+            fontSize: 'clamp(2rem, 6vw, 2.5rem)',
             fontWeight: '900',
             marginBottom: '16px',
             color: '#000',
