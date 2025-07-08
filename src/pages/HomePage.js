@@ -95,7 +95,7 @@ function HomePage() {
             🎂
           </div>
           <h1 style={{
-            fontSize: 'clamp(2.2rem, 8vw, 3.2rem)',
+            fontSize: 'clamp(2.8rem, 10vw, 3.2rem)',
             fontWeight: '800',
             marginBottom: '16px',
             textShadow: '0 4px 8px rgba(0,0,0,0.3)',
