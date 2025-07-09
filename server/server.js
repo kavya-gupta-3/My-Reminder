@@ -69,9 +69,7 @@ app.post('/api/send-notification', async (req, res) => {
     const message = {
       notification: {
         title: title || 'Birthday Reminder',
-        body: body || 'You have a birthday reminder!',
-        icon: '/logo.png',
-        badge: '/logo.png'
+        body: body || 'You have a birthday reminder!'
       },
       data: {
         ...data,
@@ -166,9 +164,7 @@ app.post('/api/send-notification-to-users', async (req, res) => {
     const multicastMessage = {
       notification: {
         title: title || 'Birthday Reminder',
-        body: body || 'You have a birthday reminder!',
-        icon: '/logo.png',
-        badge: '/logo.png'
+        body: body || 'You have a birthday reminder!'
       },
       data: {
         ...data,

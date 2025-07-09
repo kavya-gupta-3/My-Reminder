@@ -20,8 +20,6 @@ async function sendFCM(token, title, body, data = {}) {
       notification: { 
         title, 
         body,
-        icon: '/birthday-cake.png',
-        badge: '/birthday-cake.png',
         tag: 'birthday-reminder'
       },
       data: {
@@ -44,7 +42,28 @@ async function sendFCM(token, title, body, data = {}) {
             category: 'birthday-reminder'
           }
         }
-      }
+      },
+      webpush: {
+        notification: {
+          icon: '/birthday-cake.png',
+          badge: '/birthday-cake.png',
+          requireInteraction: true,
+          actions: [
+            {
+              action: 'view',
+              title: 'View Reminder'
+            },
+            {
+              action: 'dismiss',
+              title: 'Dismiss'
+            }
+          ]
+        },
+        fcm_options: {
+          link: getNotificationLink(reminder)
+        }
+      },
+      token: token
     });
     console.log('Notification sent:', title, body);
   } catch (err) {
