@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { auth, database, ref, update, messaging, getToken, onMessage } from './firebase';
 
-const VAPID_KEY = 'BDa5R1My7l2zhSQJDRFj39eOER_QUMajg1tw6IXtzFn95t4HuFLVHMHusztKnLhFuFywmgSMEdU4Oqx-OktVMjk';
+const VAPID_KEY = 'BErpz_gv8ZdgfQHCO02bBN-wSJNs3MniFcHNsVrq_tpljf7KC73kuDm8m8QVuJeW_ZY4tKicLDHgETx9_2PPIdE';
 
 export function useFCMToken() {
   useEffect(() => {
