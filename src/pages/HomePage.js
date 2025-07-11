@@ -434,9 +434,11 @@ function HomePage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: 'clamp(14px, 3vw, 28px)',
-            marginBottom: '36px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))',
+            gap: 'clamp(16px, 3vw, 24px)',
+            marginBottom: '36px',
+            maxWidth: '1000px',
+            margin: '0 auto 36px auto'
           }}>
             <div style={{
               background: '#fff',

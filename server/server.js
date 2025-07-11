@@ -5,7 +5,15 @@ const admin = require('firebase-admin');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow requests from frontend
+app.use(cors({
+  origin: ['https://myreminder.xyz', 'http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;

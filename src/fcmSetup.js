@@ -68,17 +68,8 @@ export function useFCMToken() {
           icon: '/logo.png',
           badge: '/logo.png',
           tag: 'birthday-reminder',
-          requireInteraction: true,
-          actions: [
-            {
-              action: 'view',
-              title: 'View Reminder'
-            },
-            {
-              action: 'dismiss',
-              title: 'Dismiss'
-            }
-          ]
+          requireInteraction: true
+          // Removed actions - only supported in ServiceWorker notifications
         });
 
         notification.onclick = () => {
