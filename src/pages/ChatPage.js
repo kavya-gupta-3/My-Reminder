@@ -22,11 +22,12 @@ function ChatPage() {
   const [userContext, setUserContext] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Chat history persistence
+  // Chat history persistence - separate for edit mode
   const getChatHistoryKey = useCallback(() => {
     const uid = auth.currentUser?.uid;
-    return uid ? `chat_history_${uid}` : null;
-  }, []);
+    const isEditMode = !!reminderId;
+    return uid ? `chat_history_${uid}${isEditMode ? '_edit' : ''}` : null;
+  }, [reminderId]);
 
   const saveChatHistory = useCallback((chatMessages) => {
     const key = getChatHistoryKey();
@@ -39,7 +40,7 @@ function ChatPage() {
         try {
           const keys = Object.keys(localStorage);
           const chatKeys = keys.filter(k => k.startsWith('chat_history_'));
-          if (chatKeys.length > 5) {
+          if (chatKeys.length > 10) {
             // Remove oldest chat history
             const oldestKey = chatKeys[0];
             localStorage.removeItem(oldestKey);
@@ -272,25 +273,37 @@ function ChatPage() {
           return;
         }
 
-        // Save to Firebase first
-        await saveReminderToFirebase(dataToSave);
-        
-        // Only show success message after successful save
-        const confirmationMessage = {
-          id: Date.now() + 2,
-          type: 'ai',
-          content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the {dataToSave.reminderType || 'reminder'} for {dataToSave.personName}! 🎉<br/><br/>Want to add another reminder? Just tell me who it's for, or ask me anything else!</>
-        };
-        setMessages(prev => [...prev, confirmationMessage]);
-        
-        // Reset reminder data for new reminder creation
-        setReminderData({
-          personName: '',
-          date: '',
-          relationship: '',
-          reminderType: 'birthday',
-          note: ''
-        });
+        try {
+          // Save to Firebase first
+          await saveReminderToFirebase(dataToSave);
+          
+          // Show success message
+          const confirmationMessage = {
+            id: Date.now() + 2,
+            type: 'ai',
+            content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the {dataToSave.reminderType || 'reminder'} for {dataToSave.personName}! 🎉<br/><br/>Want to add another reminder? Just tell me who it's for, or ask me anything else!</>
+          };
+          setMessages(prev => [...prev, confirmationMessage]);
+          
+          // Reset reminder data for new reminder creation (only if not in edit mode)
+          if (!reminderId) {
+            setReminderData({
+              personName: '',
+              date: '',
+              relationship: '',
+              reminderType: 'birthday',
+              note: ''
+            });
+          }
+        } catch (saveError) {
+          console.error('Error saving reminder:', saveError);
+          const errorMessage = {
+            id: Date.now() + 2,
+            type: 'ai',
+            content: <><FaExclamationCircle style={{ marginRight: '8px' }} /> Sorry, there was an error saving the reminder. Please try again.</>
+          };
+          setMessages(prev => [...prev, errorMessage]);
+        }
       }
     } catch (error) {
       console.error('Error in chat flow:', error);

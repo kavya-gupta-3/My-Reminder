@@ -310,21 +310,6 @@ function ReminderDetails() {
     }
   };
 
-  const calculateAge = (dateOfBirth) => {
-    if (reminder.reminderType !== 'birthday') return null;
-    const [month, day, year] = dateOfBirth.split('/');
-    // Only calculate age if year is provided and valid
-    if (!year || year === '0000' || year.length !== 4) return null;
-    const birthDate = new Date(year, month - 1, day);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   // Get AI message from localStorage
   const getStoredAIMessage = (reminderId, size) => {
     try {
@@ -582,7 +567,6 @@ function ReminderDetails() {
                 margin: '0'
               }}>
                 {reminder.relationship} • {getReminderTypeName(reminder.reminderType)}
-                {reminder.reminderType === 'birthday' && calculateAge(reminder.date) && ` • Age ${calculateAge(reminder.date)}`}
               </p>
             </div>
           </div>

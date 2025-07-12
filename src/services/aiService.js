@@ -110,8 +110,6 @@ class AIService {
 
   async processChat(messages, reminderData, isEditing, userContext) {
     try {
-      const currentDate = new Date().toLocaleDateString();
-
       let userContextInfo = '';
       if (userContext) {
         if (userContext.user && userContext.user.name) {

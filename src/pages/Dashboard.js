@@ -161,8 +161,10 @@ function Dashboard() {
 
     // Special icons for urgent reminders
     if (daysUntil === 0) return <FaGift />;
+    if (daysUntil <= 3) return <FaGift style={{ color: '#ff6b6b' }}/>;
     if (daysUntil <= 7) return <FaGift style={{ color: '#ffa726' }}/>;
-    if (daysUntil <= 30) return <FaCalendarCheck style={{ color: '#4caf50' }}/>;
+    if (daysUntil <= 14) return <FaCalendarCheck style={{ color: '#4caf50' }}/>;
+    if (daysUntil <= 30) return <FaBell style={{ color: '#2196f3' }}/>;
     return baseIcon;
   };
 
@@ -445,20 +447,6 @@ function Dashboard() {
               
               const icon = getReminderIcon(reminder.reminderType, daysUntil);
 
-              // Helper to calculate the age they will turn on their next birthday (only for birthdays)
-              const getUpcomingAge = (dateOfBirth) => {
-                if (reminder.reminderType !== 'birthday') return null;
-                const [month, day, year] = dateOfBirth.split('/');
-                const birthDate = new Date(year, month - 1, day);
-                const now = new Date();
-                let age = now.getFullYear() - birthDate.getFullYear();
-                const thisYearBirthday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-                if (now >= thisYearBirthday) {
-                  age += 1;
-                }
-                return age;
-              };
-
               // Add visual effects for running reminders
               const runningStyle = {
                 border: '2px solid #FFD700', // Gold border
@@ -553,9 +541,6 @@ function Dashboard() {
                           month: 'short',
                           day: 'numeric'
                         })}
-                        {reminder.reminderType === 'birthday' && getUpcomingAge(reminder.date) && 
-                          ` • Turns ${getUpcomingAge(reminder.date)}`
-                        }
                       </p>
                   </div>
                 </div>
