@@ -159,6 +159,7 @@ function Dashboard() {
       }
     })();
 
+    // Special icons for urgent reminders
     if (daysUntil === 0) return <FaGift />;
     if (daysUntil <= 7) return <FaGift style={{ color: '#ffa726' }}/>;
     if (daysUntil <= 30) return <FaCalendarCheck style={{ color: '#4caf50' }}/>;

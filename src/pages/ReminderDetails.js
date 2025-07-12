@@ -180,6 +180,14 @@ function ReminderDetails() {
 
   // Generate and display AI message using direct reminder message generation
   const generateAndShowAIMessage = async (reminderData, size) => {
+    // Check localStorage first
+    const storedMessage = getStoredAIMessage(reminderData.id, size);
+    if (storedMessage && storedMessage.message) {
+      setAiMessage(storedMessage.message);
+      setAiLoading(false);
+      return;
+    }
+
     // Enforce regen limit
     const allowed = await checkAndUpdateRegenLimit();
     if (!allowed) {
@@ -200,6 +208,8 @@ function ReminderDetails() {
         aiMessage: message,
         aiMessageSize: size
       }));
+      // Save to localStorage
+      saveAIMessageToStorage(reminderData.id, size, message);
     } catch (error) {
       setAiMessage('Error generating message. Please try again.');
     } finally {
@@ -210,8 +220,13 @@ function ReminderDetails() {
   // Regenerate AI message when messageSize changes
   useEffect(() => {
     if (!reminder) return;
-    // Only regenerate if the current aiMessageSize does not match the selected size
-    if (reminder.aiMessageSize !== messageSize) {
+    // Check if we have a stored message for this size
+    const storedMessage = getStoredAIMessage(reminder.id, messageSize);
+    if (storedMessage && storedMessage.message) {
+      setAiMessage(storedMessage.message);
+      setAiLoading(false);
+    } else if (reminder.aiMessageSize !== messageSize) {
+      // Only regenerate if we don't have a stored message and the size changed
       generateAndShowAIMessage(reminder, messageSize);
     } else if (reminder.aiMessage) {
       setAiMessage(reminder.aiMessage);
@@ -298,6 +313,8 @@ function ReminderDetails() {
   const calculateAge = (dateOfBirth) => {
     if (reminder.reminderType !== 'birthday') return null;
     const [month, day, year] = dateOfBirth.split('/');
+    // Only calculate age if year is provided and valid
+    if (!year || year === '0000' || year.length !== 4) return null;
     const birthDate = new Date(year, month - 1, day);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -306,6 +323,31 @@ function ReminderDetails() {
       age--;
     }
     return age;
+  };
+
+  // Get AI message from localStorage
+  const getStoredAIMessage = (reminderId, size) => {
+    try {
+      const key = `ai_message_${reminderId}_${size}`;
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error('Error getting stored AI message:', error);
+      return null;
+    }
+  };
+
+  // Save AI message to localStorage
+  const saveAIMessageToStorage = (reminderId, size, message) => {
+    try {
+      const key = `ai_message_${reminderId}_${size}`;
+      localStorage.setItem(key, JSON.stringify({
+        message,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.error('Error saving AI message to storage:', error);
+    }
   };
 
   // Send message helpers
