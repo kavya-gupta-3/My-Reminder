@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auth, database, ref, push, set, get, update } from '../firebase';
 import aiService from '../services/aiService';
@@ -14,12 +14,65 @@ function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [reminderData, setReminderData] = useState({
     personName: '',
-    dateOfBirth: '',
+    date: '',
     relationship: '',
+    reminderType: 'birthday',
     note: ''
   });
   const [userContext, setUserContext] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Chat history persistence
+  const getChatHistoryKey = useCallback(() => {
+    const uid = auth.currentUser?.uid;
+    return uid ? `chat_history_${uid}` : null;
+  }, []);
+
+  const saveChatHistory = useCallback((chatMessages) => {
+    const key = getChatHistoryKey();
+    if (key) {
+      try {
+        localStorage.setItem(key, JSON.stringify(chatMessages));
+      } catch (error) {
+        console.error('Error saving chat history:', error);
+        // If localStorage is full, try to clear old data
+        try {
+          const keys = Object.keys(localStorage);
+          const chatKeys = keys.filter(k => k.startsWith('chat_history_'));
+          if (chatKeys.length > 5) {
+            // Remove oldest chat history
+            const oldestKey = chatKeys[0];
+            localStorage.removeItem(oldestKey);
+            localStorage.setItem(key, JSON.stringify(chatMessages));
+          }
+        } catch (e) {
+          console.error('Could not save chat history:', e);
+        }
+      }
+    }
+  }, [getChatHistoryKey]);
+
+  const loadChatHistory = useCallback(() => {
+    const key = getChatHistoryKey();
+    if (key) {
+      try {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      }
+    }
+    return null;
+  }, [getChatHistoryKey]);
+
+  const clearChatHistory = useCallback(() => {
+    const key = getChatHistoryKey();
+    if (key) {
+      localStorage.removeItem(key);
+    }
+  }, [getChatHistoryKey]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,16 +98,34 @@ function ChatPage() {
         let initialMessage = {
           id: 1,
           type: 'ai',
-          content: "Hi there! 🎉 I'm here to help you create birthday reminders. Who would you like to set a reminder for? You can add as many as you'd like!"
+          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for? You can add as many as you'd like!"
         };
+
+        // Load chat history if not in edit mode
+        if (!reminderId) {
+          const savedMessages = loadChatHistory();
+          if (savedMessages && savedMessages.length > 0) {
+            setMessages(savedMessages);
+            setIsLoading(false);
+            return;
+          }
+        }
 
         if (reminderId) {
           const reminderRef = ref(database, `reminders/${uid}/${reminderId}`);
           const snapshot = await get(reminderRef);
           if (snapshot.exists()) {
             const existingData = snapshot.val();
-            setReminderData({ id: reminderId, ...existingData });
-            initialMessage.content = `I see you want to edit the reminder for ${existingData.personName}. What would you like to change?`;
+            // Convert old format to new format
+            const convertedData = {
+              personName: existingData.personName || '',
+              date: existingData.dateOfBirth || existingData.date || '',
+              relationship: existingData.relationship || '',
+              reminderType: existingData.reminderType || 'birthday',
+              note: existingData.note || ''
+            };
+            setReminderData({ id: reminderId, ...convertedData });
+            initialMessage.content = `I see you want to edit the reminder for ${convertedData.personName}. What would you like to change?`;
           } else {
             navigate('/chat'); // Fallback if reminder not found
           }
@@ -70,7 +141,14 @@ function ChatPage() {
     };
 
     initializeChat();
-  }, [reminderId, navigate]);
+  }, [reminderId, navigate, loadChatHistory]);
+
+  // Save chat history whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveChatHistory(messages);
+    }
+  }, [messages, saveChatHistory]);
 
   const saveReminderToFirebase = async (data) => {
     try {
@@ -79,6 +157,11 @@ function ChatPage() {
 
       // Remove id field if present
       const { id, ...dataWithoutId } = data;
+
+      // Ensure required fields are present
+      if (!dataWithoutId.personName || !dataWithoutId.date) {
+        throw new Error('Missing required fields: person name and date');
+      }
 
       if (reminderId) {
         // Update existing reminder
@@ -110,7 +193,7 @@ function ChatPage() {
               body: JSON.stringify({
                 token: fcmToken,
                 title: `🎉 Reminder Set for ${dataWithoutId.personName}`,
-                body: `Birthday reminder for ${dataWithoutId.personName} has been created successfully! You'll be notified on their special day.`,
+                body: `${dataWithoutId.reminderType || 'Reminder'} for ${dataWithoutId.personName} has been created successfully! You'll be notified on the important date.`,
                 data: {
                   reminderId: newReminderRef.key,
                   personName: dataWithoutId.personName,
@@ -166,21 +249,46 @@ function ChatPage() {
       setMessages(prev => [...prev, aiMessage]);
 
       if (aiResponse.isComplete) {
-        // Ensure age is not part of the saved data
+        // Ensure all required fields are present before saving
         const { age, ...restOfData } = aiResponse.updatedData;
-        await saveReminderToFirebase(restOfData);
+        const dataToSave = {
+          ...restOfData,
+          personName: restOfData.personName || '',
+          date: restOfData.date || '',
+          relationship: restOfData.relationship || '',
+          reminderType: restOfData.reminderType || 'birthday',
+          note: restOfData.note || ''
+        };
+
+        // Validate required fields
+        if (!dataToSave.personName || !dataToSave.date) {
+          const errorMessage = {
+            id: Date.now() + 2,
+            type: 'ai',
+            content: <><FaExclamationCircle style={{ marginRight: '8px' }} /> I need both the person's name and the date to save the reminder. Could you please provide those details?</>
+          };
+          setMessages(prev => [...prev, errorMessage]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Save to Firebase first
+        await saveReminderToFirebase(dataToSave);
+        
+        // Only show success message after successful save
         const confirmationMessage = {
           id: Date.now() + 2,
           type: 'ai',
-          content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the reminder for {aiResponse.updatedData.personName}! 🎉<br/><br/>Want to add another birthday reminder? Just tell me who it's for, or ask me anything else!</>
+          content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the {dataToSave.reminderType || 'reminder'} for {dataToSave.personName}! 🎉<br/><br/>Want to add another reminder? Just tell me who it's for, or ask me anything else!</>
         };
         setMessages(prev => [...prev, confirmationMessage]);
         
         // Reset reminder data for new reminder creation
         setReminderData({
           personName: '',
-          dateOfBirth: '',
+          date: '',
           relationship: '',
+          reminderType: 'birthday',
           note: ''
         });
       }
@@ -194,6 +302,17 @@ function ChatPage() {
       setMessages(prev => [...prev, aiMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleClearChat = () => {
+    if (window.confirm('Are you sure you want to clear the chat history? This cannot be undone.')) {
+      clearChatHistory();
+      setMessages([{
+        id: Date.now(),
+        type: 'ai',
+        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for?"
+      }]);
     }
   };
 
@@ -263,9 +382,33 @@ function ChatPage() {
           flex: 1,
           justifyContent: 'center'
         }}>
-          <FaRobot style={{ marginRight: '12px' }} /> AI Assistant
+          <FaRobot style={{ marginRight: '12px' }} /> My Reminder AI
         </h1>
-        <div style={{ width: '48px', flexShrink: 0 }}></div> {/* Spacer to balance the button */}
+        <button
+          onClick={handleClearChat}
+          style={{
+            background: 'transparent',
+            border: '2px solid #fff',
+            color: '#fff',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            flexShrink: 0
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#fff';
+            e.target.style.color = '#000';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'transparent';
+            e.target.style.color = '#fff';
+          }}
+        >
+          Clear
+        </button>
       </header>
 
       {/* Chat Messages */}
@@ -314,11 +457,13 @@ function ChatPage() {
               color: '#333',
               fontSize: '16px',
               border: '2px solid #000',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              <span style={{ animation: 'typing 1.4s infinite' }}>
-                <FaRobot style={{ marginRight: '12px' }} /> AI is thinking...
-              </span>
+              <FaRobot style={{ animation: 'typing 1.4s infinite' }} />
+              <span>AI is thinking...</span>
             </div>
           </div>
         )}

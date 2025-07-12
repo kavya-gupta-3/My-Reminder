@@ -106,7 +106,7 @@ function PWAInstallPrompt() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
             <img src="/logo.png" alt="App Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
             <div>
-              <div style={{ fontWeight: '600', fontSize: '16px' }}>Install Birthday Reminder</div>
+              <div style={{ fontWeight: '600', fontSize: '16px' }}>Install My Reminder</div>
               <div style={{ fontSize: '14px', opacity: 0.9 }}>Add to home screen for quick access</div>
             </div>
           </div>

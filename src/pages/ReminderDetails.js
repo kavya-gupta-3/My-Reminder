@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auth, database, ref, get, remove, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
 import './ReminderDetails.css';
 
 function ReminderDetails() {
@@ -23,12 +23,44 @@ function ReminderDetails() {
   const [editingField, setEditingField] = useState(null);
   const [editValues, setEditValues] = useState({
     personName: '',
-    dateOfBirth: '',
+    date: '',
     note: ''
   });
 
   // Helper to get today's date string
   const getToday = () => new Date().toISOString().slice(0, 10);
+
+  // Get icon based on reminder type
+  const getReminderIcon = (reminderType) => {
+    switch (reminderType) {
+      case 'birthday':
+        return <FaBirthdayCake />;
+      case 'anniversary':
+        return <FaHeart />;
+      case 'meeting':
+        return <FaBriefcase />;
+      case 'bill':
+        return <FaMoneyBillWave />;
+      default:
+        return <FaBell />;
+    }
+  };
+
+  // Get reminder type display name
+  const getReminderTypeName = (reminderType) => {
+    switch (reminderType) {
+      case 'birthday':
+        return 'Birthday';
+      case 'anniversary':
+        return 'Anniversary';
+      case 'meeting':
+        return 'Meeting';
+      case 'bill':
+        return 'Bill';
+      default:
+        return reminderType.charAt(0).toUpperCase() + reminderType.slice(1);
+    }
+  };
 
   // Load reminder, AI message, and regen count
   useEffect(() => {
@@ -44,7 +76,16 @@ function ReminderDetails() {
         const snapshot = await get(reminderRef);
         if (snapshot.exists()) {
           const data = snapshot.val();
-          setReminder({ id, ...data });
+          // Convert old format to new format
+          const convertedData = {
+            id,
+            personName: data.personName || '',
+            date: data.dateOfBirth || data.date || '',
+            relationship: data.relationship || '',
+            reminderType: data.reminderType || 'birthday',
+            note: data.note || ''
+          };
+          setReminder(convertedData);
           // Load saved AI message if exists
           if (data.aiMessage && data.aiMessageSize) {
             setAiMessage(data.aiMessage);
@@ -52,7 +93,7 @@ function ReminderDetails() {
             setAiLoading(false);
           } else {
             // Generate and save if not exists
-            generateAndShowAIMessage(data, messageSize);
+            generateAndShowAIMessage(convertedData, messageSize);
           }
           // Load regen count
           const userRef = ref(database, `users/${uid}`);
@@ -90,17 +131,17 @@ function ReminderDetails() {
     const calculateCountdown = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
-      const [month, day, birthYear] = reminder.dateOfBirth.split('/');
+      const [month, day] = reminder.date.split('/');
       
-      // Calculate this year's birthday occurrence using only month/day
-      let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+      // Calculate this year's occurrence using only month/day
+      let reminderDate = new Date(currentYear, parseInt(month) - 1, parseInt(day));
       
-      // If birthday has passed this year, calculate for next year
-      if (birthday < now) {
-        birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+      // If date has passed this year, calculate for next year
+      if (reminderDate < now) {
+        reminderDate = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
       }
 
-      const diff = birthday - now;
+      const diff = reminderDate - now;
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -137,12 +178,12 @@ function ReminderDetails() {
     return true;
   };
 
-  // Generate and display AI message using direct birthday message generation
+  // Generate and display AI message using direct reminder message generation
   const generateAndShowAIMessage = async (reminderData, size) => {
     // Enforce regen limit
     const allowed = await checkAndUpdateRegenLimit();
     if (!allowed) {
-      setAiMessage('You have reached your daily limit for birthday message generations. Please try again tomorrow.');
+      setAiMessage('You have reached your daily limit for message generations. Please try again tomorrow.');
       setAiLoading(false);
       return;
     }
@@ -151,8 +192,8 @@ function ReminderDetails() {
       const uid = auth.currentUser?.uid;
       // Get user context
       const context = await aiService.getUserContext(uid);
-      // Use the new direct birthday message generation function
-      const message = await aiService.generateDirectBirthdayMessage(reminderData, context, size);
+      // Use the new direct reminder message generation function
+      const message = await aiService.generateDirectReminderMessage(reminderData, context, size);
       setAiMessage(message);
       setReminder(prev => ({
         ...prev,
@@ -210,7 +251,7 @@ function ReminderDetails() {
     setEditingField(field);
     setEditValues({
       personName: reminder.personName,
-      dateOfBirth: reminder.dateOfBirth,
+      date: reminder.date,
       note: reminder.note || ''
     });
   };
@@ -219,7 +260,7 @@ function ReminderDetails() {
     setEditingField(null);
     setEditValues({
       personName: '',
-      dateOfBirth: '',
+      date: '',
       note: ''
     });
   };
@@ -230,9 +271,9 @@ function ReminderDetails() {
       const reminderRef = ref(database, `reminders/${uid}/${id}`);
       
       // Validate date format
-      if (editingField === 'dateOfBirth') {
+      if (editingField === 'date') {
         const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-        if (!dateRegex.test(editValues.dateOfBirth)) {
+        if (!dateRegex.test(editValues.date)) {
           alert('Please enter date in MM/DD/YYYY format');
           return;
         }
@@ -255,6 +296,7 @@ function ReminderDetails() {
   };
 
   const calculateAge = (dateOfBirth) => {
+    if (reminder.reminderType !== 'birthday') return null;
     const [month, day, year] = dateOfBirth.split('/');
     const birthDate = new Date(year, month - 1, day);
     const today = new Date();
@@ -276,7 +318,7 @@ function ReminderDetails() {
     setShowShareFallback(false);
   };
   const handleEmail = () => {
-    window.open(`mailto:?subject=Birthday%20Message&body=${encodeURIComponent(aiMessage)}`);
+    window.open(`mailto:?subject=${getReminderTypeName(reminder.reminderType)}%20Message&body=${encodeURIComponent(aiMessage)}`);
     setShowShareFallback(false);
   };
   const handleSMS = () => {
@@ -289,7 +331,7 @@ function ReminderDetails() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `Birthday Message for ${reminder.personName}`,
+        title: `${getReminderTypeName(reminder.reminderType)} Message for ${reminder.personName}`,
         text: aiMessage,
         url: window.location.href
       }).catch(() => {}); // Suppress share cancel error
@@ -415,7 +457,7 @@ function ReminderDetails() {
           paddingRight: '68px',
           textAlign: 'center'
         }}>
-          <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Birthday
+          {getReminderIcon(reminder.reminderType)} {reminder.personName}'s {getReminderTypeName(reminder.reminderType)}
         </h1>
       </header>
 
@@ -424,7 +466,7 @@ function ReminderDetails() {
         maxWidth: '800px',
         margin: '0 auto'
       }}>
-        {/* Birthday Info Card */}
+        {/* Reminder Info Card */}
         <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
@@ -444,7 +486,7 @@ function ReminderDetails() {
               fontSize: '44px',
               marginRight: '20px'
             }}>
-              <FaBirthdayCake />
+              {getReminderIcon(reminder.reminderType)}
             </span>
             <div>
               <h2 style={{
@@ -497,7 +539,8 @@ function ReminderDetails() {
                 color: '#666',
                 margin: '0'
               }}>
-                {reminder.relationship} • Age {calculateAge(reminder.dateOfBirth)}
+                {reminder.relationship} • {getReminderTypeName(reminder.reminderType)}
+                {reminder.reminderType === 'birthday' && calculateAge(reminder.date) && ` • Age ${calculateAge(reminder.date)}`}
               </p>
             </div>
           </div>
@@ -517,11 +560,11 @@ function ReminderDetails() {
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaBirthdayCake /></div>
+              <div style={{ fontSize: '28px', marginBottom: '10px' }}>{getReminderIcon(reminder.reminderType)}</div>
               <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                Birthday
+                {getReminderTypeName(reminder.reminderType)}
                 <FaPencilAlt 
-                  onClick={() => startEditing('dateOfBirth')}
+                  onClick={() => startEditing('date')}
                   style={{ 
                     fontSize: '14px', 
                     cursor: 'pointer', 
@@ -533,12 +576,12 @@ function ReminderDetails() {
                 />
               </div>
               <div style={{ color: '#666', fontSize: '15px' }}>
-                {editingField === 'dateOfBirth' ? (
+                {editingField === 'date' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                     <input
                       type="text"
-                      value={editValues.dateOfBirth}
-                      onChange={(e) => setEditValues({...editValues, dateOfBirth: e.target.value})}
+                      value={editValues.date}
+                      onChange={(e) => setEditValues({...editValues, date: e.target.value})}
                       placeholder="MM/DD/YYYY"
                       style={{
                         fontSize: '15px',
@@ -554,8 +597,8 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  /* Display only month/day for current year birthday, not birth year */
-                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
+                  /* Display only month/day for current year occurrence, not year */
+                  new Date(new Date().getFullYear(), parseInt(reminder.date.split('/')[0]) - 1, parseInt(reminder.date.split('/')[1])).toLocaleDateString('en-US', {
                   month: 'long',
                     day: 'numeric'
                   })
@@ -685,7 +728,7 @@ function ReminderDetails() {
             margin: '0 0 20px 0',
             color: '#000'
           }}>
-            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to Birthday</>}
+            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to {getReminderTypeName(reminder.reminderType)}</>}
           </h3>
           <div className="countdown-grid" style={{
             display: 'grid',
@@ -783,7 +826,7 @@ function ReminderDetails() {
               margin: '0',
               color: '#000'
             }}>
-              AI Birthday Message
+              AI {getReminderTypeName(reminder.reminderType)} Message
             </h3>
             </div>
             <div className="ai-controls" style={{

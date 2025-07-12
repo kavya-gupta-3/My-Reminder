@@ -1,16 +1,41 @@
+import * as chrono from 'chrono-node';
+
 class AIService {
-  async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
+  // Parse natural date input to MM/DD/YYYY format
+  parseNaturalDate(dateInput) {
+    if (!dateInput || typeof dateInput !== 'string') {
+      return null;
+    }
+
+    try {
+      // Try to parse with chrono
+      const parsed = chrono.parse(dateInput);
+      if (parsed && parsed.length > 0) {
+        const date = parsed[0].start.date();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+      }
+    } catch (error) {
+      console.error('Error parsing date:', error);
+    }
+
+    return null;
+  }
+
+  async generateReminderMessage(reminderData, userContext = null, size = 'medium') {
     try {
       // Build context from user's existing reminders
       let userContextInfo = '';
       if (userContext && userContext.reminders) {
         const existingReminders = userContext.reminders
           .filter(r => r.id !== reminderData.id) // Exclude current reminder
-          .map(r => `${r.personName} (${r.relationship}, age ${r.age})`)
+          .map(r => `${r.personName} (${r.relationship}, ${r.reminderType || 'reminder'})`)
           .join(', ');
         
         if (existingReminders) {
-          userContextInfo = `\n\nUser's other birthday reminders: ${existingReminders}`;
+          userContextInfo = `\n\nUser's other reminders: ${existingReminders}`;
         }
       }
 
@@ -28,21 +53,23 @@ class AIService {
         maxTokens = 100;
       }
 
-      const calculateAge = (dateOfBirth) => {
-        const [month, day, year] = dateOfBirth.split('/');
-        const birthDate = new Date(year, month - 1, day);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-          age--;
-        }
-        return age;
-      };
-      const currentAge = reminderData.dateOfBirth ? calculateAge(reminderData.dateOfBirth) : reminderData.age;
-
       const currentDate = new Date().toLocaleDateString();
-      const prompt = `You are a friendly AI assistant that creates personalized birthday messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and celebratory\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Don't mention specific ages if the person might be sensitive about it\n- Focus on positive wishes and celebration\n\nGenerate a personalized birthday message for ${reminderData.personName}. \n      \nContext:\n- Person: ${reminderData.personName}\n- Age they are turning: ${currentAge}\n- Relationship: ${reminderData.relationship}\n- Birthday: ${reminderData.dateOfBirth}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
+      const reminderType = reminderData.reminderType || 'reminder';
+      
+      let typeSpecificPrompt = '';
+      if (reminderType === 'birthday') {
+        typeSpecificPrompt = `Generate a personalized birthday message for ${reminderData.personName}.`;
+      } else if (reminderType === 'anniversary') {
+        typeSpecificPrompt = `Generate a personalized anniversary message for ${reminderData.personName}.`;
+      } else if (reminderType === 'meeting') {
+        typeSpecificPrompt = `Generate a friendly reminder message for ${reminderData.personName}'s meeting.`;
+      } else if (reminderType === 'bill') {
+        typeSpecificPrompt = `Generate a helpful reminder message for ${reminderData.personName}'s bill payment.`;
+      } else {
+        typeSpecificPrompt = `Generate a personalized ${reminderType} message for ${reminderData.personName}.`;
+      }
+
+      const prompt = `You are a friendly AI assistant that creates personalized ${reminderType} messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and appropriate for the reminder type\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 📅, 💝, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Focus on positive wishes and helpful reminders\n\n${typeSpecificPrompt}\n      \nContext:\n- Person: ${reminderData.personName}\n- Reminder Type: ${reminderType}\n- Date: ${reminderData.date}\n- Relationship: ${reminderData.relationship}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt message that feels like it's coming from a caring friend or family member.`;
 
       // Use backend proxy
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
@@ -55,7 +82,7 @@ class AIService {
           messages: [
             {
               role: 'system',
-              content: 'You are a friendly AI assistant that creates personalized birthday messages. You are warm, caring, and creative. You follow the rules strictly and create appropriate, celebratory messages.'
+              content: `You are a friendly AI assistant that creates personalized ${reminderType} messages. You are warm, caring, and creative. You follow the rules strictly and create appropriate, celebratory messages.`
             },
             {
               role: 'user',
@@ -74,9 +101,10 @@ class AIService {
       const data = await response.json();
       return data.choices[0].message.content.trim();
     } catch (error) {
-      console.error('Error generating birthday message:', error);
+      console.error('Error generating reminder message:', error);
       // Fallback to a simple message if AI fails
-      return `🎉 Happy Birthday ${reminderData.personName}! Wishing you a day filled with joy, laughter, and all the things that make you smile. May this year bring you endless opportunities and wonderful memories!`;
+      const reminderType = reminderData.reminderType || 'reminder';
+      return `🎉 Happy ${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} ${reminderData.personName}! Wishing you a wonderful day filled with joy and success!`;
     }
   }
 
@@ -91,23 +119,23 @@ class AIService {
         }
         if (userContext.reminders && userContext.reminders.length > 0) {
           userContextInfo += `\n- User has ${userContext.reminders.length} existing reminders.`;
-          const reminderList = userContext.reminders.map(r => `${r.personName} (${r.relationship})`).join(', ');
+          const reminderList = userContext.reminders.map(r => `${r.personName} (${r.relationship}, ${r.reminderType || 'reminder'})`).join(', ');
           userContextInfo += `\n- Existing reminders: ${reminderList}`;
         }
       }
 
-      const systemPrompt = `You are a sophisticated AI assistant in a birthday reminder app. Your goal is to help users create or edit reminders through a natural conversation. Today's date is ${currentDate}.
+      const systemPrompt = `You are a sophisticated AI assistant in a reminder app called "My Reminder". Your goal is to help users create or edit reminders through a natural conversation. Today's date is ${currentDate}.
 
       **Your main tasks:**
       1.  **Understand User Intent:** Determine if the user wants to create a new reminder, edit an existing one, or is just chatting.
-      2.  **Gather Information:** Collect the necessary details for a reminder: 'personName', 'dateOfBirth' (in MM/DD/YYYY format), 'relationship', and a 'note'. DO NOT ask for age; it is calculated automatically.
-      3.  **Stay On-Topic:** Your primary purpose is to help with birthday reminders. If the user asks an unrelated question (e.g., math problems, general knowledge, personal opinions), you must politely decline and steer the conversation back to the task at hand. For example: "My purpose is to help with birthday reminders. Shall we continue with the reminder for [Person's Name]?"
-      4.  **Validate Information:** Gently correct the user if they provide information in the wrong format (e.g., dates). If you're not sure about something, ask for clarification.
-      5.  **Manage Conversation Flow:** Guide the user through the process. You can ask one or more questions at a time.
+      2.  **Gather Information:** Collect the necessary details for a reminder: 'personName', 'date' (accept natural date formats like "Oct 25", "next Sunday", "25th December", etc.), 'relationship', 'reminderType' (birthday, anniversary, meeting, bill, or other), and a 'note'.
+      3.  **Stay On-Topic:** Your primary purpose is to help with reminders. If the user asks an unrelated question, politely decline and steer the conversation back to reminders.
+      4.  **Validate Information:** Gently correct the user if they provide unclear information. If you're not sure about something, ask for clarification.
+      5.  **Manage Conversation Flow:** Guide the user through the process naturally. You can ask one or more questions at a time.
       6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder.
-      7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions. The conversation should continue naturally.
+      7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions.
       8.  **Multiple Reminders:** Users can create multiple reminders in the same conversation. When starting a new reminder, reset to empty fields.
-      9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨.
+      9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎉✨📅.
       10. **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing the current reminder, but the conversation can continue for new reminders).
 
       **Current State:**
@@ -116,17 +144,20 @@ class AIService {
       -   **User Context:** ${userContextInfo}
       
       **Important Notes:**
+      - Accept natural date formats - don't ask for specific formats
       - If reminder data is empty (all fields blank), the user might be starting a new reminder
       - After completing a reminder (isComplete: true), encourage them to create another one
       - Be helpful and keep the conversation going naturally
+      - Support all types of reminders: birthdays, anniversaries, meetings, bills, etc.
 
       Example of a valid JSON response:
       {
-        "response": "Great! I've got John's birthday down as 03/15/1990. How old will he be turning?",
+        "response": "Great! I've got John's birthday down as October 15th. What's your relationship to John?",
         "updatedData": {
           "personName": "John Doe",
-          "dateOfBirth": "03/15/1990",
+          "date": "10/15/1990",
           "relationship": "",
+          "reminderType": "birthday",
           "note": ""
         },
         "isComplete": false
@@ -158,7 +189,17 @@ class AIService {
 
       // Parse the JSON content
       try {
-        return JSON.parse(content);
+        const parsed = JSON.parse(content);
+        
+        // Parse natural date if provided
+        if (parsed.updatedData && parsed.updatedData.date && typeof parsed.updatedData.date === 'string') {
+          const parsedDate = this.parseNaturalDate(parsed.updatedData.date);
+          if (parsedDate) {
+            parsed.updatedData.date = parsedDate;
+          }
+        }
+        
+        return parsed;
       } catch (e) {
         console.error("Failed to parse AI's JSON response:", content);
         // Fallback for non-JSON response
@@ -211,8 +252,8 @@ class AIService {
     }
   }
 
-  // Direct, robust birthday message generation (no chat, no JSON, no follow-up)
-  async generateDirectBirthdayMessage(reminderData, userContext = null, size = 'medium') {
+  // Direct, robust reminder message generation (no chat, no JSON, no follow-up)
+  async generateDirectReminderMessage(reminderData, userContext = null, size = 'medium') {
     try {
       // Add a random seed to help with regeneration
       const randomSeed = Math.floor(Math.random() * 1000000);
@@ -220,10 +261,10 @@ class AIService {
       if (userContext && userContext.reminders) {
         const existingReminders = userContext.reminders
           .filter(r => r.id !== reminderData.id)
-          .map(r => `${r.personName} (${r.relationship})`)
+          .map(r => `${r.personName} (${r.relationship}, ${r.reminderType || 'reminder'})`)
           .join(', ');
         if (existingReminders) {
-          userContextInfo = `\n\nUser's other birthday reminders: ${existingReminders}`;
+          userContextInfo = `\n\nUser's other reminders: ${existingReminders}`;
         }
       }
       
@@ -236,19 +277,18 @@ class AIService {
         sizePrompt = 'Keep it short and sweet (2-3 sentences, 30-40 words).';
       }
 
-      // Determine tone and approach based on relationship
+      const reminderType = reminderData.reminderType || 'reminder';
+      
+      // Determine tone and approach based on relationship and reminder type
       const relationship = reminderData.relationship?.toLowerCase() || '';
-      const personName = reminderData.personName || '';
       
       // Categorize relationships
       const elderRelationships = ['mom', 'mother', 'dad', 'father', 'papa', 'mama', 'uncle', 'aunt', 'aunty', 'auntie', 'grandfather', 'grandmother', 'grandpa', 'grandma', 'nana', 'nani', 'dada', 'dadi', 'boss', 'sir', 'madam', 'teacher', 'professor'];
       const kidRelationships = ['son', 'daughter', 'nephew', 'niece', 'cousin', 'kid', 'child', 'student'];
-      const peerRelationships = ['friend', 'buddy', 'pal', 'colleague', 'coworker', 'roommate', 'neighbor', 'classmate'];
       const romanticRelationships = ['wife', 'husband', 'girlfriend', 'boyfriend', 'partner', 'spouse', 'fiancé', 'fiancée'];
       
       const isElder = elderRelationships.some(elder => relationship.includes(elder));
       const isKid = kidRelationships.some(kid => relationship.includes(kid));
-      const isPeer = peerRelationships.some(peer => relationship.includes(peer));
       const isRomantic = romanticRelationships.some(romantic => relationship.includes(romantic));
       
       let toneGuidelines = '';
@@ -261,7 +301,7 @@ class AIService {
 - Show appreciation and gratitude
 - Keep it dignified but not too formal
 - Make it feel genuine and caring`;
-        nameUsage = `- ALWAYS start with "Happy Birthday" followed by the relationship title (Mom, Dad, Uncle, Aunt, etc.) instead of their actual name`;
+        nameUsage = `- ALWAYS start with an appropriate greeting followed by the relationship title (Mom, Dad, Uncle, Aunt, etc.) instead of their actual name`;
       } else if (isKid) {
         toneGuidelines = `
 - Be playful, fun, and energetic
@@ -269,7 +309,7 @@ class AIService {
 - Include fun elements and enthusiasm
 - Make it feel like a celebration
 - Be encouraging and sweet`;
-        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name`;
+        nameUsage = `- ALWAYS start with an appropriate greeting followed by their actual name`;
       } else if (isRomantic) {
         toneGuidelines = `
 - Be loving and sweet but not overly sappy
@@ -277,7 +317,7 @@ class AIService {
 - Use warm, affectionate language
 - Make it feel special and personal
 - Balance romance with genuine care`;
-        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name in a loving way`;
+        nameUsage = `- ALWAYS start with an appropriate greeting followed by their actual name in a loving way`;
       } else {
         // Peers and general relationships
         toneGuidelines = `
@@ -286,10 +326,39 @@ class AIService {
 - Include light humor and warmth
 - Keep it relaxed and genuine
 - Make it feel like you're talking to a friend`;
-        nameUsage = `- ALWAYS start with "Happy Birthday" followed by their actual name`;
+        nameUsage = `- ALWAYS start with an appropriate greeting followed by their actual name`;
       }
 
-      const systemPrompt = `You are creating a personalized birthday message that sounds like it's from a real human, not an AI.
+      // Reminder type specific guidelines
+      let typeSpecificGuidelines = '';
+      if (reminderType === 'birthday') {
+        typeSpecificGuidelines = `
+- Use birthday-specific emojis: 🎉, 🎂, 🎁, ✨, 🥳
+- Focus on celebration and well-wishes
+- Make it feel special and personal`;
+      } else if (reminderType === 'anniversary') {
+        typeSpecificGuidelines = `
+- Use romantic/celebration emojis: 💝, 💕, 🎉, ✨, 🥂
+- Focus on love, commitment, and celebration
+- Make it feel romantic and meaningful`;
+      } else if (reminderType === 'meeting') {
+        typeSpecificGuidelines = `
+- Use professional but friendly emojis: 📅, ⏰, 💼, 🤝
+- Focus on preparation and success
+- Keep it professional but warm`;
+      } else if (reminderType === 'bill') {
+        typeSpecificGuidelines = `
+- Use helpful emojis: 💰, 📋, ✅, ⏰
+- Focus on being helpful and supportive
+- Keep it practical but caring`;
+      } else {
+        typeSpecificGuidelines = `
+- Use general reminder emojis: 📅, ⏰, ✅, ✨
+- Focus on being helpful and supportive
+- Keep it friendly and practical`;
+      }
+
+      const systemPrompt = `You are creating a personalized ${reminderType} message that sounds like it's from a real human, not an AI.
 
 CRITICAL STYLE REQUIREMENTS:
 - Use colloquial everyday words (like "awesome", "super", "really", "totally", "amazing", "fantastic")
@@ -305,13 +374,16 @@ CRITICAL STYLE REQUIREMENTS:
 RELATIONSHIP-BASED TONE:
 ${toneGuidelines}
 
+REMINDER TYPE GUIDELINES:
+${typeSpecificGuidelines}
+
 MANDATORY OPENING FORMAT:
 ${nameUsage}
 
 MESSAGE REQUIREMENTS:
-- Output ONLY the birthday message, no preamble or explanations
+- Output ONLY the message, no preamble or explanations
 - ${sizePrompt}
-- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 😄, 🎈, etc.)
+- Use appropriate emojis based on reminder type
 - Make each message unique and personal
 - Sound like a real person wrote it
 - Include genuine warmth and personality
@@ -320,9 +392,9 @@ MESSAGE REQUIREMENTS:
 
 EXAMPLES OF GOOD STYLE:
 - "Happy Birthday Mom! Hope your day is super awesome!" 
-- "Happy Birthday Sarah! You're amazing and this is gonna be epic!"
-- "Happy Birthday Dad! Can't wait to celebrate with you!"
-- "Happy Birthday buddy! Time to party!" 
+- "Meeting reminder Sarah! You're gonna crush it!"
+- "Bill due today buddy! Don't forget!"
+- "Anniversary time! Love you so much!" 
 
 AVOID THESE FORMAL STYLES:
 - "I hope your day will be wonderful"
@@ -330,7 +402,7 @@ AVOID THESE FORMAL STYLES:
 - "I look forward to celebrating"
 - "This will be magnificent"`;
 
-      const userPrompt = `Create a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
+      const userPrompt = `Create a ${reminderType} message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
       
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
@@ -358,9 +430,18 @@ AVOID THESE FORMAL STYLES:
       
       return data.choices[0].message.content.trim();
     } catch (error) {
-      console.error('Error generating direct birthday message:', error);
-      throw new Error('Error generating birthday message. Please try again.');
+      console.error('Error generating direct reminder message:', error);
+      throw new Error('Error generating reminder message. Please try again.');
     }
+  }
+
+  // Legacy method for backward compatibility
+  async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
+    return this.generateReminderMessage({ ...reminderData, reminderType: 'birthday' }, userContext, size);
+  }
+
+  async generateDirectBirthdayMessage(reminderData, userContext = null, size = 'medium') {
+    return this.generateDirectReminderMessage({ ...reminderData, reminderType: 'birthday' }, userContext, size);
   }
 }
 

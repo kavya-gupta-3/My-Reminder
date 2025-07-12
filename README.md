@@ -1,8 +1,8 @@
-# 🎂 Birthday Remind - Never Miss a Special Day
+# 🎂 My Reminder - Never Miss a Special Day
 
 <div align="center">
 
-![Birthday Remind Logo](public/logo.png)
+![My Reminder Logo](public/logo.png)
 
 **A modern, AI-powered birthday reminder app that ensures you never forget another special day!**
 
@@ -22,7 +22,7 @@
 
 ### 🔔 **Smart Notifications**
 - **Push Notifications**: Get reminded on web, mobile, and desktop
-- **Multiple Alert Times**: Notifications at 1 week, 1 day, 6 hours, 1 hour, and midnight
+- **Perfect Timing**: Notifications sent at the ideal time to ensure you never miss a birthday
 - **Cross-Platform**: Works on iOS, Android, and desktop browsers
 - **Offline Support**: PWA capabilities for reliable notifications
 
@@ -32,7 +32,7 @@
 - **Edit Mode**: Update existing reminders via chat
 - **Smart Data Validation**: AI ensures proper date formats and complete information
 
-### 📱 **Progressive Web App (PWA)**
+### 📱 **Installable Web App**
 - **Install on Any Device**: Add to home screen on mobile and desktop
 - **Offline Functionality**: Works without internet connection
 - **App-Like Experience**: Full-screen mode with native app feel
@@ -52,7 +52,7 @@
 
 ## 🚀 Live Demo
 
-Experience Birthday Remind now: **[https://myreminder.xyz/](https://myreminder.xyz/)**
+Experience My Reminder now: **[https://myreminder.xyz/](https://myreminder.xyz/)**
 
 ### Install as PWA:
 1. **Mobile (iOS/Android)**: Visit the link and tap "Add to Home Screen"
@@ -82,7 +82,7 @@ Experience Birthday Remind now: **[https://myreminder.xyz/](https://myreminder.x
 - **Vercel** - Frontend hosting with auto-deployment
 - **Render** - Backend API hosting
 - **GitHub Actions** - Continuous integration
-- **Progressive Web App** - Service worker implementation
+- **Installable Web App** - Service worker implementation
 
 ### **Development Tools**
 - **Create React App** - Development environment
@@ -100,8 +100,8 @@ Experience Birthday Remind now: **[https://myreminder.xyz/](https://myreminder.x
 
 ### **1. Clone Repository**
    ```bash
-git clone https://github.com/kavya-gupta-3/Birthday-Reminder.git
-cd Birthday-Reminder
+git clone https://github.com/kavya-gupta-3/MyReminder.git
+cd MyReminder
    ```
 
 ### **2. Install Dependencies**
@@ -247,14 +247,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - **Live App**: [https://myreminder.xyz/](https://myreminder.xyz/)
-- **GitHub Repository**: [https://github.com/kavya-gupta-3/Birthday-Reminder](https://github.com/kavya-gupta-3/Birthday-Reminder)
+- **GitHub Repository**: [https://github.com/kavya-gupta-3/MyReminder](https://github.com/kavya-gupta-3/MyReminder)
 - **Backend API**: [https://birthday-reminder-i1uf.onrender.com](https://birthday-reminder-i1uf.onrender.com)
 
 ## 📞 Support
 
 Having issues? Get help:
 
-- **GitHub Issues**: [Create an issue](https://github.com/kavya-gupta-3/Birthday-Reminder/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/kavya-gupta-3/MyReminder/issues)
 - **Documentation**: Check this README
 - **Community**: Join our discussions
 
@@ -272,6 +272,6 @@ Having issues? Get help:
 
 **Made with ❤️ for keeping relationships strong**
 
-[⭐ Star this repo](https://github.com/kavya-gupta-3/Birthday-Reminder) | [🐛 Report Bug](https://github.com/kavya-gupta-3/Birthday-Reminder/issues) | [✨ Request Feature](https://github.com/kavya-gupta-3/Birthday-Reminder/issues)
+[⭐ Star this repo](https://github.com/kavya-gupta-3/MyReminder) | [🐛 Report Bug](https://github.com/kavya-gupta-3/MyReminder/issues) | [✨ Request Feature](https://github.com/kavya-gupta-3/MyReminder/issues)
 
 </div>

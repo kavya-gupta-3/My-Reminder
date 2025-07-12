@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../firebase';
 import { 
   FaBirthdayCake, 
   FaRobot, 
@@ -9,29 +7,28 @@ import {
   FaMobile, 
   FaUsers, 
   FaPlay,
-  FaChevronDown,
   FaShare,
-  FaPalette,
   FaRocket,
   FaComments,
   FaCalendarCheck,
-  FaHeart
+  FaHeart,
+  FaBriefcase,
+  FaMoneyBillWave
 } from 'react-icons/fa';
 
 function HomePage() {
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const features = [
     {
       icon: <FaRobot />,
       title: "AI-Powered Messages",
-      description: "Generate personalized birthday messages using advanced AI that understands relationships and creates heartfelt content tailored to each person."
+      description: "Generate personalized messages using advanced AI that understands relationships and creates heartfelt content tailored to each person and reminder type."
     },
     {
       icon: <FaBell />,
       title: "Smart Notifications",
-      description: "Never miss a birthday with intelligent reminders sent at perfect times."
+      description: "Never miss important dates with intelligent reminders sent at the perfect time for birthdays, anniversaries, meetings, bills, and more."
     },
     {
       icon: <FaMobile />,
@@ -46,12 +43,35 @@ function HomePage() {
     {
       icon: <FaShare />,
       title: "Easy Sharing",
-      description: "Share birthday messages instantly via WhatsApp, email, SMS, or copy to clipboard with one click for seamless communication."
+      description: "Share messages instantly via WhatsApp, email, SMS, or copy to clipboard with one click for seamless communication."
     },
     {
       icon: <FaComments />,
       title: "AI Chat Assistant",
       description: "Add reminders through natural conversation with our AI assistant. Just chat naturally and it handles all the details."
+    }
+  ];
+
+  const reminderTypes = [
+    {
+      icon: <FaBirthdayCake />,
+      title: "Birthdays",
+      description: "Never forget a birthday again"
+    },
+    {
+      icon: <FaHeart />,
+      title: "Anniversaries",
+      description: "Celebrate love and milestones"
+    },
+    {
+      icon: <FaBriefcase />,
+      title: "Meetings",
+      description: "Stay on top of important meetings"
+    },
+    {
+      icon: <FaMoneyBillWave />,
+      title: "Bills",
+      description: "Never miss a payment deadline"
     }
   ];
 
@@ -92,7 +112,7 @@ function HomePage() {
             marginBottom: '16px',
             animation: 'bounce 2s infinite'
           }}>
-            🎂
+            📅
           </div>
           <h1 style={{
             fontSize: 'clamp(2rem, 6vw, 2.5rem)',
@@ -102,7 +122,7 @@ function HomePage() {
             letterSpacing: '-1px',
             lineHeight: 1.1
           }}>
-            MyReminder
+            My Reminder
           </h1>
           <p style={{
             fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
@@ -112,7 +132,7 @@ function HomePage() {
             maxWidth: '600px',
             margin: '0 auto 32px auto'
           }}>
-            Never miss a special day again with AI-powered birthday reminders and personalized messages
+            Never miss a special day again with AI-powered reminders and personalized messages for all your important dates
           </p>
           <div style={{
             display: 'flex',
@@ -184,6 +204,90 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Reminder Types Section */}
+      <section style={{
+        padding: 'clamp(40px, 8vw, 70px) 10px',
+        background: '#fff'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vw, 60px)' }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 6vw, 2.5rem)',
+              fontWeight: '900',
+              marginBottom: '16px',
+              color: '#000',
+              letterSpacing: '-0.5px',
+              lineHeight: 1.15
+            }}>
+              All Types of Reminders
+            </h2>
+            <p style={{
+              fontSize: 'clamp(1rem, 3vw, 1.15rem)',
+              color: '#666',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              From birthdays to bills, we've got you covered for every important date
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'clamp(16px, 3vw, 32px)'
+          }}>
+            {reminderTypes.map((type, index) => (
+              <div
+                key={index}
+                style={{
+                  background: '#f8f9fa',
+                  padding: 'clamp(18px, 4vw, 32px)',
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '2px solid #000',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+                }}
+              >
+                <div style={{
+                  fontSize: 'clamp(1.5rem, 6vw, 2.2rem)',
+                  color: '#000',
+                  marginBottom: '16px'
+                }}>
+                  {type.icon}
+                </div>
+                <h3 style={{
+                  fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                  fontWeight: '700',
+                  marginBottom: '10px',
+                  color: '#000',
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1.15
+                }}>
+                  {type.title}
+                </h3>
+                <p style={{
+                  color: '#666',
+                  lineHeight: '1.6',
+                  fontSize: 'clamp(0.95rem, 2vw, 1.05rem)'
+                }}>
+                  {type.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" style={{
         padding: 'clamp(40px, 8vw, 70px) 10px',
@@ -207,7 +311,7 @@ function HomePage() {
               maxWidth: '600px',
               margin: '0 auto'
             }}>
-              Everything you need to never miss another birthday, powered by cutting-edge AI technology
+              Everything you need to never miss another important date, powered by cutting-edge AI technology
             </p>
           </div>
 
@@ -324,14 +428,14 @@ function HomePage() {
                 letterSpacing: '-0.5px',
                 lineHeight: 1.15
               }}>
-                Add Birthdays
+                Add Reminders
               </h3>
               <p style={{
                 color: '#666',
                 lineHeight: '1.6',
                 fontSize: 'clamp(0.93rem, 2vw, 1.02rem)'
               }}>
-                Simply chat with our AI assistant to add birthdays. Just tell us the name, date, and relationship - it's that easy.
+                Simply chat with our AI assistant to add reminders. Just tell us the name, date, and relationship - it's that easy.
               </p>
             </div>
 
@@ -366,7 +470,7 @@ function HomePage() {
                 lineHeight: '1.6',
                 fontSize: 'clamp(0.93rem, 2vw, 1.02rem)'
               }}>
-                Receive smart notifications at the perfect times - multiple reminders ensure you never miss a birthday.
+                Receive smart notifications at the perfect times - multiple reminders ensure you never miss an important date.
               </p>
             </div>
 
@@ -429,7 +533,7 @@ function HomePage() {
             color: '#666',
             marginBottom: '36px'
           }}>
-            A complete birthday management solution that keeps your relationships strong
+            A complete reminder management solution that keeps your relationships strong
           </p>
 
           <div style={{
@@ -449,7 +553,7 @@ function HomePage() {
             }}>
               <FaCalendarCheck style={{ fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: '#000', marginBottom: '10px' }} />
               <h4 style={{ color: '#000', marginBottom: '6px', fontSize: 'clamp(1.01rem, 3vw, 1.13rem)', fontWeight: '700' }}>Smart Reminders</h4>
-              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Multiple alerts before each birthday</p>
+              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Multiple alerts before each important date</p>
             </div>
             <div style={{
               background: '#fff',
@@ -460,7 +564,7 @@ function HomePage() {
             }}>
               <FaRobot style={{ fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: '#000', marginBottom: '10px' }} />
               <h4 style={{ color: '#000', marginBottom: '6px', fontSize: 'clamp(1.01rem, 3vw, 1.13rem)', fontWeight: '700' }}>AI Messages</h4>
-              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Personalized birthday messages</p>
+              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Personalized messages for any occasion</p>
             </div>
             <div style={{
               background: '#fff',
@@ -505,7 +609,7 @@ function HomePage() {
             marginBottom: '28px',
             opacity: 0.9
           }}>
-            Start remembering every birthday and creating meaningful connections today.
+            Start remembering every important date and creating meaningful connections today.
           </p>
           <button
             onClick={handleGetStarted}
@@ -533,7 +637,7 @@ function HomePage() {
               e.target.style.boxShadow = '0 4px 16px rgba(255,255,255,0.2)';
             }}
           >
-            <FaBirthdayCake /> Start Free Today
+            <FaCalendarCheck /> Start Free Today
           </button>
         </div>
       </section>
@@ -555,14 +659,14 @@ function HomePage() {
             gap: '10px',
             flexWrap: 'wrap'
           }}>
-            <FaBirthdayCake style={{ fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', color: '#fff' }} />
+            <FaCalendarCheck style={{ fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', color: '#fff' }} />
             <h3 style={{
               fontSize: 'clamp(1.01rem, 3vw, 1.2rem)',
               fontWeight: '800',
               margin: 0,
               letterSpacing: '-0.5px'
             }}>
-              MyReminder
+              My Reminder
             </h3>
           </div>
           
@@ -580,7 +684,7 @@ function HomePage() {
               margin: 0,
               fontSize: 'clamp(0.8rem, 2vw, 0.9rem)'
             }}>
-              © 2025 MyReminder. All rights reserved.
+              © 2025 My Reminder. All rights reserved.
             </p>
           </div>
         </div>
