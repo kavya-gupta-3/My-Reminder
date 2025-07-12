@@ -31,12 +31,12 @@ function HomePage() {
     {
       icon: <FaBell />,
       title: "Smart Notifications",
-      description: "Never miss a birthday with intelligent reminders sent at perfect times - 1 week, 1 day, 6 hours, and 1 hour before the special day."
+      description: "Never miss a birthday with intelligent reminders sent at perfect times."
     },
     {
       icon: <FaMobile />,
-      title: "Progressive Web App",
-      description: "Install on any device and enjoy native app experience with offline support and home screen access across all platforms."
+      title: "Works on Any Device",
+      description: "Install on your phone, tablet, or computer and enjoy a seamless experience everywhere."
     },
     {
       icon: <FaUsers />,
@@ -102,7 +102,7 @@ function HomePage() {
             letterSpacing: '-1px',
             lineHeight: 1.1
           }}>
-            Birthday Remind
+            MyReminder
           </h1>
           <p style={{
             fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
@@ -470,19 +470,8 @@ function HomePage() {
               textAlign: 'center'
             }}>
               <FaMobile style={{ fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: '#000', marginBottom: '10px' }} />
-              <h4 style={{ color: '#000', marginBottom: '6px', fontSize: 'clamp(1.01rem, 3vw, 1.13rem)', fontWeight: '700' }}>Mobile App</h4>
-              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Install on any device</p>
-            </div>
-            <div style={{
-              background: '#fff',
-              padding: 'clamp(14px, 3vw, 22px)',
-              borderRadius: '12px',
-              border: '2px solid #000',
-              textAlign: 'center'
-            }}>
-              <FaHeart style={{ fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', color: '#000', marginBottom: '10px' }} />
-              <h4 style={{ color: '#000', marginBottom: '6px', fontSize: 'clamp(1.01rem, 3vw, 1.13rem)', fontWeight: '700' }}>Free Forever</h4>
-              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>No hidden costs or subscriptions</p>
+              <h4 style={{ color: '#000', marginBottom: '6px', fontSize: 'clamp(1.01rem, 3vw, 1.13rem)', fontWeight: '700' }}>Works on Any Device</h4>
+              <p style={{ color: '#666', fontSize: 'clamp(0.85rem, 2vw, 0.97rem)' }}>Install on your phone, tablet, or computer</p>
             </div>
           </div>
         </div>
@@ -573,7 +562,7 @@ function HomePage() {
               margin: 0,
               letterSpacing: '-0.5px'
             }}>
-              Birthday Remind
+              MyReminder
             </h3>
           </div>
           
@@ -591,7 +580,7 @@ function HomePage() {
               margin: 0,
               fontSize: 'clamp(0.8rem, 2vw, 0.9rem)'
             }}>
-              © 2025 Birthday Remind. All rights reserved.
+              © 2025 MyReminder. All rights reserved.
             </p>
           </div>
         </div>
