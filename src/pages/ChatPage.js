@@ -156,61 +156,36 @@ function ChatPage() {
       const uid = auth.currentUser?.uid;
       if (!uid) throw new Error('User not authenticated');
 
-      // Remove id field if present
-      const { id, ...dataWithoutId } = data;
+      // Prepare data based on reminder type
+      const reminderType = data.reminderType || 'birthday';
+      let firebaseData = {
+        date: data.date,
+        reminderType: reminderType,
+        note: data.note || '',
+        createdAt: new Date().toISOString()
+      };
 
-      // Ensure required fields are present
-      if (!dataWithoutId.personName || !dataWithoutId.date) {
-        throw new Error('Missing required fields: person name and date');
+      // Add type-specific fields
+      if (reminderType === 'birthday' || reminderType === 'anniversary') {
+        firebaseData.personName = data.personName;
+        firebaseData.relationship = data.relationship || '';
+      } else if (reminderType === 'meeting') {
+        firebaseData.title = data.title || data.personName || 'Meeting';
+        firebaseData.location = data.location || '';
+        firebaseData.attendees = data.attendees || '';
+      } else if (reminderType === 'bill') {
+        firebaseData.title = data.title || data.personName || 'Bill';
+        firebaseData.amount = data.amount || '';
+      } else if (reminderType === 'task' || reminderType === 'custom') {
+        firebaseData.title = data.title || data.personName || 'Task';
+        firebaseData.description = data.note || '';
       }
 
-      if (reminderId) {
-        // Update existing reminder
-        const reminderRef = ref(database, `reminders/${uid}/${reminderId}`);
-        await update(reminderRef, dataWithoutId);
-        return reminderId;
-      } else {
-        // Create new reminder
-        const remindersRef = ref(database, `reminders/${uid}`);
-        const newReminderRef = push(remindersRef);
-        await set(newReminderRef, {
-          ...dataWithoutId,
-          createdAt: new Date().toISOString(),
-          userId: uid
-        });
-        
-        // Send instant notification for new reminder creation
-        try {
-          // Get user's FCM token from database
-          const userRef = ref(database, `users/${uid}`);
-          const userSnap = await get(userRef);
-          if (userSnap.exists() && userSnap.val().fcmToken) {
-            const fcmToken = userSnap.val().fcmToken;
-            
-            // Call backend endpoint to send notification
-            await fetch('https://birthday-reminder-i1uf.onrender.com/api/send-notification', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                token: fcmToken,
-                title: `🎉 Reminder Set for ${dataWithoutId.personName}`,
-                body: `${dataWithoutId.reminderType || 'Reminder'} for ${dataWithoutId.personName} has been created successfully! You'll be notified on the important date.`,
-                data: {
-                  reminderId: newReminderRef.key,
-                  personName: dataWithoutId.personName,
-                  type: 'reminder_created'
-                }
-              })
-            });
-            
-            console.log('Reminder creation notification sent');
-          }
-        } catch (err) {
-          console.error('Instant notification error:', err);
-        }
-        
-        return newReminderRef.key;
-      }
+      const remindersRef = ref(database, `reminders/${uid}`);
+      const newReminderRef = push(remindersRef);
+      await set(newReminderRef, firebaseData);
+      
+      return newReminderRef.key;
     } catch (error) {
       console.error('Error saving reminder:', error);
       throw error;
@@ -262,36 +237,67 @@ function ChatPage() {
         };
 
         // Validate required fields
-        if (!dataToSave.personName || !dataToSave.date) {
+        if (!aiResponse.updatedData.date) {
           const errorMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: '❌ I need both the person\'s name and the date to save the reminder. Could you please provide those details?'
+            content: '❌ I need the date to save the reminder. Could you please provide the date?'
           };
           setMessages(prev => [...prev, errorMessage]);
-          setIsLoading(false);
+          return;
+        }
+
+        // Check if we have the required fields based on reminder type
+        const reminderType = aiResponse.updatedData.reminderType || 'birthday';
+        let hasRequiredFields = true;
+        let missingField = '';
+
+        if (reminderType === 'birthday' || reminderType === 'anniversary') {
+          if (!aiResponse.updatedData.personName) {
+            hasRequiredFields = false;
+            missingField = 'person name';
+          }
+        } else if (reminderType === 'meeting' || reminderType === 'task' || reminderType === 'bill') {
+          if (!aiResponse.updatedData.title && !aiResponse.updatedData.personName) {
+            hasRequiredFields = false;
+            missingField = reminderType === 'meeting' ? 'meeting topic/title' : 
+                          reminderType === 'bill' ? 'bill name/company' : 'task title';
+          }
+        }
+
+        if (!hasRequiredFields) {
+          const errorMessage = {
+            id: Date.now() + 2,
+            type: 'ai',
+            content: `❌ I need the ${missingField} to save this ${reminderType}. Could you please provide that?`
+          };
+          setMessages(prev => [...prev, errorMessage]);
           return;
         }
 
         // Save to Firebase
         try {
-          const savedId = await saveReminderToFirebase(dataToSave);
+          await saveReminderToFirebase(aiResponse.updatedData);
           
           const successMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${dataToSave.reminderType || 'reminder'} for ${dataToSave.personName}! 🎉\n\nWant to add another reminder or edit this one?`
+            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'}! 🎉\n\nWant to add another reminder? Just tell me about it!`
           };
           setMessages(prev => [...prev, successMessage]);
           
-          // Clear reminder data for next reminder
+          // Clear reminder data for new reminder
           if (!reminderId) {
             setReminderData({
               personName: '',
+              title: '',
               date: '',
               relationship: '',
               reminderType: 'birthday',
-              note: ''
+              note: '',
+              location: '',
+              attendees: '',
+              amount: ''
             });
           }
         } catch (error) {

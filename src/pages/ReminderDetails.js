@@ -57,8 +57,34 @@ function ReminderDetails() {
         return 'Meeting';
       case 'bill':
         return 'Bill';
+      case 'task':
+        return 'Task';
+      case 'custom':
+        return 'Event';
       default:
         return reminderType.charAt(0).toUpperCase() + reminderType.slice(1);
+    }
+  };
+
+  // Get display name for reminder
+  const getReminderDisplayName = (reminder) => {
+    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
+      return reminder.personName || 'Unknown Person';
+    } else {
+      return reminder.title || reminder.personName || 'Untitled';
+    }
+  };
+
+  // Get display subtitle for reminder
+  const getReminderSubtitle = (reminder) => {
+    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
+      return reminder.relationship || '';
+    } else if (reminder.reminderType === 'meeting') {
+      return reminder.location ? `📍 ${reminder.location}` : '';
+    } else if (reminder.reminderType === 'bill') {
+      return reminder.amount ? `💰 $${reminder.amount}` : '';
+    } else {
+      return reminder.note || '';
     }
   };
 
@@ -79,11 +105,15 @@ function ReminderDetails() {
           // Convert old format to new format
           const convertedData = {
             id,
-            personName: data.personName || '',
+            personName: data.personName || data.title || '',
+            title: data.title || data.personName || '',
             date: data.dateOfBirth || data.date || '',
             relationship: data.relationship || '',
             reminderType: data.reminderType || 'birthday',
-            note: data.note || ''
+            note: data.note || '',
+            location: data.location || '',
+            attendees: data.attendees || '',
+            amount: data.amount || ''
           };
           setReminder(convertedData);
           // Load saved AI message if exists
@@ -484,7 +514,7 @@ function ReminderDetails() {
           paddingRight: '68px',
           textAlign: 'center'
         }}>
-          {getReminderIcon(reminder.reminderType)} {reminder.personName}'s {getReminderTypeName(reminder.reminderType)}
+          {getReminderIcon(reminder.reminderType)} {getReminderDisplayName(reminder)}'s {getReminderTypeName(reminder.reminderType)}
         </h1>
       </header>
 
@@ -546,7 +576,7 @@ function ReminderDetails() {
                   </div>
                 ) : (
                   <>
-                {reminder.personName}
+                {getReminderDisplayName(reminder)}
                     <FaPencilAlt 
                       onClick={() => startEditing('personName')}
                       style={{ 
@@ -566,7 +596,7 @@ function ReminderDetails() {
                 color: '#666',
                 margin: '0'
               }}>
-                {reminder.relationship} • {getReminderTypeName(reminder.reminderType)}
+                {getReminderSubtitle(reminder)} • {getReminderTypeName(reminder.reminderType)}
               </p>
             </div>
           </div>
