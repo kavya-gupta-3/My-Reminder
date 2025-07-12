@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auth, database, ref, push, set, get, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaPaperPlane, FaRobot, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaPaperPlane, FaRobot } from 'react-icons/fa';
 
 function ChatPage() {
   const navigate = useNavigate();
@@ -266,26 +266,25 @@ function ChatPage() {
           const errorMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: <><FaExclamationCircle style={{ marginRight: '8px' }} /> I need both the person's name and the date to save the reminder. Could you please provide those details?</>
+            content: '❌ I need both the person\'s name and the date to save the reminder. Could you please provide those details?'
           };
           setMessages(prev => [...prev, errorMessage]);
           setIsLoading(false);
           return;
         }
 
+        // Save to Firebase
         try {
-          // Save to Firebase first
-          await saveReminderToFirebase(dataToSave);
+          const savedId = await saveReminderToFirebase(dataToSave);
           
-          // Show success message
-          const confirmationMessage = {
+          const successMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: <><FaCheckCircle style={{ marginRight: '8px' }} /> Perfect! I've {reminderId ? 'updated' : 'saved'} the {dataToSave.reminderType || 'reminder'} for {dataToSave.personName}! 🎉<br/><br/>Want to add another reminder? Just tell me who it's for, or ask me anything else!</>
+            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${dataToSave.reminderType || 'reminder'} for ${dataToSave.personName}! 🎉\n\nWant to add another reminder or edit this one?`
           };
-          setMessages(prev => [...prev, confirmationMessage]);
+          setMessages(prev => [...prev, successMessage]);
           
-          // Reset reminder data for new reminder creation (only if not in edit mode)
+          // Clear reminder data for next reminder
           if (!reminderId) {
             setReminderData({
               personName: '',
@@ -295,12 +294,12 @@ function ChatPage() {
               note: ''
             });
           }
-        } catch (saveError) {
-          console.error('Error saving reminder:', saveError);
+        } catch (error) {
+          console.error('Error saving reminder:', error);
           const errorMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: <><FaExclamationCircle style={{ marginRight: '8px' }} /> Sorry, there was an error saving the reminder. Please try again.</>
+            content: '❌ Sorry, there was an error saving the reminder. Please try again.'
           };
           setMessages(prev => [...prev, errorMessage]);
         }
@@ -310,7 +309,7 @@ function ChatPage() {
       const aiMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        content: <><FaExclamationCircle style={{ marginRight: '8px' }} /> Sorry, there was an error processing your request. Please try again.</>
+        content: '❌ Sorry, there was an error processing your request. Please try again.'
       };
       setMessages(prev => [...prev, aiMessage]);
     } finally {
