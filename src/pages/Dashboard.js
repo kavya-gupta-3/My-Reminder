@@ -61,64 +61,74 @@ function Dashboard() {
     
     setRemindersLoading(true);
     
-    const unsubscribe = onValue(remindersRef, async (snapshot) => {
-      const reminders = [];
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        // Convert old format to new format
-        const reminder = {
-          id: childSnapshot.key,
-          personName: data.personName || data.title || '',
-          title: data.title || data.personName || '',
-          date: data.dateOfBirth || data.date || '',
-          relationship: data.relationship || '',
-          reminderType: data.reminderType || 'birthday',
-          note: data.note || '',
-          location: data.location || '',
-          attendees: data.attendees || '',
-          amount: data.amount || ''
-        };
-        reminders.push(reminder);
-      });
+    const unsubscribe = onValue(remindersRef, (snapshot) => {
+      try {
+        const reminders = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            // Convert old format to new format
+            const reminder = {
+              id: childSnapshot.key,
+              personName: data.personName || data.title || '',
+              title: data.title || data.personName || '',
+              date: data.dateOfBirth || data.date || '',
+              relationship: data.relationship || '',
+              reminderType: data.reminderType || 'birthday',
+              note: data.note || '',
+              location: data.location || '',
+              attendees: data.attendees || '',
+              amount: data.amount || ''
+            };
+            reminders.push(reminder);
+          });
+        }
 
-      // Modify sorting logic to prioritize running reminders
-      reminders.sort((a, b) => {
-        const now = new Date();
-        const currentYear = now.getFullYear();
+        // Modify sorting logic to prioritize running reminders
+        reminders.sort((a, b) => {
+          const now = new Date();
+          const currentYear = now.getFullYear();
 
-        // Parse dates correctly - date is in MM/DD/YYYY format
-        const [monthA, dayA] = a.date.split('/');
-        const [monthB, dayB] = b.date.split('/');
-        
-        // Calculate this year's occurrence
-        let dateA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
-        let dateB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
-        
-        // Check if the reminder is running (within 24 hours after the date)
-        const isRunningA = now >= dateA && now < new Date(dateA.getTime() + 24 * 60 * 60 * 1000);
-        const isRunningB = now >= dateB && now < new Date(dateB.getTime() + 24 * 60 * 60 * 1000);
+          // Parse dates correctly - date is in MM/DD/YYYY format
+          const [monthA, dayA] = a.date.split('/');
+          const [monthB, dayB] = b.date.split('/');
+          
+          // Calculate this year's occurrence
+          let dateA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
+          let dateB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
+          
+          // Check if the reminder is running (within 24 hours after the date)
+          const isRunningA = now >= dateA && now < new Date(dateA.getTime() + 24 * 60 * 60 * 1000);
+          const isRunningB = now >= dateB && now < new Date(dateB.getTime() + 24 * 60 * 60 * 1000);
 
-        // Prioritize running reminders
-        if (isRunningA && !isRunningB) return -1;
-        if (!isRunningA && isRunningB) return 1;
+          // Prioritize running reminders
+          if (isRunningA && !isRunningB) return -1;
+          if (!isRunningA && isRunningB) return 1;
 
-        // If both are running or neither, sort by closest date
-        if (dateA < now) dateA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
-        if (dateB < now) dateB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
-        
-        const daysUntilA = Math.ceil((dateA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-        const daysUntilB = Math.ceil((dateB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-        
-        return daysUntilA - daysUntilB;
-      });
+          // If both are running or neither, sort by closest date
+          if (dateA < now) dateA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
+          if (dateB < now) dateB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
+          
+          const daysUntilA = Math.ceil((dateA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          const daysUntilB = Math.ceil((dateB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          
+          return daysUntilA - daysUntilB;
+        });
 
-      setReminders(reminders);
+        setReminders(reminders);
+      } catch (error) {
+        console.error('Error processing reminders:', error);
+      } finally {
+        setRemindersLoading(false);
+      }
     }, (error) => {
       console.error('Error fetching reminders:', error);
       setRemindersLoading(false);
     });
 
-    return () => off(remindersRef, 'value', unsubscribe);
+    return () => {
+      off(remindersRef, 'value', unsubscribe);
+    };
   }, [user]);
 
   // Add logout handler
@@ -167,26 +177,6 @@ function Dashboard() {
     if (daysUntil <= 14) return <FaCalendarCheck style={{ color: '#4caf50' }}/>;
     if (daysUntil <= 30) return <FaBell style={{ color: '#2196f3' }}/>;
     return baseIcon;
-  };
-
-  // Get reminder type display name
-  const getReminderTypeName = (reminderType) => {
-    switch (reminderType) {
-      case 'birthday':
-        return 'Birthday';
-      case 'anniversary':
-        return 'Anniversary';
-      case 'meeting':
-        return 'Meeting';
-      case 'bill':
-        return 'Bill';
-      case 'task':
-        return 'Task';
-      case 'custom':
-        return 'Event';
-      default:
-        return reminderType.charAt(0).toUpperCase() + reminderType.slice(1);
-    }
   };
 
   // Get display name for reminder
@@ -631,7 +621,7 @@ function Dashboard() {
         <FaComments />
       </button>
 
-      <style jsx>{`
+      <style>{`
         .dashboard-container {
           padding: 0 16px 100px 16px;
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { auth, database, ref, push, set, get, update } from '../firebase';
+import { auth, database, ref, push, set, get } from '../firebase';
 import aiService from '../services/aiService';
 import { FaArrowLeft, FaPaperPlane, FaRobot } from 'react-icons/fa';
 
@@ -227,14 +227,6 @@ function ChatPage() {
       if (aiResponse.isComplete) {
         // Ensure all required fields are present before saving
         const { age, ...restOfData } = aiResponse.updatedData;
-        const dataToSave = {
-          ...restOfData,
-          personName: restOfData.personName || '',
-          date: restOfData.date || '',
-          relationship: restOfData.relationship || '',
-          reminderType: restOfData.reminderType || 'birthday',
-          note: restOfData.note || ''
-        };
 
         // Validate required fields
         if (!aiResponse.updatedData.date) {

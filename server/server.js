@@ -8,7 +8,7 @@ const app = express();
 
 // Configure CORS to allow requests from frontend
 app.use(cors({
-  origin: ['https://myreminder.xyz', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: ['https://myreminder.xyz', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -18,29 +18,49 @@ app.use(express.json());
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-// Initialize Firebase Admin
-const serviceAccount = {
-  type: "service_account",
-  project_id: "birthdayreminder-a5def",
-  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.FIREBASE_CLIENT_ID,
-  auth_uri: "https://accounts.google.com/o/oauth2/auth",
-  token_uri: "https://oauth2.googleapis.com/token",
-  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
-};
+// Initialize Firebase Admin only if environment variables are available
+let firebaseInitialized = false;
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://birthdayreminder-a5def-default-rtdb.firebaseio.com"
-  });
+if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+  try {
+    const serviceAccount = {
+      type: "service_account",
+      project_id: "birthdayreminder-a5def",
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
+    };
+
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://birthdayreminder-a5def-default-rtdb.firebaseio.com"
+      });
+      firebaseInitialized = true;
+      console.log('Firebase Admin initialized successfully');
+    }
+  } catch (error) {
+    console.error('Error initializing Firebase Admin:', error);
+  }
+} else {
+  console.log('Firebase environment variables not found. Firebase features will be disabled.');
 }
 
 app.post('/api/generate', async (req, res) => {
   console.log('Received /api/generate request');
+  
+  if (!OPENROUTER_API_KEY) {
+    return res.status(500).json({ 
+      error: 'OpenRouter API key not configured',
+      message: 'Please set OPENROUTER_API_KEY environment variable'
+    });
+  }
+  
   try {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
@@ -54,12 +74,20 @@ app.post('/api/generate', async (req, res) => {
     );
     res.json(response.data);
   } catch (err) {
+    console.error('Error in /api/generate:', err.message);
     res.status(500).json({ error: err.message, details: err.response?.data });
   }
 });
 
 // Send notification endpoint
 app.post('/api/send-notification', async (req, res) => {
+  if (!firebaseInitialized) {
+    return res.status(503).json({ 
+      error: 'Firebase not initialized',
+      message: 'Firebase environment variables are required for notifications'
+    });
+  }
+  
   try {
     const { token, title, body, data = {} } = req.body;
     
@@ -136,6 +164,13 @@ app.post('/api/send-notification', async (req, res) => {
 
 // Send notification to multiple users
 app.post('/api/send-notification-to-users', async (req, res) => {
+  if (!firebaseInitialized) {
+    return res.status(503).json({ 
+      error: 'Firebase not initialized',
+      message: 'Firebase environment variables are required for notifications'
+    });
+  }
+  
   try {
     const { userIds, title, body, data = {} } = req.body;
     
@@ -221,11 +256,12 @@ app.post('/api/send-notification-to-users', async (req, res) => {
     };
 
     const response = await admin.messaging().sendMulticast(multicastMessage);
-    console.log('Multicast notification sent:', response);
+    console.log('Multicast notification sent successfully:', response);
     res.json({ 
       success: true, 
       successCount: response.successCount,
-      failureCount: response.failureCount
+      failureCount: response.failureCount,
+      responses: response.responses
     });
   } catch (error) {
     console.error('Error sending multicast notification:', error);
@@ -233,5 +269,20 @@ app.post('/api/send-notification-to-users', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    firebaseInitialized,
+    openrouterConfigured: !!OPENROUTER_API_KEY,
+    timestamp: new Date().toISOString()
+  });
+});
+
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Firebase initialized: ${firebaseInitialized}`);
+  console.log(`OpenRouter configured: ${!!OPENROUTER_API_KEY}`);
+});
