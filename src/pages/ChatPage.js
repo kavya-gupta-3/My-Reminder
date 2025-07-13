@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { auth, database, ref, push, set, get } from '../firebase';
+import { auth, database, ref, push, set, get, remove } from '../firebase';
 import aiService from '../services/aiService';
 import { FaArrowLeft, FaPaperPlane, FaRobot } from 'react-icons/fa';
 
@@ -99,7 +99,7 @@ function ChatPage() {
         let initialMessage = {
           id: 1,
           type: 'ai',
-          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for? You can add as many as you'd like!"
+          content: "Hey! What kind of event would you like to set a reminder for?"
         };
 
         // Load chat history if not in edit mode
@@ -176,7 +176,7 @@ function ChatPage() {
       } else if (reminderType === 'bill') {
         firebaseData.title = data.title || data.personName || 'Bill';
         firebaseData.amount = data.amount || '';
-      } else if (reminderType === 'task' || reminderType === 'custom') {
+      } else if (reminderType === 'task' || reminderType === 'custom' || reminderType === 'exam') {
         firebaseData.title = data.title || data.personName || 'Task';
         firebaseData.description = data.note || '';
       }
@@ -196,6 +196,20 @@ function ChatPage() {
       }
     } catch (error) {
       console.error('Error saving reminder:', error);
+      throw error;
+    }
+  };
+
+  const deleteReminderFromFirebase = async (reminderId) => {
+    try {
+      const uid = auth.currentUser?.uid;
+      if (!uid) throw new Error('User not authenticated');
+
+      const reminderRef = ref(database, `reminders/${uid}/${reminderId}`);
+      await remove(reminderRef);
+      return true;
+    } catch (error) {
+      console.error('Error deleting reminder:', error);
       throw error;
     }
   };
@@ -232,66 +246,38 @@ function ChatPage() {
       };
       setMessages(prev => [...prev, aiMessage]);
 
-      if (aiResponse.isComplete) {
-        // Ensure all required fields are present before saving
-
-        // Validate required fields
-        if (!aiResponse.updatedData.date) {
+      // Handle special actions
+      if (aiResponse.updatedData.action === 'delete') {
+        try {
+          await deleteReminderFromFirebase(aiResponse.updatedData.reminderId);
+          // Clear reminder data after successful deletion
+          setReminderData({
+            personName: '',
+            date: '',
+            relationship: '',
+            reminderType: 'birthday',
+            note: ''
+          });
+        } catch (error) {
           const errorMessage = {
             id: Date.now() + 2,
             type: 'ai',
-            content: '❌ I need the date to save the reminder. Could you please provide the date?'
+            content: '❌ Sorry, there was an error deleting the reminder. Please try again.'
           };
           setMessages(prev => [...prev, errorMessage]);
-          return;
         }
-
-        // Check if we have the required fields based on reminder type
-        const reminderType = aiResponse.updatedData.reminderType || 'birthday';
-        let hasRequiredFields = true;
-        let missingField = '';
-
-        if (reminderType === 'birthday' || reminderType === 'anniversary') {
-          if (!aiResponse.updatedData.personName) {
-            hasRequiredFields = false;
-            missingField = 'person name';
-          }
-        } else if (reminderType === 'meeting' || reminderType === 'task' || reminderType === 'bill') {
-          if (!aiResponse.updatedData.title && !aiResponse.updatedData.personName) {
-            hasRequiredFields = false;
-            missingField = reminderType === 'meeting' ? 'meeting topic/title' : 
-                          reminderType === 'bill' ? 'bill name/company' : 'task title';
-          }
-        }
-
-        if (!hasRequiredFields) {
-          const errorMessage = {
-            id: Date.now() + 2,
-            type: 'ai',
-            content: `❌ I need the ${missingField} to save this ${reminderType}. Could you please provide that?`
-          };
-          setMessages(prev => [...prev, errorMessage]);
-          return;
-        }
-
-        // Save to Firebase
+      } else if (aiResponse.isComplete && !aiResponse.updatedData.action) {
+        // Save new reminder to Firebase
         try {
           await saveReminderToFirebase(aiResponse.updatedData);
           
-          const successMessage = {
-          id: Date.now() + 2,
-          type: 'ai',
-            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'}! 🎉\n\nWant to add another reminder? Just tell me about it!`
-        };
-          setMessages(prev => [...prev, successMessage]);
-        
-          // Clear reminder data for new reminder
+          // Clear reminder data for new reminder (unless in edit mode)
           if (!reminderId) {
-        setReminderData({
-          personName: '',
+            setReminderData({
+              personName: '',
               title: '',
               date: '',
-          relationship: '',
+              relationship: '',
               reminderType: 'birthday',
               note: '',
               location: '',
@@ -328,7 +314,7 @@ function ChatPage() {
       setMessages([{
         id: Date.now(),
         type: 'ai',
-        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for?"
+        content: "Hey! What kind of event would you like to set a reminder for?"
       }]);
     }
   };
@@ -454,7 +440,8 @@ function ChatPage() {
                 lineHeight: '1.5',
                 wordWrap: 'break-word',
                 border: message.type === 'user' ? '2px solid #000' : '2px solid #000',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                whiteSpace: 'pre-line'
               }}>
               {message.content}
             </div>

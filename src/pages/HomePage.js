@@ -13,9 +13,7 @@ import {
   FaCalendarCheck,
   FaHeart,
   FaBriefcase,
-  FaMoneyBillWave,
-  FaGraduationCap,
-  FaClipboardList
+  FaMoneyBillWave
 } from 'react-icons/fa';
 
 function HomePage() {
@@ -74,16 +72,6 @@ function HomePage() {
       icon: <FaMoneyBillWave />,
       title: "Bills",
       description: "Never miss a payment deadline"
-    },
-    {
-      icon: <FaGraduationCap />,
-      title: "Exams",
-      description: "Ace your tests with timely reminders"
-    },
-    {
-      icon: <FaClipboardList />,
-      title: "Tasks",
-      description: "Complete your daily tasks on time"
     }
   ];
 
