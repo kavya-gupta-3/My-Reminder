@@ -155,28 +155,23 @@ function Dashboard() {
 
   // Get icon based on reminder type
   const getReminderIcon = (reminderType, daysUntil) => {
-    const baseIcon = (() => {
-      switch (reminderType) {
-        case 'birthday':
-          return <FaBirthdayCake />;
-        case 'anniversary':
-          return <FaHeart />;
-        case 'meeting':
-          return <FaBriefcase />;
-        case 'bill':
-          return <FaMoneyBillWave />;
-        default:
-          return <FaBell />;
-      }
-    })();
-
-    // Special icons for urgent reminders
-    if (daysUntil === 0) return <FaGift />;
-    if (daysUntil <= 3) return <FaGift style={{ color: '#ff6b6b' }}/>;
-    if (daysUntil <= 7) return <FaGift style={{ color: '#ffa726' }}/>;
-    if (daysUntil <= 14) return <FaCalendarCheck style={{ color: '#4caf50' }}/>;
-    if (daysUntil <= 30) return <FaBell style={{ color: '#2196f3' }}/>;
-    return baseIcon;
+    // Always show type-specific icons, not urgency-based icons
+    switch (reminderType) {
+      case 'birthday':
+        return <FaBirthdayCake style={{ color: '#ff6b6b' }} />;
+      case 'anniversary':
+        return <FaHeart style={{ color: '#e91e63' }} />;
+      case 'meeting':
+        return <FaBriefcase style={{ color: '#2196f3' }} />;
+      case 'bill':
+        return <FaMoneyBillWave style={{ color: '#4caf50' }} />;
+      case 'task':
+        return <FaCalendarCheck style={{ color: '#ff9800' }} />;
+      case 'custom':
+        return <FaBell style={{ color: '#9c27b0' }} />;
+      default:
+        return <FaBell style={{ color: '#666' }} />;
+    }
   };
 
   // Get display name for reminder

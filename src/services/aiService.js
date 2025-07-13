@@ -117,92 +117,176 @@ class AIService {
         }
         if (userContext.reminders && userContext.reminders.length > 0) {
           userContextInfo += `\n- User has ${userContext.reminders.length} existing reminders.`;
-          const reminderList = userContext.reminders.map(r => `${r.personName || r.title} (${r.relationship || r.type}, ${r.reminderType || 'reminder'})`).join(', ');
-          userContextInfo += `\n- Existing reminders: ${reminderList}`;
         }
       }
 
-      const systemPrompt = `You are a sophisticated AI assistant in a reminder app called "My Reminder". Your goal is to help users create or edit reminders through a natural conversation. Today's date is ${new Date().toLocaleDateString()}.
-
-IMPORTANT: Different reminder types require different information:
-
-1. **Birthday/Anniversary**: Requires person name, date, relationship
-2. **Meeting**: Requires meeting title/topic, date, location (optional), attendees (optional)
-3. **Bill**: Requires bill name/company, due date, amount (optional)
-4. **Task/Event**: Requires event title, date, description (optional)
-5. **Custom**: Can be anything - ask what's needed
-
-Ask only the information relevant to the reminder type. Don't ask for person name for meetings, bills, or tasks unless it's a personal meeting.
-
-${userContextInfo}
-
-Respond in JSON format:
-{
-  "response": "Your conversational response",
-  "updatedData": {
-    "personName": "Name (only for personal events)",
-    "title": "Title for meetings/tasks/bills",
-    "date": "MM/DD/YYYY",
-    "relationship": "Relationship (only for personal events)",
-    "reminderType": "birthday|anniversary|meeting|bill|task|custom",
-    "location": "Location (for meetings)",
-    "attendees": "Attendees (for meetings)",
-    "amount": "Amount (for bills)",
-    "note": "Additional notes"
-  },
-  "isComplete": true/false,
-  "missingFields": ["field1", "field2"]
-}
-
-Be conversational, friendly, and professional. Ask one question at a time.`;
-
-      // Use backend proxy
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'openai/gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...messages.map(msg => ({ role: msg.type === 'ai' ? 'assistant' : 'user', content: msg.content }))
-          ],
-          max_tokens: 400,
-          temperature: 0.5,
-          response_format: { "type": "json_object" },
-        })
-      });
-
-      if (!response.ok) {
-        console.error('API Error:', response.status, response.statusText);
-        // Return a fallback response instead of throwing
-        return {
-          response: "I'm having trouble connecting right now. Please try again in a moment.",
-          updatedData: reminderData,
-          isComplete: false,
-          missingFields: []
-        };
-      }
-
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      // Determine the current conversation state and reminder type
+      const lastUserMessage = messages.filter(m => m.type === 'user').pop()?.content.toLowerCase() || '';
+      const currentReminderType = reminderData.reminderType || 'birthday';
       
-      try {
-        const parsed = JSON.parse(aiResponse);
-        return {
-          response: parsed.response,
-          updatedData: { ...reminderData, ...parsed.updatedData },
-          isComplete: parsed.isComplete || false,
-          missingFields: parsed.missingFields || []
-        };
-      } catch (parseError) {
-        console.error('Error parsing AI response:', parseError);
-        return {
-          response: aiResponse,
-          updatedData: reminderData,
-          isComplete: false,
-          missingFields: []
-        };
+      // Check if user is specifying a reminder type
+      let detectedType = currentReminderType;
+      if (lastUserMessage.includes('birthday') || lastUserMessage.includes('birth')) {
+        detectedType = 'birthday';
+      } else if (lastUserMessage.includes('anniversary') || lastUserMessage.includes('anniversary')) {
+        detectedType = 'anniversary';
+      } else if (lastUserMessage.includes('meeting') || lastUserMessage.includes('appointment')) {
+        detectedType = 'meeting';
+      } else if (lastUserMessage.includes('bill') || lastUserMessage.includes('payment') || lastUserMessage.includes('due')) {
+        detectedType = 'bill';
+      } else if (lastUserMessage.includes('task') || lastUserMessage.includes('todo')) {
+        detectedType = 'task';
       }
+
+      // Update reminder type if detected
+      if (detectedType !== currentReminderType) {
+        reminderData.reminderType = detectedType;
+      }
+
+      // Try to parse date from user message
+      const parsedDate = this.parseNaturalDate(lastUserMessage);
+      if (parsedDate && !reminderData.date) {
+        reminderData.date = parsedDate;
+      }
+
+      // Type-specific prompts and logic
+      let systemPrompt = '';
+      let isComplete = false;
+      let response = '';
+
+      switch (detectedType) {
+        case 'birthday':
+          systemPrompt = `You are a birthday reminder assistant. Ask for:
+1. Person's name
+2. Birthday date (MM/DD/YYYY)
+3. Relationship (optional)
+
+Be friendly and celebratory. Ask one question at a time.`;
+          
+          if (!reminderData.personName) {
+            response = "🎂 Great! I'll help you set up a birthday reminder. What's the person's name?";
+          } else if (!reminderData.date) {
+            response = `Perfect! When is ${reminderData.personName}'s birthday? (You can say "March 15" or "March 15, 1990")`;
+          } else if (reminderData.date && !reminderData.relationship) {
+            response = `Awesome! What's your relationship with ${reminderData.personName}? (e.g., friend, family, colleague)`;
+            isComplete = true; // Relationship is optional
+          } else {
+            response = `🎉 Perfect! I've saved ${reminderData.personName}'s birthday on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+          break;
+
+        case 'anniversary':
+          systemPrompt = `You are an anniversary reminder assistant. Ask for:
+1. Person's name or couple names
+2. Anniversary date (MM/DD/YYYY)
+3. Type of anniversary (optional)
+
+Be romantic and supportive. Ask one question at a time.`;
+          
+          if (!reminderData.personName) {
+            response = "💕 I'll help you set up an anniversary reminder. Who is this anniversary for? (e.g., 'John and Sarah' or 'Our wedding')";
+          } else if (!reminderData.date) {
+            response = `When is ${reminderData.personName}'s anniversary? (You can say "June 10" or "June 10, 2020")`;
+          } else if (reminderData.date) {
+            response = `💖 Perfect! I've saved ${reminderData.personName}'s anniversary on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+          break;
+
+        case 'meeting':
+          systemPrompt = `You are a meeting reminder assistant. Ask for:
+1. Meeting topic/title
+2. Meeting date and time
+3. Location (optional)
+
+Be professional and concise. Ask one question at a time.`;
+          
+          if (!reminderData.title && !reminderData.personName) {
+            response = "📅 I'll help you set up a meeting reminder. What's the meeting about?";
+          } else if (!reminderData.date) {
+            const meetingTitle = reminderData.title || reminderData.personName;
+            response = `When is the "${meetingTitle}" meeting? (You can say "Tomorrow at 2 PM" or "March 20 at 10 AM")`;
+          } else if (reminderData.date) {
+            const meetingTitle = reminderData.title || reminderData.personName;
+            response = `✅ Perfect! I've saved the "${meetingTitle}" meeting on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+          break;
+
+        case 'bill':
+          systemPrompt = `You are a bill reminder assistant. Ask for:
+1. Bill name or company
+2. Due date
+3. Amount (optional)
+
+Be helpful and practical. Ask one question at a time.`;
+          
+          if (!reminderData.title && !reminderData.personName) {
+            response = "💰 I'll help you set up a bill reminder. What bill is this for? (e.g., 'Electricity bill' or 'Netflix')";
+          } else if (!reminderData.date) {
+            const billName = reminderData.title || reminderData.personName;
+            response = `When is the ${billName} due? (You can say "March 25" or "Next Friday")`;
+          } else if (reminderData.date) {
+            const billName = reminderData.title || reminderData.personName;
+            response = `💳 Perfect! I've saved the ${billName} due on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+          break;
+
+        case 'task':
+          systemPrompt = `You are a task reminder assistant. Ask for:
+1. Task title
+2. Due date
+3. Description (optional)
+
+Be motivational and encouraging. Ask one question at a time.`;
+          
+          if (!reminderData.title && !reminderData.personName) {
+            response = "📝 I'll help you set up a task reminder. What task do you need to remember?";
+          } else if (!reminderData.date) {
+            const taskTitle = reminderData.title || reminderData.personName;
+            response = `When do you need to complete "${taskTitle}"? (You can say "Tomorrow" or "March 30")`;
+          } else if (reminderData.date) {
+            const taskTitle = reminderData.title || reminderData.personName;
+            response = `🎯 Perfect! I've saved the task "${taskTitle}" due on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+          break;
+
+        default:
+          systemPrompt = `You are a general reminder assistant. Ask for:
+1. Event title
+2. Date
+3. Description (optional)
+
+Be helpful and friendly. Ask one question at a time.`;
+          
+          if (!reminderData.title && !reminderData.personName) {
+            response = "📌 I'll help you set up a reminder. What event or thing do you want to remember?";
+          } else if (!reminderData.date) {
+            const eventTitle = reminderData.title || reminderData.personName;
+            response = `When is "${eventTitle}"? (You can say "March 15" or "Next Monday")`;
+          } else if (reminderData.date) {
+            const eventTitle = reminderData.title || reminderData.personName;
+            response = `✅ Perfect! I've saved "${eventTitle}" on ${reminderData.date}. Want to add another reminder?`;
+            isComplete = true;
+          }
+      }
+
+      // For edit mode, provide different response
+      if (isEditing) {
+        response = `I see you want to edit this ${detectedType} reminder. What would you like to change?`;
+        isComplete = false;
+      }
+
+      return {
+        response: response,
+        updatedData: { ...reminderData, reminderType: detectedType },
+        isComplete: isComplete,
+        missingFields: []
+      };
+
     } catch (error) {
       console.error('Error processing chat:', error);
       return {

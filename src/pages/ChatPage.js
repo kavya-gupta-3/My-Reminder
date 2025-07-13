@@ -162,7 +162,7 @@ function ChatPage() {
         date: data.date,
         reminderType: reminderType,
         note: data.note || '',
-        createdAt: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
 
       // Add type-specific fields
@@ -181,11 +181,19 @@ function ChatPage() {
         firebaseData.description = data.note || '';
       }
 
-      const remindersRef = ref(database, `reminders/${uid}`);
-      const newReminderRef = push(remindersRef);
-      await set(newReminderRef, firebaseData);
-      
-      return newReminderRef.key;
+      if (reminderId) {
+        // Update existing reminder
+        const reminderRef = ref(database, `reminders/${uid}/${reminderId}`);
+        await set(reminderRef, firebaseData);
+        return reminderId;
+      } else {
+        // Create new reminder
+        firebaseData.createdAt = new Date().toISOString();
+        const remindersRef = ref(database, `reminders/${uid}`);
+        const newReminderRef = push(remindersRef);
+        await set(newReminderRef, firebaseData);
+        return newReminderRef.key;
+      }
     } catch (error) {
       console.error('Error saving reminder:', error);
       throw error;
@@ -226,7 +234,6 @@ function ChatPage() {
 
       if (aiResponse.isComplete) {
         // Ensure all required fields are present before saving
-        const { age, ...restOfData } = aiResponse.updatedData;
 
         // Validate required fields
         if (!aiResponse.updatedData.date) {
