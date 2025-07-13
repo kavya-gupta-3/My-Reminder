@@ -279,19 +279,19 @@ function ChatPage() {
           await saveReminderToFirebase(aiResponse.updatedData);
           
           const successMessage = {
-            id: Date.now() + 2,
-            type: 'ai',
+          id: Date.now() + 2,
+          type: 'ai',
             content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'}! 🎉\n\nWant to add another reminder? Just tell me about it!`
-          };
+        };
           setMessages(prev => [...prev, successMessage]);
-          
+        
           // Clear reminder data for new reminder
           if (!reminderId) {
-            setReminderData({
-              personName: '',
+        setReminderData({
+          personName: '',
               title: '',
               date: '',
-              relationship: '',
+          relationship: '',
               reminderType: 'birthday',
               note: '',
               location: '',

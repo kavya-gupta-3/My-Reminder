@@ -110,38 +110,34 @@ class AIService {
 
   async processChat(messages, reminderData, isEditing, userContext) {
     try {
-      let userContextInfo = '';
-      if (userContext) {
-        if (userContext.user && userContext.user.name) {
-          userContextInfo += `\n- User's name: ${userContext.user.name}`;
-        }
-        if (userContext.reminders && userContext.reminders.length > 0) {
-          userContextInfo += `\n- User has ${userContext.reminders.length} existing reminders.`;
-        }
-      }
-
-      // Determine the current conversation state and reminder type
+      // Get the last user message
       const lastUserMessage = messages.filter(m => m.type === 'user').pop()?.content.toLowerCase() || '';
-      const currentReminderType = reminderData.reminderType || 'birthday';
       
-      // Check if user is specifying a reminder type
-      let detectedType = currentReminderType;
-      if (lastUserMessage.includes('birthday') || lastUserMessage.includes('birth')) {
-        detectedType = 'birthday';
-      } else if (lastUserMessage.includes('anniversary') || lastUserMessage.includes('anniversary')) {
-        detectedType = 'anniversary';
-      } else if (lastUserMessage.includes('meeting') || lastUserMessage.includes('appointment')) {
-        detectedType = 'meeting';
-      } else if (lastUserMessage.includes('bill') || lastUserMessage.includes('payment') || lastUserMessage.includes('due')) {
-        detectedType = 'bill';
-      } else if (lastUserMessage.includes('task') || lastUserMessage.includes('todo')) {
-        detectedType = 'task';
+      // For edit mode, handle differently
+      if (isEditing) {
+        return {
+          response: "I see you want to edit this reminder. What would you like to change?",
+          updatedData: reminderData,
+          isComplete: false,
+          missingFields: []
+        };
       }
 
-      // Update reminder type if detected
-      if (detectedType !== currentReminderType) {
-        reminderData.reminderType = detectedType;
+      // Initialize conversation state if not exists
+      if (!reminderData.conversationState) {
+        reminderData.conversationState = 'start';
+        reminderData.reminderType = '';
+        reminderData.personName = '';
+        reminderData.date = '';
+        reminderData.relationship = '';
+        reminderData.note = '';
+        reminderData.title = '';
       }
+
+      const state = reminderData.conversationState;
+      let response = '';
+      let isComplete = false;
+      let nextState = state;
 
       // Try to parse date from user message
       const parsedDate = this.parseNaturalDate(lastUserMessage);
@@ -149,140 +145,272 @@ class AIService {
         reminderData.date = parsedDate;
       }
 
-      // Type-specific prompts and logic
-      let systemPrompt = '';
-      let isComplete = false;
-      let response = '';
+      // Main conversation flow logic
+      switch (state) {
+        case 'start':
+          response = "What kind of event do you want to set a reminder for?";
+          nextState = 'waiting_for_type';
+          break;
 
-      switch (detectedType) {
-        case 'birthday':
-          systemPrompt = `You are a birthday reminder assistant. Ask for:
-1. Person's name
-2. Birthday date (MM/DD/YYYY)
-3. Relationship (optional)
-
-Be friendly and celebratory. Ask one question at a time.`;
-          
-          if (!reminderData.personName) {
-            response = "🎂 Great! I'll help you set up a birthday reminder. What's the person's name?";
-          } else if (!reminderData.date) {
-            response = `Perfect! When is ${reminderData.personName}'s birthday? (You can say "March 15" or "March 15, 1990")`;
-          } else if (reminderData.date && !reminderData.relationship) {
-            response = `Awesome! What's your relationship with ${reminderData.personName}? (e.g., friend, family, colleague)`;
-            isComplete = true; // Relationship is optional
+        case 'waiting_for_type':
+          // Detect reminder type from user input
+          let detectedType = '';
+          if (lastUserMessage.includes('birthday') || lastUserMessage.includes('birth')) {
+            detectedType = 'birthday';
+          } else if (lastUserMessage.includes('anniversary') || lastUserMessage.includes('anniversary')) {
+            detectedType = 'anniversary';
+          } else if (lastUserMessage.includes('meeting') || lastUserMessage.includes('appointment')) {
+            detectedType = 'meeting';
+          } else if (lastUserMessage.includes('exam') || lastUserMessage.includes('test')) {
+            detectedType = 'exam';
+          } else if (lastUserMessage.includes('task') || lastUserMessage.includes('todo') || lastUserMessage.includes('call') || lastUserMessage.includes('water')) {
+            detectedType = 'task';
           } else {
-            response = `🎉 Perfect! I've saved ${reminderData.personName}'s birthday on ${reminderData.date}. Want to add another reminder?`;
-            isComplete = true;
+            // If user didn't specify a clear type, ask for clarification
+            response = "I can help you set reminders for birthdays, anniversaries, meetings, exams, tasks, and more. What kind of event do you want to set a reminder for?";
+            nextState = 'waiting_for_type';
+            break;
+          }
+
+          reminderData.reminderType = detectedType;
+          
+          // Move to type-specific flow
+          switch (detectedType) {
+            case 'birthday':
+              response = "Whose birthday is it?";
+              nextState = 'birthday_name';
+              break;
+            case 'anniversary':
+              response = "Whose anniversary is it?";
+              nextState = 'anniversary_name';
+              break;
+            case 'meeting':
+              response = "What's the meeting about?";
+              nextState = 'meeting_title';
+              break;
+            case 'exam':
+              response = "Which subject or exam is it?";
+              nextState = 'exam_subject';
+              break;
+            case 'task':
+              response = "What do you want to be reminded about?";
+              nextState = 'task_title';
+              break;
           }
           break;
 
-        case 'anniversary':
-          systemPrompt = `You are an anniversary reminder assistant. Ask for:
-1. Person's name or couple names
-2. Anniversary date (MM/DD/YYYY)
-3. Type of anniversary (optional)
-
-Be romantic and supportive. Ask one question at a time.`;
-          
-          if (!reminderData.personName) {
-            response = "💕 I'll help you set up an anniversary reminder. Who is this anniversary for? (e.g., 'John and Sarah' or 'Our wedding')";
-          } else if (!reminderData.date) {
-            response = `When is ${reminderData.personName}'s anniversary? (You can say "June 10" or "June 10, 2020")`;
-          } else if (reminderData.date) {
-            response = `💖 Perfect! I've saved ${reminderData.personName}'s anniversary on ${reminderData.date}. Want to add another reminder?`;
-            isComplete = true;
+        // Birthday flow
+        case 'birthday_name':
+          if (lastUserMessage.trim()) {
+            reminderData.personName = lastUserMessage.trim();
+            response = "What's their birth date?";
+            nextState = 'birthday_date';
+          } else {
+            response = "Whose birthday is it?";
+            nextState = 'birthday_name';
           }
           break;
 
-        case 'meeting':
-          systemPrompt = `You are a meeting reminder assistant. Ask for:
-1. Meeting topic/title
-2. Meeting date and time
-3. Location (optional)
-
-Be professional and concise. Ask one question at a time.`;
-          
-          if (!reminderData.title && !reminderData.personName) {
-            response = "📅 I'll help you set up a meeting reminder. What's the meeting about?";
-          } else if (!reminderData.date) {
-            const meetingTitle = reminderData.title || reminderData.personName;
-            response = `When is the "${meetingTitle}" meeting? (You can say "Tomorrow at 2 PM" or "March 20 at 10 AM")`;
-          } else if (reminderData.date) {
-            const meetingTitle = reminderData.title || reminderData.personName;
-            response = `✅ Perfect! I've saved the "${meetingTitle}" meeting on ${reminderData.date}. Want to add another reminder?`;
-            isComplete = true;
+        case 'birthday_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "What is their relationship to you?";
+            nextState = 'birthday_relationship';
+          } else {
+            response = "What's their birth date?";
+            nextState = 'birthday_date';
           }
           break;
 
-        case 'bill':
-          systemPrompt = `You are a bill reminder assistant. Ask for:
-1. Bill name or company
-2. Due date
-3. Amount (optional)
-
-Be helpful and practical. Ask one question at a time.`;
-          
-          if (!reminderData.title && !reminderData.personName) {
-            response = "💰 I'll help you set up a bill reminder. What bill is this for? (e.g., 'Electricity bill' or 'Netflix')";
-          } else if (!reminderData.date) {
-            const billName = reminderData.title || reminderData.personName;
-            response = `When is the ${billName} due? (You can say "March 25" or "Next Friday")`;
-          } else if (reminderData.date) {
-            const billName = reminderData.title || reminderData.personName;
-            response = `💳 Perfect! I've saved the ${billName} due on ${reminderData.date}. Want to add another reminder?`;
-            isComplete = true;
+        case 'birthday_relationship':
+          if (lastUserMessage.trim()) {
+            reminderData.relationship = lastUserMessage.trim();
+            response = "Would you like to add a note or message?";
+            nextState = 'birthday_note';
+          } else {
+            response = "What is their relationship to you?";
+            nextState = 'birthday_relationship';
           }
           break;
 
-        case 'task':
-          systemPrompt = `You are a task reminder assistant. Ask for:
-1. Task title
-2. Due date
-3. Description (optional)
+        case 'birthday_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = `✅ Done! I've created the birthday reminder for ${reminderData.personName}.`;
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
 
-Be motivational and encouraging. Ask one question at a time.`;
-          
-          if (!reminderData.title && !reminderData.personName) {
-            response = "📝 I'll help you set up a task reminder. What task do you need to remember?";
-          } else if (!reminderData.date) {
-            const taskTitle = reminderData.title || reminderData.personName;
-            response = `When do you need to complete "${taskTitle}"? (You can say "Tomorrow" or "March 30")`;
-          } else if (reminderData.date) {
-            const taskTitle = reminderData.title || reminderData.personName;
-            response = `🎯 Perfect! I've saved the task "${taskTitle}" due on ${reminderData.date}. Want to add another reminder?`;
+        // Anniversary flow
+        case 'anniversary_name':
+          if (lastUserMessage.trim()) {
+            reminderData.personName = lastUserMessage.trim();
+            response = "What's the date of the anniversary?";
+            nextState = 'anniversary_date';
+          } else {
+            response = "Whose anniversary is it?";
+            nextState = 'anniversary_name';
+          }
+          break;
+
+        case 'anniversary_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "Would you like to add a note or message?";
+            nextState = 'anniversary_note';
+          } else {
+            response = "What's the date of the anniversary?";
+            nextState = 'anniversary_date';
+          }
+          break;
+
+        case 'anniversary_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = "✅ Got it! Anniversary reminder added.";
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
+
+        // Meeting flow
+        case 'meeting_title':
+          if (lastUserMessage.trim()) {
+            reminderData.title = lastUserMessage.trim();
+            response = "What day and time is it scheduled for?";
+            nextState = 'meeting_date';
+          } else {
+            response = "What's the meeting about?";
+            nextState = 'meeting_title';
+          }
+          break;
+
+        case 'meeting_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "Any notes or location details you want to add?";
+            nextState = 'meeting_note';
+          } else {
+            response = "What day and time is it scheduled for?";
+            nextState = 'meeting_date';
+          }
+          break;
+
+        case 'meeting_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = "✅ Your meeting has been added to the dashboard.";
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
+
+        // Exam flow
+        case 'exam_subject':
+          if (lastUserMessage.trim()) {
+            reminderData.title = lastUserMessage.trim();
+            response = "When is the exam date?";
+            nextState = 'exam_date';
+          } else {
+            response = "Which subject or exam is it?";
+            nextState = 'exam_subject';
+          }
+          break;
+
+        case 'exam_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "Do you want to add any study notes or topics?";
+            nextState = 'exam_note';
+          } else {
+            response = "When is the exam date?";
+            nextState = 'exam_date';
+          }
+          break;
+
+        case 'exam_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = "✅ Exam reminder set. Good luck!";
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
+
+        // Task flow
+        case 'task_title':
+          if (lastUserMessage.trim()) {
+            reminderData.title = lastUserMessage.trim();
+            response = "When or how often should I remind you?";
+            nextState = 'task_date';
+          } else {
+            response = "What do you want to be reminded about?";
+            nextState = 'task_title';
+          }
+          break;
+
+        case 'task_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "Any note or message to include?";
+            nextState = 'task_note';
+          } else {
+            response = "When or how often should I remind you?";
+            nextState = 'task_date';
+          }
+          break;
+
+        case 'task_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = "✅ Reminder created successfully!";
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
+
+        // Ask for another reminder
+        case 'ask_another':
+          if (lastUserMessage.includes('yes') || lastUserMessage.includes('sure') || lastUserMessage.includes('okay') || lastUserMessage.includes('another')) {
+            // Reset for new reminder
+            reminderData.conversationState = 'start';
+            reminderData.reminderType = '';
+            reminderData.personName = '';
+            reminderData.date = '';
+            reminderData.relationship = '';
+            reminderData.note = '';
+            reminderData.title = '';
+            response = "What kind of event do you want to set a reminder for?";
+            nextState = 'waiting_for_type';
+          } else {
+            response = "Great! Your reminders are all set. You can view and manage them on your dashboard. Have a wonderful day! 🎉";
             isComplete = true;
+            nextState = 'complete';
           }
           break;
 
         default:
-          systemPrompt = `You are a general reminder assistant. Ask for:
-1. Event title
-2. Date
-3. Description (optional)
-
-Be helpful and friendly. Ask one question at a time.`;
-          
-          if (!reminderData.title && !reminderData.personName) {
-            response = "📌 I'll help you set up a reminder. What event or thing do you want to remember?";
-          } else if (!reminderData.date) {
-            const eventTitle = reminderData.title || reminderData.personName;
-            response = `When is "${eventTitle}"? (You can say "March 15" or "Next Monday")`;
-          } else if (reminderData.date) {
-            const eventTitle = reminderData.title || reminderData.personName;
-            response = `✅ Perfect! I've saved "${eventTitle}" on ${reminderData.date}. Want to add another reminder?`;
-            isComplete = true;
-          }
+          response = "What kind of event do you want to set a reminder for?";
+          nextState = 'waiting_for_type';
       }
 
-      // For edit mode, provide different response
-      if (isEditing) {
-        response = `I see you want to edit this ${detectedType} reminder. What would you like to change?`;
-        isComplete = false;
-      }
+      // Update conversation state
+      reminderData.conversationState = nextState;
 
       return {
         response: response,
-        updatedData: { ...reminderData, reminderType: detectedType },
+        updatedData: reminderData,
         isComplete: isComplete,
         missingFields: []
       };
@@ -336,15 +464,8 @@ Be helpful and friendly. Ask one question at a time.`;
     try {
       const currentDate = new Date().toLocaleDateString();
       
-      let userContextInfo = '';
-      if (userContext) {
-        if (userContext.user && userContext.user.name) {
-          userContextInfo += `\n- User's name: ${userContext.user.name}`;
-        }
-        if (userContext.reminders && userContext.reminders.length > 0) {
-          userContextInfo += `\n- User has ${userContext.reminders.length} existing reminders.`;
-        }
-      }
+      // Note: userContextInfo is used in the generateReminderMessage method, not here
+      // This is kept for potential future use in chat context
 
       const systemPrompt = `You are an AI assistant that generates personalized messages for different types of reminders. Today's date is ${currentDate}.
 
@@ -364,7 +485,7 @@ Message should be ${size === 'small' ? 'brief (1-2 sentences)' : size === 'mediu
 Reminder data: ${JSON.stringify(reminderData)}`;
 
       const userPrompt = `Generate a ${size} message for this ${reminderData.reminderType || 'reminder'}.`;
-
+      
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -386,7 +507,7 @@ Reminder data: ${JSON.stringify(reminderData)}`;
         const title = reminderData.title || reminderData.personName || 'this event';
         return `🎉 Happy ${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)}! Wishing you a wonderful day for ${title}!`;
       }
-
+      
       const data = await response.json();
       return data.choices[0].message.content;
     } catch (error) {
