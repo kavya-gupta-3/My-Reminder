@@ -196,6 +196,10 @@ class AIService {
               response = "What do you want to be reminded about?";
               nextState = 'task_title';
               break;
+            default:
+              response = "I can help you set reminders for birthdays, anniversaries, meetings, exams, tasks, and more. What kind of event do you want to set a reminder for?";
+              nextState = 'waiting_for_type';
+              break;
           }
           break;
 
@@ -464,8 +468,18 @@ class AIService {
     try {
       const currentDate = new Date().toLocaleDateString();
       
-      // Note: userContextInfo is used in the generateReminderMessage method, not here
-      // This is kept for potential future use in chat context
+      // Build context from user's existing reminders if available
+      let userContextInfo = '';
+      if (userContext && userContext.reminders) {
+        const existingReminders = userContext.reminders
+          .filter(r => r.id !== reminderData.id) // Exclude current reminder
+          .map(r => `${r.personName || r.title} (${r.relationship || 'reminder'}, ${r.reminderType || 'reminder'})`)
+          .join(', ');
+        
+        if (existingReminders) {
+          userContextInfo = `\n\nUser's other reminders: ${existingReminders}`;
+        }
+      }
 
       const systemPrompt = `You are an AI assistant that generates personalized messages for different types of reminders. Today's date is ${currentDate}.
 
