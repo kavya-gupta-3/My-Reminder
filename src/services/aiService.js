@@ -134,6 +134,27 @@ class AIService {
         reminderData.title = '';
       }
 
+      // Check for correction keywords that should reset the flow
+      const correctionKeywords = ['no', 'wait', 'stop', 'cancel', 'wrong', 'different', 'change', 'actually', 'i meant', 'i want'];
+      const isCorrection = correctionKeywords.some(keyword => lastUserMessage.includes(keyword));
+      
+      // If user is correcting and we're in a specific flow, reset to type selection
+      if (isCorrection && reminderData.conversationState !== 'start' && reminderData.conversationState !== 'waiting_for_type') {
+        reminderData.conversationState = 'waiting_for_type';
+        reminderData.reminderType = '';
+        reminderData.personName = '';
+        reminderData.date = '';
+        reminderData.relationship = '';
+        reminderData.note = '';
+        reminderData.title = '';
+        return {
+          response: "No problem! Let me start over. What kind of event do you want to set a reminder for?",
+          updatedData: reminderData,
+          isComplete: false,
+          missingFields: []
+        };
+      }
+
       const state = reminderData.conversationState;
       let response = '';
       let isComplete = false;
@@ -153,18 +174,51 @@ class AIService {
           break;
 
         case 'waiting_for_type':
-          // Detect reminder type from user input
+          // Detect reminder type from user input with better pattern matching
           let detectedType = '';
-          if (lastUserMessage.includes('birthday') || lastUserMessage.includes('birth')) {
-            detectedType = 'birthday';
-          } else if (lastUserMessage.includes('anniversary') || lastUserMessage.includes('anniversary')) {
-            detectedType = 'anniversary';
-          } else if (lastUserMessage.includes('meeting') || lastUserMessage.includes('appointment')) {
+          const message = lastUserMessage.toLowerCase().trim();
+          
+          // Check for explicit corrections first
+          if (message.includes('i want meeting') || message.includes('want meeting') || message.includes('meeting please')) {
             detectedType = 'meeting';
-          } else if (lastUserMessage.includes('exam') || lastUserMessage.includes('test')) {
+          } else if (message.includes('i want birthday') || message.includes('want birthday') || message.includes('birthday please')) {
+            detectedType = 'birthday';
+          } else if (message.includes('i want anniversary') || message.includes('want anniversary') || message.includes('anniversary please')) {
+            detectedType = 'anniversary';
+          } else if (message.includes('i want exam') || message.includes('want exam') || message.includes('exam please')) {
             detectedType = 'exam';
-          } else if (lastUserMessage.includes('task') || lastUserMessage.includes('todo') || lastUserMessage.includes('call') || lastUserMessage.includes('water')) {
+          } else if (message.includes('i want task') || message.includes('want task') || message.includes('task please')) {
             detectedType = 'task';
+          } else if (message.includes('i want bill') || message.includes('want bill') || message.includes('bill please')) {
+            detectedType = 'bill';
+          }
+          // Regular detection if no explicit correction
+          else if (message.includes('birthday') || message.includes('birth') || message.includes('bday')) {
+            detectedType = 'birthday';
+          } 
+          // Anniversary detection with common misspellings
+          else if (message.includes('anniversary') || message.includes('aniversary') || 
+                   message.includes('aniversari') || message.includes('anniversari') ||
+                   message.includes('aniversery') || message.includes('anniversery') ||
+                   message.includes('aniversarie') || message.includes('anniversarie')) {
+            detectedType = 'anniversary';
+          } 
+          // Meeting detection
+          else if (message.includes('meeting') || message.includes('appointment') || message.includes('call')) {
+            detectedType = 'meeting';
+          } 
+          // Exam detection
+          else if (message.includes('exam') || message.includes('test') || message.includes('quiz')) {
+            detectedType = 'exam';
+          } 
+          // Task detection
+          else if (message.includes('task') || message.includes('todo') || message.includes('reminder') || 
+                   message.includes('water') || message.includes('check') || message.includes('follow')) {
+            detectedType = 'task';
+          } 
+          // Bill detection
+          else if (message.includes('bill') || message.includes('payment') || message.includes('due')) {
+            detectedType = 'bill';
           } else {
             // If user didn't specify a clear type, ask for clarification
             response = "I can help you set reminders for birthdays, anniversaries, meetings, exams, tasks, and more. What kind of event do you want to set a reminder for?";
@@ -196,6 +250,10 @@ class AIService {
               response = "What do you want to be reminded about?";
               nextState = 'task_title';
               break;
+            case 'bill':
+              response = "What bill or payment is it?";
+              nextState = 'bill_title';
+              break;
             default:
               response = "I can help you set reminders for birthdays, anniversaries, meetings, exams, tasks, and more. What kind of event do you want to set a reminder for?";
               nextState = 'waiting_for_type';
@@ -206,6 +264,24 @@ class AIService {
         // Birthday flow
         case 'birthday_name':
           if (lastUserMessage.trim()) {
+            // Check if user is trying to correct the reminder type
+            const message = lastUserMessage.toLowerCase().trim();
+            if (message.includes('meeting') || message.includes('anniversary') || message.includes('exam') || message.includes('task') || message.includes('bill')) {
+              // User is trying to change the reminder type
+              reminderData.conversationState = 'waiting_for_type';
+              reminderData.reminderType = '';
+              reminderData.personName = '';
+              reminderData.date = '';
+              reminderData.relationship = '';
+              reminderData.note = '';
+              reminderData.title = '';
+              return {
+                response: "I understand you want a different type of reminder. What kind of event do you want to set a reminder for?",
+                updatedData: reminderData,
+                isComplete: false,
+                missingFields: []
+              };
+            }
             reminderData.personName = lastUserMessage.trim();
             response = "What's their birth date?";
             nextState = 'birthday_date';
@@ -217,6 +293,24 @@ class AIService {
 
         case 'birthday_date':
           if (reminderData.date || lastUserMessage.trim()) {
+            // Check if user is trying to correct something
+            const message = lastUserMessage.toLowerCase().trim();
+            if (message.includes('no') || message.includes('wait') || message.includes('stop') || message.includes('wrong')) {
+              // User wants to go back or correct
+              reminderData.conversationState = 'waiting_for_type';
+              reminderData.reminderType = '';
+              reminderData.personName = '';
+              reminderData.date = '';
+              reminderData.relationship = '';
+              reminderData.note = '';
+              reminderData.title = '';
+              return {
+                response: "No problem! Let me start over. What kind of event do you want to set a reminder for?",
+                updatedData: reminderData,
+                isComplete: false,
+                missingFields: []
+              };
+            }
             if (!reminderData.date) {
               reminderData.date = lastUserMessage.trim();
             }
@@ -380,6 +474,51 @@ class AIService {
             reminderData.note = lastUserMessage.trim();
           }
           response = "✅ Reminder created successfully!";
+          isComplete = true;
+          nextState = 'ask_another';
+          break;
+
+        // Bill flow
+        case 'bill_title':
+          if (lastUserMessage.trim()) {
+            reminderData.title = lastUserMessage.trim();
+            response = "When is the payment due?";
+            nextState = 'bill_date';
+          } else {
+            response = "What bill or payment is it?";
+            nextState = 'bill_title';
+          }
+          break;
+
+        case 'bill_date':
+          if (reminderData.date || lastUserMessage.trim()) {
+            if (!reminderData.date) {
+              reminderData.date = lastUserMessage.trim();
+            }
+            response = "What's the amount due?";
+            nextState = 'bill_amount';
+          } else {
+            response = "When is the payment due?";
+            nextState = 'bill_date';
+          }
+          break;
+
+        case 'bill_amount':
+          if (lastUserMessage.trim()) {
+            reminderData.amount = lastUserMessage.trim();
+            response = "Any additional notes about this bill?";
+            nextState = 'bill_note';
+          } else {
+            response = "What's the amount due?";
+            nextState = 'bill_amount';
+          }
+          break;
+
+        case 'bill_note':
+          if (lastUserMessage.trim() && !lastUserMessage.includes('no') && !lastUserMessage.includes('skip')) {
+            reminderData.note = lastUserMessage.trim();
+          }
+          response = "✅ Bill reminder added successfully!";
           isComplete = true;
           nextState = 'ask_another';
           break;
