@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { useNavigate } from 'react-router-dom';
-import { FaComments, FaBirthdayCake, FaSignOutAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell, FaGraduationCap, FaClipboardList } from 'react-icons/fa';
+import { FaComments, FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -165,10 +165,8 @@ function Dashboard() {
         return <FaBriefcase style={{ color: '#2196f3' }} />;
       case 'bill':
         return <FaMoneyBillWave style={{ color: '#4caf50' }} />;
-      case 'exam':
-        return <FaGraduationCap style={{ color: '#673ab7' }} />;
       case 'task':
-        return <FaClipboardList style={{ color: '#ff9800' }} />;
+        return <FaCalendarCheck style={{ color: '#ff9800' }} />;
       case 'custom':
         return <FaBell style={{ color: '#9c27b0' }} />;
       default:

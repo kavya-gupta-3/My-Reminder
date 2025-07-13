@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auth, database, ref, get, remove, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell, FaGraduationCap, FaClipboardList } from 'react-icons/fa';
+import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
 import './ReminderDetails.css';
 
 function ReminderDetails() {
@@ -41,10 +41,6 @@ function ReminderDetails() {
         return <FaBriefcase />;
       case 'bill':
         return <FaMoneyBillWave />;
-      case 'exam':
-        return <FaGraduationCap />;
-      case 'task':
-        return <FaClipboardList />;
       default:
         return <FaBell />;
     }
@@ -61,8 +57,6 @@ function ReminderDetails() {
         return 'Meeting';
       case 'bill':
         return 'Bill';
-      case 'exam':
-        return 'Exam';
       case 'task':
         return 'Task';
       case 'custom':
