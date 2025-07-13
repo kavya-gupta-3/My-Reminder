@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { useNavigate } from 'react-router-dom';
-import { FaComments, FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
+import { FaComments, FaBirthdayCake, FaSignOutAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell, FaGraduationCap, FaClipboardList, FaCalendarAlt, FaGift, FaUsers, FaClock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -153,24 +153,35 @@ function Dashboard() {
     }
   };
 
-  // Get icon based on reminder type
+  // Get icon based on reminder type with better visual appeal
   const getReminderIcon = (reminderType, daysUntil) => {
-    // Always show type-specific icons, not urgency-based icons
+    // Check if reminder is today or overdue for special styling
+    const isToday = daysUntil === 0;
+    const isOverdue = daysUntil < 0;
+    
+    const baseStyle = {
+      fontSize: '24px',
+      filter: isToday ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))' : 'none',
+      animation: isToday ? 'pulse 2s infinite' : 'none'
+    };
+
     switch (reminderType) {
       case 'birthday':
-        return <FaBirthdayCake style={{ color: '#ff6b6b' }} />;
+        return <FaBirthdayCake style={{ ...baseStyle, color: isToday ? '#ff4757' : '#ff6b6b' }} />;
       case 'anniversary':
-        return <FaHeart style={{ color: '#e91e63' }} />;
+        return <FaHeart style={{ ...baseStyle, color: isToday ? '#ff3838' : '#e91e63' }} />;
       case 'meeting':
-        return <FaBriefcase style={{ color: '#2196f3' }} />;
+        return <FaUsers style={{ ...baseStyle, color: isToday ? '#3742fa' : '#2196f3' }} />;
       case 'bill':
-        return <FaMoneyBillWave style={{ color: '#4caf50' }} />;
+        return <FaMoneyBillWave style={{ ...baseStyle, color: isToday ? '#2ed573' : '#4caf50' }} />;
+      case 'exam':
+        return <FaGraduationCap style={{ ...baseStyle, color: isToday ? '#5f27cd' : '#673ab7' }} />;
       case 'task':
-        return <FaCalendarCheck style={{ color: '#ff9800' }} />;
+        return <FaCheckCircle style={{ ...baseStyle, color: isToday ? '#ffa502' : '#ff9800' }} />;
       case 'custom':
-        return <FaBell style={{ color: '#9c27b0' }} />;
+        return <FaCalendarAlt style={{ ...baseStyle, color: isToday ? '#9c27b0' : '#9c27b0' }} />;
       default:
-        return <FaBell style={{ color: '#666' }} />;
+        return <FaBell style={{ ...baseStyle, color: isToday ? '#ff6b6b' : '#666' }} />;
     }
   };
 
