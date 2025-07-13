@@ -1,14 +1,61 @@
 import * as chrono from 'chrono-node';
 
-class AIService {
-  // Parse natural date input to MM/DD/YYYY format
-  parseNaturalDate(dateInput) {
-    if (!dateInput || typeof dateInput !== 'string') {
-      return null;
-    }
+function stringSimilarity(a, b) {
+  // Simple similarity: lower, remove spaces, count matching chars
+  a = a.toLowerCase().replace(/\s+/g, '');
+  b = b.toLowerCase().replace(/\s+/g, '');
+  let matches = 0;
+  for (let char of a) if (b.includes(char)) matches++;
+  return matches / Math.max(a.length, b.length, 1);
+}
 
+function fuzzyFindReminder(reminders, query, type = null) {
+  if (!reminders || reminders.length === 0) return null;
+  let best = null;
+  let bestScore = 0.5; // Only match if > 0.5
+  for (let r of reminders) {
+    if (type && r.reminderType !== type) continue;
+    const name = r.personName || r.title || '';
+    const score = stringSimilarity(name, query);
+    if (score > bestScore) {
+      best = r;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+function fuzzyFindRemindersByType(reminders, type) {
+  if (!reminders) return [];
+  return reminders.filter(r => r.reminderType === type);
+}
+
+function detectEventType(text) {
+  text = text.toLowerCase();
+  if (/birth|bday|b\'day|birtday|birtay|bday|🎂|birthday/.test(text)) return 'birthday';
+  if (/anniv|anni|💍|wedding|marriage/.test(text)) return 'anniversary';
+  if (/meet|appointment|call|zoom|conference|📅/.test(text)) return 'meeting';
+  if (/exam|test|paper|quiz|final|midterm/.test(text)) return 'exam';
+  if (/bill|payment|due|invoice|rent|💰/.test(text)) return 'bill';
+  if (/task|todo|to-do|chore|work|job|📝/.test(text)) return 'task';
+  return null;
+}
+
+function extractName(text) {
+  // Try to extract a name (very basic, just first capitalized word)
+  const match = text.match(/([A-Z][a-z]+( [A-Z][a-z]+)?)/);
+  return match ? match[0] : '';
+}
+
+function extractAmount(text) {
+  const match = text.match(/\$?(\d+[.,]?\d*)/);
+  return match ? match[1] : '';
+}
+
+class AIService {
+  parseNaturalDate(dateInput) {
+    if (!dateInput || typeof dateInput !== 'string') return null;
     try {
-      // Try to parse with chrono
       const parsed = chrono.parse(dateInput);
       if (parsed && parsed.length > 0) {
         const date = parsed[0].start.date();
@@ -20,101 +67,229 @@ class AIService {
     } catch (error) {
       console.error('Error parsing date:', error);
     }
-
     return null;
   }
 
-  // Extract person name from user input
-  extractPersonName(input) {
-    // First, try to extract from patterns with reminder types
-    const namePatterns = [
-      /(?:for|about|to)\s+([A-Za-z\s]+?)(?:\s+(?:birthday|anniversary|meeting|task|bill|exam|reminder))/i,
-      /([A-Za-z\s]+?)(?:\s+(?:birthday|anniversary|meeting|task|bill|exam|reminder))/i,
-      /(?:my|the)\s+([A-Za-z\s]+?)(?:\s+(?:birthday|anniversary|meeting|task|bill|exam|reminder))/i
-    ];
-
-    for (const pattern of namePatterns) {
-      const match = input.match(pattern);
-      if (match && match[1]) {
-        return match[1].trim();
+  async getUserContext(userId) {
+    try {
+      const { database, ref, get } = await import('../firebase');
+      const userRef = ref(database, `users/${userId}`);
+      const userSnapshot = await get(userRef);
+      const userData = userSnapshot.exists() ? userSnapshot.val() : null;
+      const remindersRef = ref(database, `reminders/${userId}`);
+      const remindersSnapshot = await get(remindersRef);
+      let reminders = [];
+      if (remindersSnapshot.exists()) {
+        const remindersData = remindersSnapshot.val();
+        reminders = Object.keys(remindersData).map(key => ({
+          id: key,
+          ...remindersData[key]
+        }));
       }
+      return { user: userData, reminders };
+    } catch (error) {
+      console.error('Error fetching user context:', error);
+      return { user: null, reminders: [] };
     }
-
-    // If no pattern match, check if the input is just a name/description
-    const trimmedInput = input.trim();
-    if (trimmedInput && !this.detectReminderType(trimmedInput)) {
-      // If it doesn't contain reminder type keywords, treat it as a name
-      return trimmedInput;
-    }
-
-    return null;
   }
 
-  // Detect reminder type from user input
-  detectReminderType(input) {
-    const lowerInput = input.toLowerCase();
-    
-    if (lowerInput.includes('birthday') || lowerInput.includes('birth') || lowerInput.includes('bday')) {
-      return 'birthday';
-    } else if (lowerInput.includes('anniversary') || lowerInput.includes('wedding')) {
-      return 'anniversary';
-    } else if (lowerInput.includes('meeting') || lowerInput.includes('appointment') || lowerInput.includes('call')) {
-      return 'meeting';
-    } else if (lowerInput.includes('bill') || lowerInput.includes('payment') || lowerInput.includes('due')) {
-      return 'bill';
-    } else if (lowerInput.includes('task') || lowerInput.includes('todo') || lowerInput.includes('work')) {
-      return 'task';
-    } else if (lowerInput.includes('exam') || lowerInput.includes('test') || lowerInput.includes('assignment')) {
-      return 'exam';
-    }
-    
-    return null;
-  }
-
-  // Main AI conversation processor
+  // Main conversational AI logic
   async processChat(messages, reminderData, isEditing, userContext) {
     try {
+      const reminders = userContext?.reminders || [];
       const lastUserMessage = messages.filter(m => m.type === 'user').pop()?.content || '';
-      const conversationHistory = messages.filter(m => m.type === 'user').map(m => m.content).join(' | ');
-      
-      // Get user's existing reminders for context
-      let existingReminders = [];
-      if (userContext && userContext.reminders) {
-        existingReminders = userContext.reminders;
+      const lowerMsg = lastUserMessage.toLowerCase();
+      let state = reminderData._state || null;
+      let type = reminderData.reminderType || null;
+      let response = '';
+      let updatedData = { ...reminderData };
+      let isComplete = false;
+      let loop = false;
+
+      // --- Detect edit/delete/show commands ---
+      if (/delete|remove|erase|cancel/.test(lowerMsg)) {
+        // Try to find which reminder to delete
+        let found = null;
+        let foundType = detectEventType(lowerMsg);
+        if (foundType) {
+          found = fuzzyFindReminder(reminders, lastUserMessage, foundType);
+        } else {
+          found = fuzzyFindReminder(reminders, lastUserMessage);
+        }
+        if (found) {
+          // Simulate deletion (actual deletion should be handled in UI)
+          response = `Done. I’ve removed the ${found.reminderType} for ${found.personName || found.title || 'this event'}. 🗑️`;
+        } else {
+          response = `I couldn't find that reminder. Can you tell me the name or type?`;
+        }
+        loop = true;
+        return { response, updatedData, isComplete: false, missingFields: [] };
+      }
+      if (/change|edit|update|modify/.test(lowerMsg)) {
+        // Try to find which reminder to edit
+        let found = null;
+        let foundType = detectEventType(lowerMsg);
+        if (foundType) {
+          found = fuzzyFindReminder(reminders, lastUserMessage, foundType);
+        } else {
+          found = fuzzyFindReminder(reminders, lastUserMessage);
+        }
+        if (found) {
+          // Simulate edit (actual edit should be handled in UI)
+          response = `What would you like to change for ${found.personName || found.title || 'this event'}?`;
+          updatedData = { ...found, _state: 'edit' };
+        } else {
+          response = `I couldn't find that reminder to edit. Can you tell me the name or type?`;
+        }
+        return { response, updatedData, isComplete: false, missingFields: [] };
+      }
+      if (/show|list|what|which|display|see/.test(lowerMsg)) {
+        // Show reminders by type or today
+        if (/today|now/.test(lowerMsg)) {
+          const today = new Date();
+          const todayStr = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+          const todayReminders = reminders.filter(r => (r.date || '').startsWith(todayStr));
+          if (todayReminders.length > 0) {
+            response = `Here are your reminders for today:\n` + todayReminders.map(r => `- ${r.reminderType}: ${r.personName || r.title} (${r.date})`).join('\n');
+          } else {
+            response = `You have no reminders for today.`;
+          }
+        } else {
+          let foundType = detectEventType(lowerMsg);
+          if (foundType) {
+            const foundRems = fuzzyFindRemindersByType(reminders, foundType);
+            if (foundRems.length > 0) {
+              response = `Here are your ${foundType} reminders:\n` + foundRems.map(r => `- ${r.personName || r.title} (${r.date})`).join('\n');
+            } else {
+              response = `You have no ${foundType} reminders.`;
+            }
+          } else {
+            response = `Here are all your reminders:\n` + reminders.map(r => `- ${r.reminderType}: ${r.personName || r.title} (${r.date})`).join('\n');
+          }
+        }
+        loop = true;
+        return { response, updatedData, isComplete: false, missingFields: [] };
       }
 
-      // If this is the first message or we're starting fresh
-      if (messages.length <= 1 || (messages.length === 2 && messages[0].type === 'ai')) {
-        return {
-          response: "Hey! What kind of event would you like to set a reminder for?",
-          updatedData: reminderData,
-          isComplete: false,
-          missingFields: []
-        };
+      // --- Conversation Start ---
+      if (!state && messages.length <= 2) {
+        response = `Hey! What kind of event would you like to set a reminder for?`;
+        updatedData = { reminderType: '', personName: '', date: '', relationship: '', note: '', _state: 'await_type' };
+        return { response, updatedData, isComplete: false, missingFields: [] };
       }
 
-      // Handle edit mode
-      if (isEditing) {
-        return this.handleEditMode(lastUserMessage, reminderData, existingReminders);
+      // --- Detect event type if not set ---
+      if (!type || !['birthday','anniversary','meeting','exam','bill','task','custom'].includes(type)) {
+        let detected = detectEventType(lastUserMessage);
+        if (detected) {
+          type = detected;
+          updatedData.reminderType = type;
+        } else {
+          // fallback: treat as custom
+          type = 'custom';
+          updatedData.reminderType = type;
+        }
       }
 
-      // Handle delete requests
-      if (this.isDeleteRequest(lastUserMessage, existingReminders)) {
-        return this.handleDeleteRequest(lastUserMessage, existingReminders);
+      // --- Step-by-step conversational flow ---
+      // BIRTHDAY
+      if (type === 'birthday') {
+        if (!updatedData.personName) {
+          updatedData._state = 'await_birthday_name';
+          response = `Whose birthday is it?`;
+          return { response, updatedData, isComplete: false, missingFields: ['personName'] };
+        }
+        if (!updatedData.date) {
+          const parsed = this.parseNaturalDate(lastUserMessage);
+          if (parsed) updatedData.date = parsed;
+          if (!updatedData.date) {
+            updatedData._state = 'await_birthday_date';
+            response = `What’s their birth date?`;
+            return { response, updatedData, isComplete: false, missingFields: ['date'] };
+          }
+        }
+        if (!updatedData.relationship) {
+          updatedData._state = 'await_birthday_relationship';
+          response = `What is their relationship to you?`;
+          return { response, updatedData, isComplete: false, missingFields: ['relationship'] };
+        }
+        if (!updatedData.note) {
+          updatedData._state = 'await_birthday_note';
+          response = `Would you like to add a note or message? (optional)`;
+          return { response, updatedData, isComplete: false, missingFields: [] };
+        }
+        response = `Done! I’ve saved the birthday for ${updatedData.personName}. 🎉`;
+        isComplete = true;
+        loop = true;
+      }
+      // ANNIVERSARY
+      else if (type === 'anniversary') {
+        if (!updatedData.personName) {
+          updatedData._state = 'await_anniv_name';
+          response = `Whose anniversary is it?`;
+          return { response, updatedData, isComplete: false, missingFields: ['personName'] };
+        }
+        if (!updatedData.date) {
+          const parsed = this.parseNaturalDate(lastUserMessage);
+          if (parsed) updatedData.date = parsed;
+          if (!updatedData.date) {
+            updatedData._state = 'await_anniv_date';
+            response = `What’s the date?`;
+            return { response, updatedData, isComplete: false, missingFields: ['date'] };
+          }
+        }
+        if (!updatedData.note) {
+          updatedData._state = 'await_anniv_note';
+          response = `Any note or message to include? (optional)`;
+          return { response, updatedData, isComplete: false, missingFields: [] };
+        }
+        response = `Anniversary reminder added. 💖 Want to add another one?`;
+        isComplete = true;
+        loop = true;
+      }
+      // MEETING/EXAM/TASK/BILL/OTHER
+      else if (['meeting','exam','task','bill','custom'].includes(type)) {
+        if (!updatedData.title && !updatedData.personName) {
+          updatedData._state = 'await_title';
+          response = `What is the reminder for?`;
+          return { response, updatedData, isComplete: false, missingFields: ['title'] };
+        }
+        if (!updatedData.date) {
+          const parsed = this.parseNaturalDate(lastUserMessage);
+          if (parsed) updatedData.date = parsed;
+          if (!updatedData.date) {
+            updatedData._state = 'await_date';
+            response = `What date and time should I remind you?`;
+            return { response, updatedData, isComplete: false, missingFields: ['date'] };
+          }
+        }
+        if (!updatedData.note) {
+          updatedData._state = 'await_note';
+          response = `Any message or detail to include? (optional)`;
+          return { response, updatedData, isComplete: false, missingFields: [] };
+        }
+        response = `Got it! Your reminder has been saved. ✅`;
+        isComplete = true;
+        loop = true;
       }
 
-      // Handle view requests
-      if (this.isViewRequest(lastUserMessage)) {
-        return this.handleViewRequest(lastUserMessage, existingReminders);
+      // --- Looping: ask if user wants to do anything else ---
+      if (isComplete || loop) {
+        response += `\n\nWould you like to do anything else?`;
+        updatedData = { reminderType: '', personName: '', date: '', relationship: '', note: '', _state: null };
+        isComplete = false; // Let UI handle actual save, then restart
       }
 
-      // Handle reminder creation/editing
-      return this.handleReminderCreation(lastUserMessage, reminderData, conversationHistory, existingReminders);
+      // --- Fallback for unclear input ---
+      if (!response) {
+        response = `Can you tell me a bit more? Like who it’s for or when?`;
+      }
 
+      return { response, updatedData, isComplete, missingFields: [] };
     } catch (error) {
-      console.error('Error processing chat:', error);
+      console.error('Error in AI conversation:', error);
       return {
-        response: "I'm having trouble understanding. Can you tell me a bit more?",
+        response: "I'm having trouble processing your request. Please try again.",
         updatedData: reminderData,
         isComplete: false,
         missingFields: []
@@ -122,331 +297,13 @@ class AIService {
     }
   }
 
-  // Handle edit mode
-  handleEditMode(userMessage, reminderData, existingReminders) {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('name') || lowerMessage.includes('who')) {
-      return {
-        response: "What's the new name?",
-        updatedData: { ...reminderData, editingField: 'personName' },
-        isComplete: false,
-        missingFields: []
-      };
-    } else if (lowerMessage.includes('date') || lowerMessage.includes('when')) {
-      return {
-        response: "What's the new date?",
-        updatedData: { ...reminderData, editingField: 'date' },
-        isComplete: false,
-        missingFields: []
-      };
-    } else if (lowerMessage.includes('note') || lowerMessage.includes('message')) {
-      return {
-        response: "What note would you like to add?",
-        updatedData: { ...reminderData, editingField: 'note' },
-        isComplete: false,
-        missingFields: []
-      };
-    } else {
-      // Try to extract the new value
-      const newValue = this.extractNewValue(userMessage, reminderData.editingField);
-      if (newValue) {
-        return {
-          response: `Updated! ${reminderData.editingField} is now "${newValue}". Want to change anything else?`,
-          updatedData: { 
-            ...reminderData, 
-            [reminderData.editingField]: newValue,
-            editingField: null 
-          },
-          isComplete: true,
-          missingFields: []
-        };
-      }
-    }
-
-    return {
-      response: "What would you like to change? The name, date, or add a note?",
-      updatedData: reminderData,
-      isComplete: false,
-      missingFields: []
-    };
-  }
-
-  // Extract new value for editing
-  extractNewValue(userMessage, field) {
-    if (field === 'date') {
-      return this.parseNaturalDate(userMessage);
-    } else if (field === 'personName') {
-      return this.extractPersonName(userMessage) || userMessage.trim();
-    } else if (field === 'note') {
-      return userMessage.trim();
-    }
-    return null;
-  }
-
-  // Check if user wants to delete a reminder
-  isDeleteRequest(userMessage, existingReminders) {
-    const lowerMessage = userMessage.toLowerCase();
-    return lowerMessage.includes('delete') || lowerMessage.includes('remove') || lowerMessage.includes('cancel');
-  }
-
-  // Handle delete requests
-  handleDeleteRequest(userMessage, existingReminders) {
-    // Find the reminder to delete
-    const reminderToDelete = this.findReminderByName(userMessage, existingReminders);
-    
-    if (reminderToDelete) {
-      return {
-        response: `Done! I've removed the reminder for ${reminderToDelete.personName || reminderToDelete.title}. Want to do anything else?`,
-        updatedData: { action: 'delete', reminderId: reminderToDelete.id },
-        isComplete: true,
-        missingFields: []
-      };
-    } else {
-      return {
-        response: "I couldn't find that reminder. Can you tell me which one you want to delete?",
-        updatedData: {},
-        isComplete: false,
-        missingFields: []
-      };
-    }
-  }
-
-  // Check if user wants to view reminders
-  isViewRequest(userMessage) {
-    const lowerMessage = userMessage.toLowerCase();
-    return lowerMessage.includes('show') || lowerMessage.includes('what') || lowerMessage.includes('list') || 
-           lowerMessage.includes('today') || lowerMessage.includes('upcoming');
-  }
-
-  // Handle view requests
-  handleViewRequest(userMessage, existingReminders) {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('today')) {
-      const todayReminders = this.getTodayReminders(existingReminders);
-      if (todayReminders.length > 0) {
-        const reminderList = todayReminders.map(r => `• ${r.personName || r.title} (${r.reminderType})`).join('\n');
-        return {
-          response: `Here are your reminders for today:\n${reminderList}`,
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      } else {
-        return {
-          response: "You have no reminders for today! Want to add one?",
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      }
-    } else if (lowerMessage.includes('birthday')) {
-      const birthdayReminders = existingReminders.filter(r => r.reminderType === 'birthday');
-      if (birthdayReminders.length > 0) {
-        const reminderList = birthdayReminders.map(r => `• ${r.personName} - ${r.date}`).join('\n');
-        return {
-          response: `Here are your birthday reminders:\n${reminderList}`,
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      } else {
-        return {
-          response: "You don't have any birthday reminders yet. Want to add one?",
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      }
-    } else {
-      // Show all reminders
-      if (existingReminders.length > 0) {
-        const reminderList = existingReminders.map(r => `• ${r.personName || r.title} (${r.reminderType}) - ${r.date}`).join('\n');
-        return {
-          response: `Here are all your reminders:\n${reminderList}`,
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      } else {
-        return {
-          response: "You don't have any reminders yet. Want to add your first one?",
-          updatedData: {},
-          isComplete: false,
-          missingFields: []
-        };
-      }
-    }
-  }
-
-  // Handle reminder creation
-  handleReminderCreation(userMessage, reminderData, conversationHistory, existingReminders) {
-    // Detect reminder type if not already set
-    let detectedType = reminderData.reminderType || this.detectReminderType(userMessage);
-    
-    // Extract person name if not already set
-    let personName = reminderData.personName || this.extractPersonName(userMessage);
-    
-    // Extract date if not already set
-    let date = reminderData.date || this.parseNaturalDate(userMessage);
-    
-    // If we have a reminder type but no person name, and the user message doesn't contain reminder type keywords,
-    // treat the entire message as a person name
-    if (detectedType && !personName && !this.detectReminderType(userMessage) && userMessage.trim()) {
-      personName = userMessage.trim();
-    }
-    
-    // Update reminder data
-    const updatedData = {
-      ...reminderData,
-      reminderType: detectedType || reminderData.reminderType || 'birthday',
-      personName: personName || reminderData.personName,
-      date: date || reminderData.date
-    };
-
-    // Determine what information we still need
-    const missingFields = this.getMissingFields(updatedData);
-    
-    if (missingFields.length === 0) {
-      // We have all the information, save the reminder
-      return {
-        response: this.getCompletionMessage(updatedData),
-        updatedData: updatedData,
-        isComplete: true,
-        missingFields: []
-      };
-    } else {
-      // Ask for missing information
-      return {
-        response: this.getNextQuestion(updatedData, missingFields[0]),
-        updatedData: updatedData,
-        isComplete: false,
-        missingFields: missingFields
-      };
-    }
-  }
-
-  // Get missing fields for a reminder
-  getMissingFields(reminderData) {
-    const missing = [];
-    
-    if (!reminderData.reminderType) {
-      missing.push('type');
-    }
-    
-    if (!reminderData.personName && !reminderData.title) {
-      missing.push('name');
-    }
-    
-    if (!reminderData.date) {
-      missing.push('date');
-    }
-    
-    return missing;
-  }
-
-  // Get the next question to ask
-  getNextQuestion(reminderData, missingField) {
-    const type = reminderData.reminderType;
-    
-    switch (missingField) {
-      case 'type':
-        return "Hmm, I didn't catch that. Do you want to set a birthday, anniversary, task, or something else?";
-      
-      case 'name':
-        if (type === 'birthday') {
-          return "Whose birthday is it?";
-        } else if (type === 'anniversary') {
-          return "Whose anniversary is it?";
-        } else if (type === 'meeting') {
-          return "What is the meeting for?";
-        } else if (type === 'bill') {
-          return "What bill is this for?";
-        } else if (type === 'task') {
-          return "What task do you need to remember?";
-        } else {
-          return "What is the reminder for?";
-        }
-      
-      case 'date':
-        const name = reminderData.personName || reminderData.title || 'this';
-        if (type === 'birthday') {
-          return `What's ${name}'s birth date?`;
-        } else if (type === 'anniversary') {
-          return `What's the date of ${name}'s anniversary?`;
-        } else if (type === 'meeting') {
-          return `When is the "${name}" meeting?`;
-        } else if (type === 'bill') {
-          return `When is the ${name} due?`;
-        } else if (type === 'task') {
-          return `When do you need to complete "${name}"?`;
-        } else {
-          return `When is "${name}"?`;
-        }
-      
-      default:
-        return "Can you tell me a bit more?";
-    }
-  }
-
-  // Get completion message
-  getCompletionMessage(reminderData) {
-    const type = reminderData.reminderType;
-    const name = reminderData.personName || reminderData.title;
-    
-    switch (type) {
-      case 'birthday':
-        return `Done! I've saved the birthday for ${name}. 🎉\n\nWant to create another reminder?`;
-      case 'anniversary':
-        return `Anniversary reminder added for ${name}. 💖\n\nWant to add another one?`;
-      case 'meeting':
-        return `Got it! Your meeting "${name}" has been saved. ✅\n\nNeed to add another one?`;
-      case 'bill':
-        return `Perfect! I've saved the ${name} reminder. 💳\n\nWant to add another reminder?`;
-      case 'task':
-        return `Task "${name}" has been saved! 🎯\n\nNeed to add another one?`;
-      default:
-        return `Got it! Your reminder for "${name}" has been saved. ✅\n\nWant to add another one?`;
-    }
-  }
-
-  // Find reminder by name in existing reminders
-  findReminderByName(userMessage, existingReminders) {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    for (const reminder of existingReminders) {
-      const reminderName = (reminder.personName || reminder.title || '').toLowerCase();
-      if (lowerMessage.includes(reminderName) && reminderName.length > 0) {
-        return reminder;
-      }
-    }
-    
-    return null;
-  }
-
-  // Get today's reminders
-  getTodayReminders(reminders) {
-    const today = new Date();
-    const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
-    
-    return reminders.filter(reminder => {
-      if (!reminder.date) return false;
-      const reminderDate = reminder.date.split('/');
-      return reminderDate[0] === todayString.split('/')[0] && reminderDate[1] === todayString.split('/')[1];
-    });
-  }
-
-  // Generate reminder message (for display purposes)
   async generateReminderMessage(reminderData, userContext = null, size = 'medium') {
     try {
-      const currentDate = new Date().toLocaleDateString();
-      const reminderType = reminderData.reminderType || 'reminder';
-      
+      // Build context from user's existing reminders
       let userContextInfo = '';
       if (userContext && userContext.reminders) {
         const existingReminders = userContext.reminders
-          .filter(r => r.id !== reminderData.id)
+          .filter(r => r.id !== reminderData.id) // Exclude current reminder
           .map(r => `${r.personName} (${r.relationship}, ${r.reminderType || 'reminder'})`)
           .join(', ');
         
@@ -455,25 +312,39 @@ class AIService {
         }
       }
 
-      const prompt = `You are a friendly AI assistant that creates personalized ${reminderType} messages. Today's date is ${currentDate}.
+      // Message size logic
+      let sizePrompt = '';
+      let maxTokens = 100;
+      if (size === 'small') {
+        sizePrompt = 'Keep it very short (1-2 sentences, 15-25 words).';
+        maxTokens = 60;
+      } else if (size === 'large') {
+        sizePrompt = 'Make it a bit longer and more heartfelt (4-6 sentences, up to 80 words).';
+        maxTokens = 200;
+      } else {
+        sizePrompt = 'Keep it short and sweet (2-3 sentences, 30-40 words).';
+        maxTokens = 100;
+      }
 
-IMPORTANT RULES:
-- Always be warm, caring, and appropriate for the reminder type
-- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 📅, 💝, etc.)
-- Keep it short and sweet (2-3 sentences, 30-40 words)
-- Make them feel personal and genuine
-- Don't be overly formal or generic
-- Focus on positive wishes and helpful reminders
+      const currentDate = new Date().toLocaleDateString();
+      const reminderType = reminderData.reminderType || 'reminder';
+      
+      let typeSpecificPrompt = '';
+      if (reminderType === 'birthday') {
+        typeSpecificPrompt = `Generate a personalized birthday message for ${reminderData.personName}.`;
+      } else if (reminderType === 'anniversary') {
+        typeSpecificPrompt = `Generate a personalized anniversary message for ${reminderData.personName}.`;
+      } else if (reminderType === 'meeting') {
+        typeSpecificPrompt = `Generate a friendly reminder message for ${reminderData.personName}'s meeting.`;
+      } else if (reminderType === 'bill') {
+        typeSpecificPrompt = `Generate a helpful reminder message for ${reminderData.personName}'s bill payment.`;
+      } else {
+        typeSpecificPrompt = `Generate a personalized ${reminderType} message for ${reminderData.personName}.`;
+      }
 
-Context:
-- Person: ${reminderData.personName}
-- Reminder Type: ${reminderType}
-- Date: ${reminderData.date}
-- Relationship: ${reminderData.relationship}
-- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}
+      const prompt = `You are a friendly AI assistant that creates personalized ${reminderType} messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and appropriate for the reminder type\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, 📅, 💝, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Focus on positive wishes and helpful reminders\n\n${typeSpecificPrompt}\n      \nContext:\n- Person: ${reminderData.personName}\n- Reminder Type: ${reminderType}\n- Date: ${reminderData.date}\n- Relationship: ${reminderData.relationship}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt message that feels like it's coming from a caring friend or family member.`;
 
-Create a heartfelt message that feels like it's coming from a caring friend or family member.`;
-
+      // Use backend proxy
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
         method: 'POST',
         headers: {
@@ -484,14 +355,14 @@ Create a heartfelt message that feels like it's coming from a caring friend or f
           messages: [
             {
               role: 'system',
-              content: `You are a friendly AI assistant that creates personalized ${reminderType} messages. You are warm, caring, and creative.`
+              content: `You are a friendly AI assistant that creates personalized ${reminderType} messages. You are warm, caring, and creative. You follow the rules strictly and create appropriate, celebratory messages.`
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          max_tokens: 100,
+          max_tokens: maxTokens,
           temperature: 0.8
         })
       });
@@ -504,45 +375,17 @@ Create a heartfelt message that feels like it's coming from a caring friend or f
       return data.choices[0].message.content.trim();
     } catch (error) {
       console.error('Error generating reminder message:', error);
+      // Fallback to a simple message if AI fails
       const reminderType = reminderData.reminderType || 'reminder';
       return `🎉 Happy ${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)} ${reminderData.personName}! Wishing you a wonderful day filled with joy and success!`;
     }
   }
 
-  // Get user context from Firebase
-  async getUserContext(userId) {
-    try {
-      const { database, ref, get } = await import('../firebase');
-      
-      // Get user profile
-      const userRef = ref(database, `users/${userId}`);
-      const userSnapshot = await get(userRef);
-      const userData = userSnapshot.exists() ? userSnapshot.val() : null;
-
-      // Get user's reminders
-      const remindersRef = ref(database, `reminders/${userId}`);
-      const remindersSnapshot = await get(remindersRef);
-      let reminders = [];
-      
-      if (remindersSnapshot.exists()) {
-        const remindersData = remindersSnapshot.val();
-        reminders = Object.keys(remindersData).map(key => ({
-          id: key,
-          ...remindersData[key]
-        }));
-      }
-
-      return {
-        user: userData,
-        reminders: reminders
-      };
-    } catch (error) {
-      console.error('Error fetching user context:', error);
-      return { user: null, reminders: [] };
-    }
+  // Legacy method for backward compatibility
+  async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
+    return this.generateReminderMessage({ ...reminderData, reminderType: 'birthday' }, userContext, size);
   }
 
-  // Direct reminder message generation
   async generateDirectReminderMessage(reminderData, userContext = null, size = 'medium') {
     try {
       const currentDate = new Date().toLocaleDateString();
@@ -592,6 +435,7 @@ Reminder data: ${JSON.stringify(reminderData)}`;
       
       if (!response.ok) {
         console.error('API Error:', response.status, response.statusText);
+        // Return a fallback message instead of throwing
         const reminderType = reminderData.reminderType || 'reminder';
         const title = reminderData.title || reminderData.personName || 'this event';
         return `🎉 Happy ${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)}! Wishing you a wonderful day for ${title}!`;
@@ -605,11 +449,6 @@ Reminder data: ${JSON.stringify(reminderData)}`;
       const title = reminderData.title || reminderData.personName || 'this event';
       return `🎉 Happy ${reminderType.charAt(0).toUpperCase() + reminderType.slice(1)}! Wishing you a wonderful day for ${title}!`;
     }
-  }
-
-  // Legacy methods for backward compatibility
-  async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
-    return this.generateReminderMessage({ ...reminderData, reminderType: 'birthday' }, userContext, size);
   }
 
   async generateDirectBirthdayMessage(reminderData, userContext = null, size = 'medium') {
