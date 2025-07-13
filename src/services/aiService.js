@@ -26,6 +26,7 @@ class AIService {
 
   // Extract person name from user input
   extractPersonName(input) {
+    // First, try to extract from patterns with reminder types
     const namePatterns = [
       /(?:for|about|to)\s+([A-Za-z\s]+?)(?:\s+(?:birthday|anniversary|meeting|task|bill|exam|reminder))/i,
       /([A-Za-z\s]+?)(?:\s+(?:birthday|anniversary|meeting|task|bill|exam|reminder))/i,
@@ -37,6 +38,13 @@ class AIService {
       if (match && match[1]) {
         return match[1].trim();
       }
+    }
+
+    // If no pattern match, check if the input is just a name/description
+    const trimmedInput = input.trim();
+    if (trimmedInput && !this.detectReminderType(trimmedInput)) {
+      // If it doesn't contain reminder type keywords, treat it as a name
+      return trimmedInput;
     }
 
     return null;
@@ -282,6 +290,12 @@ class AIService {
     
     // Extract date if not already set
     let date = reminderData.date || this.parseNaturalDate(userMessage);
+    
+    // If we have a reminder type but no person name, and the user message doesn't contain reminder type keywords,
+    // treat the entire message as a person name
+    if (detectedType && !personName && !this.detectReminderType(userMessage) && userMessage.trim()) {
+      personName = userMessage.trim();
+    }
     
     // Update reminder data
     const updatedData = {
