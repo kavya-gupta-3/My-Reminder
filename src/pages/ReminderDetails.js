@@ -112,9 +112,13 @@ function ReminderDetails() {
             const day = String(date.getDate()).padStart(2, '0');
             const year = date.getFullYear();
             dateString = `${month}/${day}/${year}`;
+          } else {
+            console.error('Invalid date format for countdown:', dateString);
+            return;
           }
         } catch (error) {
           console.error('Error parsing date for countdown:', error);
+          return;
         }
       }
       if (!dateString || !dateString.includes('/')) return;
@@ -605,6 +609,20 @@ function ReminderDetails() {
                         day: 'numeric',
                         year: 'numeric'
                       });
+                    } else if (dateString) {
+                      // Try to parse and format other date formats
+                      try {
+                        const date = new Date(dateString);
+                        if (!isNaN(date.getTime())) {
+                          return date.toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Error parsing date for display:', error);
+                      }
                     }
                     return dateString || '';
                   })()

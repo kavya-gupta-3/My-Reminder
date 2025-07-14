@@ -56,6 +56,7 @@ class AIService {
     ];
     let day, month, year;
     let match;
+    
     // 1. DD month YYYY or DD month
     match = normalized.match(/^(\d{1,2})\s+([a-z]+)(?:\s+(\d{4}))?$/);
     if (match && monthNames.includes(match[2])) {
@@ -64,6 +65,7 @@ class AIService {
       year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
       return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
     }
+    
     // 2. month DD YYYY or month DD
     match = normalized.match(/^([a-z]+)\s+(\d{1,2})(?:\s+(\d{4}))?$/);
     if (match && monthNames.includes(match[1])) {
@@ -73,20 +75,30 @@ class AIService {
       return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
     }
 
-    // Fallback: Try to parse the normalized date string
+    // 3. Try to parse with JavaScript Date constructor as fallback
     try {
       const date = new Date(normalized);
-      if (isNaN(date.getTime())) {
-        return dateString; // Return original if parsing fails
+      if (!isNaN(date.getTime())) {
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
       }
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${month}/${day}/${year}`;
     } catch (error) {
-      console.error('Error converting date:', error);
-      return dateString; // Return original if conversion fails
+      console.error('Error parsing date with Date constructor:', error);
     }
+
+    // 4. Try to handle common date formats like "3rd april", "7th may"
+    const ordinalMatch = normalized.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:\s+(\d{4}))?$/);
+    if (ordinalMatch && monthNames.includes(ordinalMatch[2])) {
+      day = parseInt(ordinalMatch[1]);
+      month = monthNames.indexOf(ordinalMatch[2]) + 1;
+      year = ordinalMatch[3] ? parseInt(ordinalMatch[3]) : new Date().getFullYear();
+      return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
+    }
+
+    // If all parsing attempts fail, return the original string
+    return dateString;
   }
 
   async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
@@ -216,13 +228,21 @@ Create a heartfelt birthday message that feels like it's coming from a caring fr
 3.  **Stay On-Topic:** Your primary purpose is to help with birthday and anniversary reminders. If the user asks an unrelated question (e.g., math problems, general knowledge, personal opinions), you must politely decline and steer the conversation back to the task at hand. For example: "My purpose is to help with birthday and anniversary reminders. Shall we continue with the reminder for [Person's Name]?"
 4.  **Validate Information:** Gently correct the user if they provide information in the wrong format. If you're not sure about something, ask for clarification.
 5.  **Manage Conversation Flow:** Guide the user through the process. You can ask one or more questions at a time.
-6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder.
+6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder. When editing, preserve existing data unless the user specifically wants to change it.
 7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions. The conversation should continue naturally.
 8.  **Multiple Reminders:** Users can create multiple reminders in the same conversation. When starting a new reminder, reset to empty fields.
 9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨💖.
 10. **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing the current reminder, but the conversation can continue for new reminders).
 
 **CRITICAL:** Always include the 'reminderType' field in your updatedData JSON response. Set it to 'birthday' for birthday reminders and 'anniversary' for anniversary reminders.
+
+**EDITING MODE SPECIAL INSTRUCTIONS:**
+- When in editing mode, ALWAYS preserve existing data in updatedData unless the user specifically wants to change it
+- If the user says "change the date to X" or "update the name to Y", only update that specific field
+- If the user provides new information, merge it with existing data
+- When editing, show the current data and ask what they want to change
+- After making changes, confirm what was updated
+- When the user provides a date, accept it in any format (e.g., "3 april", "7 may 1984", "26 november") and the system will convert it to MM/DD/YYYY format
 
 **Current State:**
 -   **Mode:** ${isEditing ? 'Editing Reminder' : 'Creating New Reminder'}
@@ -235,6 +255,7 @@ Create a heartfelt birthday message that feels like it's coming from a caring fr
 - Be helpful and keep the conversation going naturally
 - When asking for date, just ask naturally without specifying format
 - ALWAYS include reminderType in your JSON response
+- When editing, preserve all existing fields unless explicitly changed
 
 Example of a valid JSON response for birthday:
 {
@@ -259,6 +280,19 @@ Example of a valid JSON response for anniversary:
     "relationship": "Spouse",
     "note": "",
     "reminderType": "anniversary"
+  },
+  "isComplete": false
+}
+
+Example of editing response (preserving existing data):
+{
+  "response": "I've updated the date to March 15th. The reminder now shows: John Doe's birthday on 03/15/1990. Is there anything else you'd like to change?",
+  "updatedData": {
+    "personName": "John Doe",
+    "dateOfBirth": "03/15/1990",
+    "relationship": "Friend",
+    "note": "Loves chocolate cake",
+    "reminderType": "birthday"
   },
   "isComplete": false
 }
@@ -293,10 +327,14 @@ Example of a valid JSON response for anniversary:
         
         // Convert dateOfBirth and date to MM/DD/YYYY format if they exist
         if (parsedResponse.updatedData && parsedResponse.updatedData.dateOfBirth) {
+          const originalDate = parsedResponse.updatedData.dateOfBirth;
           parsedResponse.updatedData.dateOfBirth = this.convertDateToMMDDYYYY(parsedResponse.updatedData.dateOfBirth);
+          console.log(`Date conversion: "${originalDate}" -> "${parsedResponse.updatedData.dateOfBirth}"`);
         }
         if (parsedResponse.updatedData && parsedResponse.updatedData.date) {
+          const originalDate = parsedResponse.updatedData.date;
           parsedResponse.updatedData.date = this.convertDateToMMDDYYYY(parsedResponse.updatedData.date);
+          console.log(`Date conversion: "${originalDate}" -> "${parsedResponse.updatedData.date}"`);
         }
         
         return parsedResponse;

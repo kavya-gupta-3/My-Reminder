@@ -121,13 +121,25 @@ function ChatPage() {
             // Convert old format to new format
             const convertedData = {
               personName: existingData.personName || '',
-              date: existingData.dateOfBirth || existingData.date || '',
+              dateOfBirth: existingData.dateOfBirth || '',
+              date: existingData.date || '',
               relationship: existingData.relationship || '',
               reminderType: existingData.reminderType || 'birthday',
-              note: existingData.note || ''
+              note: existingData.note || '',
+              partnerName: existingData.partnerName || ''
             };
             setReminderData({ id: reminderId, ...convertedData });
-            initialMessage.content = `I see you want to edit the reminder for ${convertedData.personName}. What would you like to change?`;
+            
+            // Show current reminder details to user
+            const currentDetails = [];
+            if (convertedData.personName) currentDetails.push(`Name: ${convertedData.personName}`);
+            if (convertedData.partnerName) currentDetails.push(`Partner: ${convertedData.partnerName}`);
+            if (convertedData.dateOfBirth) currentDetails.push(`Date: ${convertedData.dateOfBirth}`);
+            if (convertedData.date) currentDetails.push(`Date: ${convertedData.date}`);
+            if (convertedData.relationship) currentDetails.push(`Relationship: ${convertedData.relationship}`);
+            if (convertedData.note) currentDetails.push(`Note: ${convertedData.note}`);
+            
+            initialMessage.content = `I see you want to edit the reminder for ${convertedData.personName}. Here's what I have:\n\n${currentDetails.join('\n')}\n\nWhat would you like to change?`;
           } else {
             navigate('/chat'); // Fallback if reminder not found
           }
@@ -251,12 +263,26 @@ function ChatPage() {
     // Extract relationship/personName from input
     const extracted = extractRelationshipAndPersonName(inputValue);
     let newReminderData = { ...reminderData };
-    if (extracted.relationship && !newReminderData.relationship) {
-      newReminderData.relationship = extracted.relationship;
+    
+    // In edit mode, be more careful about overwriting existing data
+    if (reminderId) {
+      // Only update if user explicitly provides new information
+      if (extracted.relationship && inputValue.toLowerCase().includes('relationship')) {
+        newReminderData.relationship = extracted.relationship;
+      }
+      if (extracted.personName && inputValue.toLowerCase().includes('name')) {
+        newReminderData.personName = extracted.personName;
+      }
+    } else {
+      // In create mode, update as before
+      if (extracted.relationship && !newReminderData.relationship) {
+        newReminderData.relationship = extracted.relationship;
+      }
+      if (extracted.personName && !newReminderData.personName) {
+        newReminderData.personName = extracted.personName;
+      }
     }
-    if (extracted.personName && !newReminderData.personName) {
-      newReminderData.personName = extracted.personName;
-    }
+    
     // If user input contains 'anniversary', set reminderType to 'anniversary'
     if (inputValue.toLowerCase().includes('anniversary')) {
       newReminderData.reminderType = 'anniversary';
@@ -373,6 +399,8 @@ function ChatPage() {
             return;
           }
         }
+        
+        // In edit mode, don't check for duplicates since we're updating an existing reminder
 
         // Save to Firebase
         try {
@@ -381,22 +409,20 @@ function ChatPage() {
           const successMessage = {
           id: Date.now() + 2,
           type: 'ai',
-            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'}! 🎉\n\nWant to add another reminder? Just tell me about it!`
+            content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'} for ${aiResponse.updatedData.personName}! 🎉\n\n${reminderId ? 'The reminder has been updated successfully.' : 'Want to add another reminder? Just tell me about it!'}`
         };
           setMessages(prev => [...prev, successMessage]);
         
-          // Clear reminder data for new reminder
+          // Clear reminder data for new reminder (only if not in edit mode)
           if (!reminderId) {
         setReminderData({
           personName: '',
-              title: '',
+              partnerName: '',
+              dateOfBirth: '',
               date: '',
           relationship: '',
               reminderType: 'birthday',
-              note: '',
-              location: '',
-              attendees: '',
-              amount: ''
+              note: ''
             });
           }
         } catch (error) {
