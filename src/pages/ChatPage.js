@@ -14,8 +14,9 @@ function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [reminderData, setReminderData] = useState({
     personName: '',
+    partnerName: '', // for anniversary
     date: '',
-    relationship: '',
+    relationship: '', // for both
     reminderType: 'birthday',
     note: ''
   });
@@ -317,7 +318,7 @@ function ChatPage() {
       setMessages([{
         id: Date.now(),
         type: 'ai',
-        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday reminders. Who would you like to set a birthday reminder for?"
+        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday and anniversary reminders. Who would you like to set a reminder for? You can add as many as you'd like!"
       }]);
     }
   };
