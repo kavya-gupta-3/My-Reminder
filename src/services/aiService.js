@@ -162,6 +162,8 @@ Create a heartfelt birthday message that feels like it's coming from a caring fr
 9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨💖.
 10. **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing the current reminder, but the conversation can continue for new reminders).
 
+**CRITICAL:** Always include the 'reminderType' field in your updatedData JSON response. Set it to 'birthday' for birthday reminders and 'anniversary' for anniversary reminders.
+
 **Current State:**
 -   **Mode:** ${isEditing ? 'Editing Reminder' : 'Creating New Reminder'}
 -   **Reminder Data Collected So Far:** ${JSON.stringify(reminderData)}
@@ -172,18 +174,22 @@ Create a heartfelt birthday message that feels like it's coming from a caring fr
 - After completing a reminder (isComplete: true), encourage them to create another one
 - Be helpful and keep the conversation going naturally
 - When asking for date, just ask naturally without specifying format
+- ALWAYS include reminderType in your JSON response
 
-Example of a valid JSON response:
+Example of a valid JSON response for birthday:
 {
   "response": "Great! I've got John's birthday down. What's your relationship to John?",
   "updatedData": {
     "personName": "John Doe",
     "dateOfBirth": "03/15/1990",
     "relationship": "",
-    "note": ""
+    "note": "",
+    "reminderType": "birthday"
   },
   "isComplete": false
 }
+
+Example of a valid JSON response for anniversary:
 {
   "response": "Awesome! I've got your anniversary for John & Jane. Would you like to add a note?",
   "updatedData": {
@@ -191,7 +197,8 @@ Example of a valid JSON response:
     "partnerName": "Jane",
     "date": "06/20/2010",
     "relationship": "Spouse",
-    "note": ""
+    "note": "",
+    "reminderType": "anniversary"
   },
   "isComplete": false
 }

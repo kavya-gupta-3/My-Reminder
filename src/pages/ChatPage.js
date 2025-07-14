@@ -287,6 +287,16 @@ function ChatPage() {
         setReminderData(prev => ({ ...prev, reminderType: 'anniversary' }));
       }
       
+      // Debug logging
+      console.log('AI Response:', aiResponse);
+      console.log('Updated Reminder Data:', aiResponse.updatedData);
+      console.log('Reminder Type:', aiResponse.updatedData.reminderType);
+      
+      // Debug logging
+      console.log('AI Response:', aiResponse);
+      console.log('Updated Reminder Data:', aiResponse.updatedData);
+      console.log('Reminder Type:', aiResponse.updatedData.reminderType);
+      
       const aiMessage = {
         id: Date.now() + 1,
         type: 'ai',
@@ -310,6 +320,7 @@ function ChatPage() {
 
         // Check if we have the required fields based on reminder type
         const reminderType = aiResponse.updatedData.reminderType || 'birthday';
+        console.log('Final reminder type for validation:', reminderType);
         let hasRequiredFields = true;
         let missingField = '';
 
