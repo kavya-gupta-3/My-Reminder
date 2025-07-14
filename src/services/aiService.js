@@ -257,13 +257,12 @@ Example of a valid JSON response:
       if (userContext && userContext.reminders) {
         const existingReminders = userContext.reminders
           .filter(r => r.id !== reminderData.id)
-          .map(r => `${r.personName} (${r.relationship})`)
+          .map(r => `${r.personName} (${r.relationship || r.partnerName || ''})`)
           .join(', ');
         if (existingReminders) {
-          userContextInfo = `\n\nUser's other birthday reminders: ${existingReminders}`;
+          userContextInfo = `\n\nUser's other reminders: ${existingReminders}`;
         }
       }
-      
       let sizePrompt = '';
       if (size === 'small') {
         sizePrompt = 'Keep it very short (1-2 sentences, 15-25 words).';
@@ -272,7 +271,35 @@ Example of a valid JSON response:
       } else {
         sizePrompt = 'Keep it short and sweet (2-3 sentences, 30-40 words).';
       }
-
+      // Handle anniversary
+      if (reminderData.reminderType === 'anniversary') {
+        const partner = reminderData.partnerName || '';
+        const couple = partner ? `${reminderData.personName} & ${partner}` : reminderData.personName;
+        const prompt = `You are a friendly AI assistant that creates personalized anniversary messages.\n\nIMPORTANT RULES:\n- Always be warm, loving, and celebratory\n- Use appropriate emojis (💖, 💍, 🎉, 🥂, 💑, etc.)\n- ${sizePrompt}\n- Make it feel personal and genuine\n- Do not mention age or years unless provided\n- Focus on love, partnership, and celebration\n\nGenerate a heartfelt anniversary message for ${couple}.\n\nContext:\n- Couple: ${couple}\n- Date: ${reminderData.date}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a message that feels like it's coming from a caring friend or family member.`;
+        const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'openai/gpt-4o',
+            messages: [
+              { role: 'system', content: 'You are a friendly AI assistant that creates personalized anniversary messages. You are warm, loving, and creative.' },
+              { role: 'user', content: prompt }
+            ],
+            max_tokens: 200,
+            temperature: 1.2
+          })
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+        const data = await response.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+          throw new Error('Invalid response structure from API');
+        }
+        return data.choices[0].message.content.trim();
+      }
+      // Default: birthday
       // Determine tone and approach based on relationship
       const relationship = reminderData.relationship?.toLowerCase() || '';
       

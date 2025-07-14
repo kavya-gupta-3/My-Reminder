@@ -157,15 +157,24 @@ function ChatPage() {
       if (!uid) throw new Error('User not authenticated');
 
       // Prepare data based on reminder type
-      const reminderType = 'birthday'; // Force only birthday reminders
+      let reminderType = data.reminderType || 'birthday';
+      if (reminderType !== 'birthday' && reminderType !== 'anniversary') {
+        reminderType = 'coming_soon';
+      }
       let firebaseData = {
-        dateOfBirth: data.dateOfBirth || data.date, // Handle both field names
         reminderType: reminderType,
         note: data.note || '',
         updatedAt: new Date().toISOString()
       };
-      firebaseData.personName = data.personName;
-      firebaseData.relationship = data.relationship || '';
+      if (reminderType === 'birthday') {
+        firebaseData.dateOfBirth = data.dateOfBirth || data.date;
+        firebaseData.personName = data.personName;
+        firebaseData.relationship = data.relationship || '';
+      } else if (reminderType === 'anniversary') {
+        firebaseData.date = data.date;
+        firebaseData.personName = data.personName;
+        firebaseData.partnerName = data.partnerName || '';
+      }
 
       if (reminderId) {
         // Update existing reminder

@@ -84,9 +84,13 @@ function HomePage() {
           <div style={{
             fontSize: 'clamp(2.2rem, 8vw, 3.5rem)',
             marginBottom: '16px',
-            animation: 'bounce 2s infinite'
+            animation: 'bounce 2s infinite',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '80px'
           }}>
-            📅
+            <img src="/LOGO.png" alt="App Logo" style={{ height: '64px', width: '64px', objectFit: 'contain', display: 'block' }} />
           </div>
           <h1 style={{
             fontSize: 'clamp(2rem, 6vw, 2.5rem)',

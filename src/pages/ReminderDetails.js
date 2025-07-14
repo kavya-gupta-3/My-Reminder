@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auth, database, ref, get, remove, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt, FaHeart } from 'react-icons/fa';
 import './ReminderDetails.css';
 
 function ReminderDetails() {
@@ -24,7 +24,8 @@ function ReminderDetails() {
   const [editValues, setEditValues] = useState({
     personName: '',
     dateOfBirth: '',
-    note: ''
+    note: '',
+    partnerName: '' // Added for anniversary partner name
   });
 
   // Helper to get today's date string
@@ -45,14 +46,14 @@ function ReminderDetails() {
         if (snapshot.exists()) {
           const data = snapshot.val();
           setReminder({ id, ...data });
-          // Load saved AI message if exists
+          // Only load saved AI message, do not auto-generate
           if (data.aiMessage && data.aiMessageSize) {
             setAiMessage(data.aiMessage);
             setMessageSize(data.aiMessageSize);
             setAiLoading(false);
           } else {
-            // Generate and save if not exists
-            generateAndShowAIMessage(data, messageSize);
+            setAiMessage('');
+            setAiLoading(false);
           }
           // Load regen count
           const userRef = ref(database, `users/${uid}`);
@@ -187,9 +188,9 @@ function ReminderDetails() {
   // Regenerate AI message when messageSize changes
   useEffect(() => {
     if (!reminder) return;
-    // Only regenerate if the current aiMessageSize does not match the selected size
-    if (reminder.aiMessageSize !== messageSize) {
-      generateAndShowAIMessage(reminder, messageSize);
+    // Only regenerate if the current aiMessageSize does not match the selected size and user has already generated a message
+    if (reminder.aiMessage && reminder.aiMessageSize !== messageSize) {
+      handleRegenerate();
     } else if (reminder.aiMessage) {
       setAiMessage(reminder.aiMessage);
       setAiLoading(false);
@@ -201,7 +202,24 @@ function ReminderDetails() {
   const handleRegenerate = async () => {
     if (regenLimitReached) return;
     setAiLoading(true);
-    await generateAndShowAIMessage(reminder, messageSize);
+    // Always generate a new message and save it to Firebase
+    try {
+      const uid = auth.currentUser?.uid;
+      const context = await aiService.getUserContext(uid);
+      const message = await aiService.generateDirectBirthdayMessage(reminder, context, messageSize);
+      setAiMessage(message);
+      // Save to Firebase
+      const reminderRef = ref(database, `reminders/${uid}/${id}`);
+      await update(reminderRef, {
+        aiMessage: message,
+        aiMessageSize: messageSize
+      });
+      setReminder(prev => ({ ...prev, aiMessage: message, aiMessageSize: messageSize }));
+    } catch (error) {
+      setAiMessage('Error generating message. Please try again.');
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -229,7 +247,8 @@ function ReminderDetails() {
     setEditValues({
       personName: reminder.personName,
       dateOfBirth: reminder.dateOfBirth,
-      note: reminder.note || ''
+      note: reminder.note || '',
+      partnerName: reminder.partnerName || '' // Initialize partnerName for anniversary
     });
   };
 
@@ -238,7 +257,8 @@ function ReminderDetails() {
     setEditValues({
       personName: '',
       dateOfBirth: '',
-      note: ''
+      note: '',
+      partnerName: '' // Reset partnerName
     });
   };
 
@@ -246,11 +266,9 @@ function ReminderDetails() {
     try {
       const uid = auth.currentUser?.uid;
       const reminderRef = ref(database, `reminders/${uid}/${id}`);
-      
       let valueToSave = editValues[editingField];
-      
       // Convert date to MM/DD/YYYY format if it's a date field
-      if (editingField === 'dateOfBirth') {
+      if (editingField === 'dateOfBirth' || editingField === 'date') {
         if (valueToSave && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(valueToSave)) {
           try {
             const date = new Date(valueToSave);
@@ -269,16 +287,26 @@ function ReminderDetails() {
           }
         }
       }
-      
-      await update(reminderRef, {
-        [editingField]: valueToSave
-      });
-      
-      setReminder(prev => ({
-        ...prev,
-        [editingField]: valueToSave
-      }));
-      
+      // Save both personName and partnerName for anniversary
+      if (editingField === 'personName' && reminder.reminderType === 'anniversary') {
+        await update(reminderRef, {
+          personName: editValues.personName,
+          partnerName: editValues.partnerName
+        });
+        setReminder(prev => ({
+          ...prev,
+          personName: editValues.personName,
+          partnerName: editValues.partnerName
+        }));
+      } else {
+        await update(reminderRef, {
+          [editingField]: valueToSave
+        });
+        setReminder(prev => ({
+          ...prev,
+          [editingField]: valueToSave
+        }));
+      }
       setEditingField(null);
     } catch (error) {
       console.error('Error updating reminder:', error);
@@ -435,7 +463,13 @@ function ReminderDetails() {
           paddingRight: '68px',
           textAlign: 'center'
         }}>
-          <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Reminder
+          {reminder.reminderType === 'anniversary' ? (
+            <><FaHeart style={{ marginRight: '16px' }} />
+            {reminder.personName}{reminder.partnerName ? ` & ${reminder.partnerName}` : ''}'s Anniversary</>
+          ) : (
+            <><FaBirthdayCake style={{ marginRight: '16px' }} />
+            {reminder.personName}'s Birthday</>
+          )}
         </h1>
       </header>
 
@@ -444,7 +478,7 @@ function ReminderDetails() {
         maxWidth: '800px',
         margin: '0 auto'
       }}>
-        {/* Birthday Info Card */}
+        {/* Birthday/Anniversary Info Card */}
         <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
@@ -464,7 +498,7 @@ function ReminderDetails() {
               fontSize: '44px',
               marginRight: '20px'
             }}>
-              <FaBirthdayCake />
+              {reminder.reminderType === 'anniversary' ? <FaHeart /> : <FaBirthdayCake />}
             </span>
             <div>
               <h2 style={{
@@ -476,7 +510,40 @@ function ReminderDetails() {
                 alignItems: 'center',
                 gap: '12px'
               }}>
-                {editingField === 'personName' ? (
+                {editingField === 'personName' && reminder.reminderType === 'anniversary' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={editValues.personName}
+                      onChange={(e) => setEditValues({...editValues, personName: e.target.value})}
+                      style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        padding: '4px 8px',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        width: '120px'
+                      }}
+                      autoFocus
+                    />
+                    <span style={{ fontWeight: 600, fontSize: '20px' }}>&amp;</span>
+                    <input
+                      type="text"
+                      value={editValues.partnerName || ''}
+                      onChange={(e) => setEditValues({...editValues, partnerName: e.target.value})}
+                      style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        padding: '4px 8px',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        width: '120px'
+                      }}
+                    />
+                    <button onClick={saveEdit} style={{ padding: '4px 8px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓</button>
+                    <button onClick={cancelEditing} style={{ padding: '4px 8px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                  </div>
+                ) : editingField === 'personName' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input
                       type="text"
@@ -497,7 +564,8 @@ function ReminderDetails() {
                   </div>
                 ) : (
                   <>
-                {reminder.personName}
+                    {reminder.personName}
+                    {reminder.reminderType === 'anniversary' && reminder.partnerName ? ` & ${reminder.partnerName}` : ''}
                     <FaPencilAlt 
                       onClick={() => startEditing('personName')}
                       style={{ 
@@ -512,13 +580,15 @@ function ReminderDetails() {
                   </>
                 )}
               </h2>
-              <p style={{
-                fontSize: '17px',
-                color: '#666',
-                margin: '0'
-              }}>
-                {reminder.relationship}
-              </p>
+              {reminder.reminderType === 'birthday' && (
+                <p style={{
+                  fontSize: '17px',
+                  color: '#666',
+                  margin: '0'
+                }}>
+                  {reminder.relationship}
+                </p>
+              )}
             </div>
           </div>
 
@@ -537,11 +607,11 @@ function ReminderDetails() {
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaBirthdayCake /></div>
+              <div style={{ fontSize: '28px', marginBottom: '10px' }}>{reminder.reminderType === 'anniversary' ? <FaHeart /> : <FaBirthdayCake />}</div>
               <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 Date
                 <FaPencilAlt 
-                  onClick={() => startEditing('dateOfBirth')}
+                  onClick={() => startEditing(reminder.reminderType === 'anniversary' ? 'date' : 'dateOfBirth')}
                   style={{ 
                     fontSize: '14px', 
                     cursor: 'pointer', 
@@ -553,12 +623,12 @@ function ReminderDetails() {
                 />
               </div>
               <div style={{ color: '#666', fontSize: '15px' }}>
-                {editingField === 'dateOfBirth' ? (
+                {editingField === (reminder.reminderType === 'anniversary' ? 'date' : 'dateOfBirth') ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                     <input
                       type="text"
-                      value={editValues.dateOfBirth}
-                      onChange={(e) => setEditValues({...editValues, dateOfBirth: e.target.value})}
+                      value={reminder.reminderType === 'anniversary' ? editValues.date : editValues.dateOfBirth}
+                      onChange={(e) => setEditValues({...editValues, [reminder.reminderType === 'anniversary' ? 'date' : 'dateOfBirth']: e.target.value})}
                       placeholder="MM/DD/YYYY"
                       style={{
                         fontSize: '15px',
@@ -574,9 +644,12 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  /* Display only month/day for current year birthday, not birth year */
-                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
-                  month: 'long',
+                  new Date(
+                    new Date().getFullYear(),
+                    parseInt((reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth).split('/')[0]) - 1,
+                    parseInt((reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth).split('/')[1])
+                  ).toLocaleDateString('en-US', {
+                    month: 'long',
                     day: 'numeric'
                   })
                 )}
