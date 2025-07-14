@@ -65,8 +65,8 @@ export function useFCMToken() {
       if (Notification.permission === 'granted') {
         const notification = new Notification(payload.notification?.title || 'Birthday Reminder', {
           body: payload.notification?.body || 'You have a birthday reminder!',
-                  icon: '/Logo.png',
-        badge: '/Logo.png',
+                  icon: '/Logo192.png',
+        badge: '/Logo192.png',
           tag: 'birthday-reminder',
           requireInteraction: true
           // Removed actions - only supported in ServiceWorker notifications
