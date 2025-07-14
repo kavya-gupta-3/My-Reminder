@@ -298,17 +298,6 @@ function ChatPage() {
         // Ensure all required fields are present before saving
 
         // Validate required fields
-        if (!aiResponse.updatedData.dateOfBirth && !aiResponse.updatedData.date) {
-          const errorMessage = {
-            id: Date.now() + 2,
-            type: 'ai',
-            content: '❌ I need the date to save the reminder. Could you please provide the date?'
-          };
-          setMessages(prev => [...prev, errorMessage]);
-          return;
-        }
-
-        // Check if we have the required fields based on reminder type
         const reminderType = aiResponse.updatedData.reminderType || 'birthday';
         let hasRequiredFields = true;
         let missingField = '';

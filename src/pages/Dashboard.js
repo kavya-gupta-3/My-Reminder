@@ -437,7 +437,13 @@ function Dashboard() {
                       width: '100%',
                       ...reminderStyle
                   }}
-                  onClick={() => navigate(`/reminder/${reminder.id}`)}
+                  onClick={() => {
+                    if (reminder.reminderType === 'anniversary') {
+                      navigate(`/anniversary/${reminder.id}`);
+                    } else {
+                      navigate(`/reminder/${reminder.id}`);
+                    }
+                  }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 1, minWidth: 0 }}>
                     <div style={{
