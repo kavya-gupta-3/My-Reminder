@@ -28,21 +28,8 @@ class AIService {
         maxTokens = 100;
       }
 
-      const calculateAge = (dateOfBirth) => {
-        const [month, day, year] = dateOfBirth.split('/');
-        const birthDate = new Date(year, month - 1, day);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-          age--;
-        }
-        return age;
-      };
-      const currentAge = reminderData.dateOfBirth ? calculateAge(reminderData.dateOfBirth) : reminderData.age;
-
       const currentDate = new Date().toLocaleDateString();
-      const prompt = `You are a friendly AI assistant that creates personalized birthday messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and celebratory\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Don't mention specific ages if the person might be sensitive about it\n- Focus on positive wishes and celebration\n\nGenerate a personalized birthday message for ${reminderData.personName}. \n      \nContext:\n- Person: ${reminderData.personName}\n- Age they are turning: ${currentAge}\n- Relationship: ${reminderData.relationship}\n- Birthday: ${reminderData.dateOfBirth}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
+      const prompt = `You are a friendly AI assistant that creates personalized birthday messages. Today's date is ${currentDate}.\n\nIMPORTANT RULES:\n- Always be warm, caring, and celebratory\n- Use appropriate emojis (🎉, 🎂, 🎁, ✨, 🥳, etc.)\n- ${sizePrompt}\n- Make them feel personal and genuine\n- Don't be overly formal or generic\n- Don't use inappropriate humor or references\n- Don't mention specific ages if the person might be sensitive about it\n- Focus on positive wishes and celebration\n\nGenerate a personalized birthday message for ${reminderData.personName}. \n      \nContext:\n- Person: ${reminderData.personName}\n- Relationship: ${reminderData.relationship}\n- Birthday: ${reminderData.dateOfBirth}\n- Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}\n\nCreate a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
 
       // Use backend proxy
       const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
@@ -100,9 +87,9 @@ class AIService {
 
       **Your main tasks:**
       1.  **Understand User Intent:** Determine if the user wants to create a new reminder, edit an existing one, or is just chatting.
-      2.  **Gather Information:** Collect the necessary details for a reminder: 'personName', 'dateOfBirth' (in MM/DD/YYYY format), 'relationship', and a 'note'. DO NOT ask for age; it is calculated automatically.
+      2.  **Gather Information:** Collect the necessary details for a reminder: 'personName', 'dateOfBirth' (just ask for the date, don't specify format), 'relationship', and a 'note'. DO NOT ask for age; it is calculated automatically.
       3.  **Stay On-Topic:** Your primary purpose is to help with birthday reminders. If the user asks an unrelated question (e.g., math problems, general knowledge, personal opinions), you must politely decline and steer the conversation back to the task at hand. For example: "My purpose is to help with birthday reminders. Shall we continue with the reminder for [Person's Name]?"
-      4.  **Validate Information:** Gently correct the user if they provide information in the wrong format (e.g., dates). If you're not sure about something, ask for clarification.
+      4.  **Validate Information:** Gently correct the user if they provide information in the wrong format. If you're not sure about something, ask for clarification.
       5.  **Manage Conversation Flow:** Guide the user through the process. You can ask one or more questions at a time.
       6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder.
       7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions. The conversation should continue naturally.
@@ -119,10 +106,11 @@ class AIService {
       - If reminder data is empty (all fields blank), the user might be starting a new reminder
       - After completing a reminder (isComplete: true), encourage them to create another one
       - Be helpful and keep the conversation going naturally
+      - When asking for date, just ask naturally without specifying format
 
       Example of a valid JSON response:
       {
-        "response": "Great! I've got John's birthday down as 03/15/1990. How old will he be turning?",
+        "response": "Great! I've got John's birthday down. What's your relationship to John?",
         "updatedData": {
           "personName": "John Doe",
           "dateOfBirth": "03/15/1990",

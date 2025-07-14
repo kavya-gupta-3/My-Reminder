@@ -159,7 +159,7 @@ function ChatPage() {
       // Prepare data based on reminder type
       const reminderType = data.reminderType || 'birthday';
       let firebaseData = {
-        date: data.date,
+        dateOfBirth: data.dateOfBirth || data.date, // Handle both field names
         reminderType: reminderType,
         note: data.note || '',
         updatedAt: new Date().toISOString()
@@ -236,7 +236,7 @@ function ChatPage() {
         // Ensure all required fields are present before saving
 
         // Validate required fields
-        if (!aiResponse.updatedData.date) {
+        if (!aiResponse.updatedData.dateOfBirth && !aiResponse.updatedData.date) {
           const errorMessage = {
             id: Date.now() + 2,
             type: 'ai',

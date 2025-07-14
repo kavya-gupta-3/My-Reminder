@@ -254,18 +254,6 @@ function ReminderDetails() {
     }
   };
 
-  const calculateAge = (dateOfBirth) => {
-    const [month, day, year] = dateOfBirth.split('/');
-    const birthDate = new Date(year, month - 1, day);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   // Send message helpers
   const handleCopy = () => {
     navigator.clipboard.writeText(aiMessage);
@@ -497,7 +485,7 @@ function ReminderDetails() {
                 color: '#666',
                 margin: '0'
               }}>
-                {reminder.relationship} • Age {calculateAge(reminder.dateOfBirth)}
+                {reminder.relationship}
               </p>
             </div>
           </div>

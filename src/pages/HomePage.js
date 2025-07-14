@@ -96,7 +96,7 @@ function HomePage() {
             letterSpacing: '-1px',
             lineHeight: 1.1
           }}>
-            MyReminder
+            My Reminder
           </h1>
           <p style={{
             fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
@@ -556,7 +556,7 @@ function HomePage() {
               margin: 0,
               letterSpacing: '-0.5px'
             }}>
-              MyReminder
+              My Reminder
             </h3>
           </div>
           
@@ -574,7 +574,7 @@ function HomePage() {
               margin: 0,
               fontSize: 'clamp(0.8rem, 2vw, 0.9rem)'
             }}>
-              © 2025 MyReminder. All rights reserved.
+              © 2025 My Reminder. All rights reserved.
             </p>
           </div>
         </div>

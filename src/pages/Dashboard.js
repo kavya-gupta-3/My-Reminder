@@ -328,7 +328,7 @@ function Dashboard() {
           paddingRight: '20px',
           paddingLeft: '20px'
         }}>
-                      MyReminder
+          My Reminder
         </h1>
         <p style={{
           margin: '12px 0 0 0',
@@ -375,7 +375,7 @@ function Dashboard() {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
+            gap: '24px',
             maxWidth: '1200px',
             margin: '0 auto'
           }}>
@@ -401,18 +401,7 @@ function Dashboard() {
               else if (daysUntil <= 7) icon = <FaGift style={{ color: '#ffa726' }}/>;
               else if (daysUntil <= 30) icon = <FaCalendarCheck style={{ color: '#4caf50' }}/>;
 
-              // Helper to calculate the age they will turn on their next birthday
-              const getUpcomingAge = (dateOfBirth) => {
-                const [month, day, year] = dateOfBirth.split('/');
-                const birthDate = new Date(year, month - 1, day);
-                const now = new Date();
-                let age = now.getFullYear() - birthDate.getFullYear();
-                const thisYearBirthday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-                if (now >= thisYearBirthday) {
-                  age += 1;
-                }
-                return age;
-              };
+
 
                 // Add visual effects for running birthday reminders
                 const runningStyle = {
@@ -507,7 +496,7 @@ function Dashboard() {
                         {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
-                        })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
+                        })}
                       </p>
                   </div>
                 </div>
