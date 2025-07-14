@@ -99,7 +99,7 @@ function ChatPage() {
         let initialMessage = {
           id: 1,
           type: 'ai',
-          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for? You can add as many as you'd like!"
+          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday reminders. Who would you like to set a birthday reminder for? You can add as many as you'd like!"
         };
 
         // Load chat history if not in edit mode
@@ -157,29 +157,15 @@ function ChatPage() {
       if (!uid) throw new Error('User not authenticated');
 
       // Prepare data based on reminder type
-      const reminderType = data.reminderType || 'birthday';
+      const reminderType = 'birthday'; // Force only birthday reminders
       let firebaseData = {
         dateOfBirth: data.dateOfBirth || data.date, // Handle both field names
         reminderType: reminderType,
         note: data.note || '',
         updatedAt: new Date().toISOString()
       };
-
-      // Add type-specific fields
-      if (reminderType === 'birthday' || reminderType === 'anniversary') {
-        firebaseData.personName = data.personName;
-        firebaseData.relationship = data.relationship || '';
-      } else if (reminderType === 'meeting') {
-        firebaseData.title = data.title || data.personName || 'Meeting';
-        firebaseData.location = data.location || '';
-        firebaseData.attendees = data.attendees || '';
-      } else if (reminderType === 'bill') {
-        firebaseData.title = data.title || data.personName || 'Bill';
-        firebaseData.amount = data.amount || '';
-      } else if (reminderType === 'task' || reminderType === 'custom') {
-        firebaseData.title = data.title || data.personName || 'Task';
-        firebaseData.description = data.note || '';
-      }
+      firebaseData.personName = data.personName;
+      firebaseData.relationship = data.relationship || '';
 
       if (reminderId) {
         // Update existing reminder
@@ -251,16 +237,10 @@ function ChatPage() {
         let hasRequiredFields = true;
         let missingField = '';
 
-        if (reminderType === 'birthday' || reminderType === 'anniversary') {
+        if (reminderType === 'birthday') {
           if (!aiResponse.updatedData.personName) {
             hasRequiredFields = false;
             missingField = 'person name';
-          }
-        } else if (reminderType === 'meeting' || reminderType === 'task' || reminderType === 'bill') {
-          if (!aiResponse.updatedData.title && !aiResponse.updatedData.personName) {
-            hasRequiredFields = false;
-            missingField = reminderType === 'meeting' ? 'meeting topic/title' : 
-                          reminderType === 'bill' ? 'bill name/company' : 'task title';
           }
         }
 
@@ -328,7 +308,7 @@ function ChatPage() {
       setMessages([{
         id: Date.now(),
         type: 'ai',
-        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create all kinds of reminders - birthdays, anniversaries, meetings, bills, and more! Who would you like to set a reminder for?"
+        content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday reminders. Who would you like to set a birthday reminder for?"
       }]);
     }
   };

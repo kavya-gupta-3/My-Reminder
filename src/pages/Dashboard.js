@@ -67,7 +67,12 @@ function Dashboard() {
         let remindersArray = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
-        }));
+        })).filter(reminder => {
+          // Only include reminders with a valid dateOfBirth in MM/DD or MM/DD/YYYY format
+          if (!reminder.dateOfBirth) return false;
+          const parts = reminder.dateOfBirth.split('/');
+          return parts.length >= 2 && parts[0] && parts[1] && !isNaN(parseInt(parts[0])) && !isNaN(parseInt(parts[1]));
+        });
 
         // Modify sorting logic to prioritize running birthdays
         remindersArray.sort((a, b) => {
