@@ -249,7 +249,7 @@ function ReminderDetails() {
     setEditingField(field);
     setEditValues({
       personName: reminder.personName,
-      dateOfBirth: reminder.dateOfBirth,
+      dateOfBirth: reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth,
       note: reminder.note || '',
       partnerName: reminder.partnerName || '' // Initialize partnerName for anniversary
     });

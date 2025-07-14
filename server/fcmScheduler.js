@@ -93,52 +93,56 @@ async function getAllUsersWithReminders() {
 }
 
 // Helper: Calculate notification times with better scheduling
-function getNotificationTimes(dateOfBirth) {
-  // dateOfBirth: MM/DD/YYYY
-  const [month, day, year] = dateOfBirth.split('/');
+function getNotificationTimes(dateString, reminderType = 'birthday') {
+  // dateString: MM/DD/YYYY
+  const [month, day, year] = dateString.split('/');
   const now = new Date();
-  let birthday = new Date(now.getFullYear(), month - 1, day);
-  if (birthday < now) birthday = new Date(now.getFullYear() + 1, month - 1, day);
+  let eventDate = new Date(now.getFullYear(), month - 1, day);
+  if (eventDate < now) eventDate = new Date(now.getFullYear() + 1, month - 1, day);
 
   // Better notification times
   return [
-    { label: '1 week', time: new Date(birthday.getTime() - 7 * 24 * 60 * 60 * 1000) },
-    { label: '1 day', time: new Date(birthday.getTime() - 24 * 60 * 60 * 1000) },
-    { label: '6 hours', time: new Date(birthday.getTime() - 6 * 60 * 60 * 1000) },
-    { label: '1 hour', time: new Date(birthday.getTime() - 1 * 60 * 60 * 1000) },
-    { label: 'midnight', time: new Date(birthday.setHours(0,0,0,0)) }
+    { label: '1 week', time: new Date(eventDate.getTime() - 7 * 24 * 60 * 60 * 1000) },
+    { label: '1 day', time: new Date(eventDate.getTime() - 24 * 60 * 60 * 1000) },
+    { label: '6 hours', time: new Date(eventDate.getTime() - 6 * 60 * 60 * 1000) },
+    { label: '1 hour', time: new Date(eventDate.getTime() - 1 * 60 * 60 * 1000) },
+    { label: 'midnight', time: new Date(eventDate.setHours(0,0,0,0)) }
   ];
 }
 
 // Helper: Generate personalized notification messages
 function generateNotificationMessage(reminder, timeLabel) {
-  const { personName, relationship } = reminder;
+  const { personName, relationship, reminderType, partnerName } = reminder;
+  const isAnniversary = reminderType === 'anniversary';
+  const couple = partnerName ? `${personName} & ${partnerName}` : personName;
+  const eventType = isAnniversary ? 'anniversary' : 'birthday';
+  const emoji = isAnniversary ? '💖' : '🎂';
   
   const messages = {
     '1 week': [
-      `🎂 ${personName}'s birthday is coming up in a week!`,
-      `⏰ Don't forget! ${personName}'s birthday is in 7 days`,
-      `📅 ${personName}'s special day is just around the corner!`
+      `${emoji} ${couple}'s ${eventType} is coming up in a week!`,
+      `⏰ Don't forget! ${couple}'s ${eventType} is in 7 days`,
+      `📅 ${couple}'s special day is just around the corner!`
     ],
     '1 day': [
-      `🎉 Tomorrow is ${personName}'s birthday!`,
-      `📱 ${personName}'s birthday is tomorrow - time to prepare!`,
-      `✨ Get ready to celebrate ${personName} tomorrow!`
+      `🎉 Tomorrow is ${couple}'s ${eventType}!`,
+      `📱 ${couple}'s ${eventType} is tomorrow - time to prepare!`,
+      `✨ Get ready to celebrate ${couple} tomorrow!`
     ],
     '6 hours': [
-      `⏰ ${personName}'s birthday is in 6 hours!`,
-      `🎂 ${personName}'s special day is almost here!`,
-      `📱 Don't miss ${personName}'s birthday celebration!`
+      `⏰ ${couple}'s ${eventType} is in 6 hours!`,
+      `${emoji} ${couple}'s special day is almost here!`,
+      `📱 Don't miss ${couple}'s ${eventType} celebration!`
     ],
     '1 hour': [
-      `🎉 ${personName}'s birthday is in 1 hour!`,
-      `⏰ Almost time to celebrate ${personName}!`,
-      `🎂 ${personName}'s special moment is approaching!`
+      `🎉 ${couple}'s ${eventType} is in 1 hour!`,
+      `⏰ Almost time to celebrate ${couple}!`,
+      `${emoji} ${couple}'s special moment is approaching!`
     ],
     'midnight': [
-      `🎂 Happy Birthday, ${personName}! 🎉`,
-      `🎉 It's ${personName}'s birthday today!`,
-      `✨ Today is ${personName}'s special day!`
+      `${emoji} Happy ${eventType.charAt(0).toUpperCase() + eventType.slice(1)}, ${couple}! 🎉`,
+      `🎉 It's ${couple}'s ${eventType} today!`,
+      `✨ Today is ${couple}'s special day!`
     ]
   };
 
@@ -153,14 +157,20 @@ cron.schedule('*/5 * * * *', async () => {
   const now = new Date();
 
   for (const { uid, fcmToken, reminder } of usersWithReminders) {
-    const times = getNotificationTimes(reminder.dateOfBirth);
+    // Use appropriate date field based on reminder type
+    const dateField = reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth;
+    if (!dateField) continue; // Skip reminders without valid date
+    
+    const times = getNotificationTimes(dateField, reminder.reminderType);
     for (const { label, time } of times) {
       // If notification time is within the last 5 minutes
       if (Math.abs(now - time) < 5 * 60 * 1000) {
         const message = generateNotificationMessage(reminder, label);
+        const eventType = reminder.reminderType === 'anniversary' ? 'Anniversary' : 'Birthday';
+        const emoji = reminder.reminderType === 'anniversary' ? '💖' : '🎂';
         const title = label === 'midnight' 
-          ? `🎂 Happy Birthday, ${reminder.personName}!`
-          : `🎂 ${reminder.personName}'s Birthday Reminder`;
+          ? `${emoji} Happy ${eventType}, ${reminder.personName}!`
+          : `${emoji} ${reminder.personName}'s ${eventType} Reminder`;
 
         await sendFCM(
           fcmToken,
@@ -169,7 +179,7 @@ cron.schedule('*/5 * * * *', async () => {
           {
             reminderId: reminder.id,
             personName: reminder.personName,
-            type: 'birthday-reminder'
+            type: `${reminder.reminderType}-reminder`
           }
         );
       }
