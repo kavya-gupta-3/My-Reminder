@@ -1,4 +1,34 @@
 class AIService {
+  // Helper function to convert various date formats to MM/DD/YYYY
+  convertDateToMMDDYYYY(dateString) {
+    if (!dateString) return dateString;
+    
+    // If already in MM/DD/YYYY format, return as is
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    try {
+      // Try to parse the date string
+      const date = new Date(dateString);
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if parsing fails
+      }
+      
+      // Format as MM/DD/YYYY
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error('Error converting date:', error);
+      return dateString; // Return original if conversion fails
+    }
+  }
+
   async generateBirthdayMessage(reminderData, userContext = null, size = 'medium') {
     try {
       // Build context from user's existing reminders
@@ -158,7 +188,14 @@ Example of a valid JSON response:
 
       // Parse the JSON content
       try {
-        return JSON.parse(content);
+        const parsedResponse = JSON.parse(content);
+        
+        // Convert dateOfBirth to MM/DD/YYYY format if it exists
+        if (parsedResponse.updatedData && parsedResponse.updatedData.dateOfBirth) {
+          parsedResponse.updatedData.dateOfBirth = this.convertDateToMMDDYYYY(parsedResponse.updatedData.dateOfBirth);
+        }
+        
+        return parsedResponse;
       } catch (e) {
         console.error("Failed to parse AI's JSON response:", content);
         // Fallback for non-JSON response
@@ -238,17 +275,14 @@ Example of a valid JSON response:
 
       // Determine tone and approach based on relationship
       const relationship = reminderData.relationship?.toLowerCase() || '';
-      const personName = reminderData.personName || '';
       
       // Categorize relationships
       const elderRelationships = ['mom', 'mother', 'dad', 'father', 'papa', 'mama', 'uncle', 'aunt', 'aunty', 'auntie', 'grandfather', 'grandmother', 'grandpa', 'grandma', 'nana', 'nani', 'dada', 'dadi', 'boss', 'sir', 'madam', 'teacher', 'professor'];
       const kidRelationships = ['son', 'daughter', 'nephew', 'niece', 'cousin', 'kid', 'child', 'student'];
-      const peerRelationships = ['friend', 'buddy', 'pal', 'colleague', 'coworker', 'roommate', 'neighbor', 'classmate'];
       const romanticRelationships = ['wife', 'husband', 'girlfriend', 'boyfriend', 'partner', 'spouse', 'fiancé', 'fiancée'];
       
       const isElder = elderRelationships.some(elder => relationship.includes(elder));
       const isKid = kidRelationships.some(kid => relationship.includes(kid));
-      const isPeer = peerRelationships.some(peer => relationship.includes(peer));
       const isRomantic = romanticRelationships.some(romantic => relationship.includes(romantic));
       
       let toneGuidelines = '';

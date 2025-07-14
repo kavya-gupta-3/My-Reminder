@@ -90,7 +90,25 @@ function ReminderDetails() {
     const calculateCountdown = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
-      const [month, day] = reminder.dateOfBirth.split('/');
+      
+      // Ensure date is in MM/DD/YYYY format for consistent parsing
+      let dateString = reminder.dateOfBirth;
+      if (dateString && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+        // Try to parse and convert to MM/DD/YYYY format
+        try {
+          const date = new Date(dateString);
+          if (!isNaN(date.getTime())) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            dateString = `${month}/${day}/${year}`;
+          }
+        } catch (error) {
+          console.error('Error parsing date for countdown:', error);
+        }
+      }
+      
+      const [month, day] = dateString.split('/');
       
       // Calculate this year's birthday occurrence using only month/day
       let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
@@ -229,22 +247,36 @@ function ReminderDetails() {
       const uid = auth.currentUser?.uid;
       const reminderRef = ref(database, `reminders/${uid}/${id}`);
       
-      // Validate date format
+      let valueToSave = editValues[editingField];
+      
+      // Convert date to MM/DD/YYYY format if it's a date field
       if (editingField === 'dateOfBirth') {
-        const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-        if (!dateRegex.test(editValues.dateOfBirth)) {
-          alert('Please enter date in MM/DD/YYYY format');
-          return;
+        if (valueToSave && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(valueToSave)) {
+          try {
+            const date = new Date(valueToSave);
+            if (!isNaN(date.getTime())) {
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              const year = date.getFullYear();
+              valueToSave = `${month}/${day}/${year}`;
+            } else {
+              alert('Please enter a valid date');
+              return;
+            }
+          } catch (error) {
+            alert('Please enter a valid date');
+            return;
+          }
         }
       }
       
       await update(reminderRef, {
-        [editingField]: editValues[editingField]
+        [editingField]: valueToSave
       });
       
       setReminder(prev => ({
         ...prev,
-        [editingField]: editValues[editingField]
+        [editingField]: valueToSave
       }));
       
       setEditingField(null);

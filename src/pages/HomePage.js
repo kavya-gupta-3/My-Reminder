@@ -30,7 +30,7 @@ function HomePage() {
     {
       icon: <FaMobile />,
       title: "Works on Any Device",
-      description: "Install on your phone, tablet, or computer and enjoy a seamless experience everywhere."
+      description: "Install on any device and enjoy native app experience with offline support and home screen access across all platforms."
     },
     {
       icon: <FaUsers />,
@@ -86,7 +86,7 @@ function HomePage() {
             marginBottom: '16px',
             animation: 'bounce 2s infinite'
           }}>
-            🎂
+            📅
           </div>
           <h1 style={{
             fontSize: 'clamp(2rem, 6vw, 2.5rem)',
