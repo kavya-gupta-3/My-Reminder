@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { useNavigate } from 'react-router-dom';
-import { FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaComments } from 'react-icons/fa';
+import { FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaComments, FaHeart } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {

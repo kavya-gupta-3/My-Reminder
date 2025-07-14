@@ -137,57 +137,6 @@ function ReminderDetails() {
     return () => clearInterval(interval);
   }, [reminder]);
 
-  // Check and update regen limit before generating a message
-  const checkAndUpdateRegenLimit = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return false;
-    const userRef = ref(database, `users/${uid}`);
-    const userSnap = await get(userRef);
-    let newCount = 1;
-    if (userSnap.exists()) {
-      const userData = userSnap.val();
-      if (userData.regenDate === getToday()) {
-        newCount = (userData.regenCount || 0) + 1;
-        if (newCount > 15) {
-          setRegenLimitReached(true);
-          return false;
-        }
-      }
-    }
-    await update(userRef, { regenCount: newCount, regenDate: getToday() });
-    setRegenLimitReached(newCount >= 15);
-    return true;
-  };
-
-  // Generate and display AI message using direct birthday message generation
-  const generateAndShowAIMessage = async (reminderData, size) => {
-    // Enforce regen limit
-    const allowed = await checkAndUpdateRegenLimit();
-    if (!allowed) {
-      setAiMessage('You have reached your daily limit for birthday message generations. Please try again tomorrow.');
-      setAiLoading(false);
-      return;
-    }
-    try {
-      setAiLoading(true);
-      const uid = auth.currentUser?.uid;
-      // Get user context
-      const context = await aiService.getUserContext(uid);
-      // Use the new direct birthday message generation function
-      const message = await aiService.generateDirectBirthdayMessage(reminderData, context, size);
-      setAiMessage(message);
-      setReminder(prev => ({
-        ...prev,
-        aiMessage: message,
-        aiMessageSize: size
-      }));
-    } catch (error) {
-      setAiMessage('Error generating message. Please try again.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
   // Regenerate AI message when messageSize changes
   useEffect(() => {
     if (!reminder) return;
