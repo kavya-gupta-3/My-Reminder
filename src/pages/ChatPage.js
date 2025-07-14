@@ -196,9 +196,67 @@ function ChatPage() {
     }
   };
 
+  // Helper to extract relationship and personName from user input
+  function extractRelationshipAndPersonName(input) {
+    const lower = input.toLowerCase();
+    // Common relationships
+    const relationships = [
+      { key: 'dad', rel: 'Dad', name: 'Dad' },
+      { key: 'father', rel: 'Dad', name: 'Dad' },
+      { key: 'mom', rel: 'Mom', name: 'Mom' },
+      { key: 'mother', rel: 'Mom', name: 'Mom' },
+      { key: 'parents', rel: 'Parents', name: 'Mom and Dad' },
+      { key: 'myself', rel: 'Self', name: '' },
+      { key: 'me', rel: 'Self', name: '' },
+      { key: 'my birthday', rel: 'Self', name: '' },
+      { key: 'wife', rel: 'Wife', name: 'Wife' },
+      { key: 'husband', rel: 'Husband', name: 'Husband' },
+      { key: 'girlfriend', rel: 'Girlfriend', name: 'Girlfriend' },
+      { key: 'boyfriend', rel: 'Boyfriend', name: 'Boyfriend' },
+      { key: 'partner', rel: 'Partner', name: 'Partner' },
+      { key: 'son', rel: 'Son', name: 'Son' },
+      { key: 'daughter', rel: 'Daughter', name: 'Daughter' },
+      { key: 'anniversary', rel: 'Anniversary', name: '' },
+    ];
+    for (const r of relationships) {
+      if (lower.includes(r.key)) {
+        // Try to extract a name if present (e.g., "my dad's birthday" or "for my dad")
+        let personName = r.name;
+        if (r.rel === 'Self') {
+          // Try to get user's name from context if available
+          return { relationship: r.rel, personName: '' };
+        }
+        if (r.key === 'parents') {
+          return { relationship: r.rel, personName: 'Mom and Dad' };
+        }
+        // Try to extract a name after the relationship keyword
+        const match = input.match(new RegExp(`${r.key} (.+)`, 'i'));
+        if (match && match[1]) {
+          personName = match[1].replace(/'s birthday|birthday|anniversary|reminder/gi, '').trim();
+        }
+        return { relationship: r.rel, personName };
+      }
+    }
+    // Fallback: if user says "my birthday" or "myself"
+    if (lower.includes('my birthday') || lower.includes('myself') || lower.includes('me')) {
+      return { relationship: 'Self', personName: '' };
+    }
+    return {};
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
+
+    // Extract relationship/personName from input
+    const extracted = extractRelationshipAndPersonName(inputValue);
+    let newReminderData = { ...reminderData };
+    if (extracted.relationship && !newReminderData.relationship) {
+      newReminderData.relationship = extracted.relationship;
+    }
+    if (extracted.personName && !newReminderData.personName) {
+      newReminderData.personName = extracted.personName;
+    }
 
     const userMessage = {
       id: Date.now(),
@@ -214,7 +272,7 @@ function ChatPage() {
     try {
       const aiResponse = await aiService.processChat(
         newMessages,
-        reminderData,
+        newReminderData,
         !!reminderId,
         userContext
       );
@@ -230,9 +288,23 @@ function ChatPage() {
 
       if (aiResponse.isComplete) {
         // Ensure all required fields are present before saving
+
+        // Validate required fields
+        if (!aiResponse.updatedData.dateOfBirth && !aiResponse.updatedData.date) {
+          const errorMessage = {
+            id: Date.now() + 2,
+            type: 'ai',
+            content: '❌ I need the date to save the reminder. Could you please provide the date?'
+          };
+          setMessages(prev => [...prev, errorMessage]);
+          return;
+        }
+
+        // Check if we have the required fields based on reminder type
         const reminderType = aiResponse.updatedData.reminderType || 'birthday';
         let hasRequiredFields = true;
         let missingField = '';
+
         if (reminderType === 'birthday') {
           if (!aiResponse.updatedData.personName) {
             hasRequiredFields = false;
@@ -249,9 +321,10 @@ function ChatPage() {
           }
           if (!aiResponse.updatedData.date) {
             hasRequiredFields = false;
-            missingField = 'date';
+            missingField = 'anniversary date';
           }
         }
+
         if (!hasRequiredFields) {
           const errorMessage = {
             id: Date.now() + 2,
@@ -261,28 +334,50 @@ function ChatPage() {
           setMessages(prev => [...prev, errorMessage]);
           return;
         }
-        // Prevent duplicate saves in a single session
-        if (messages.some(m => m.type === 'ai' && m.content.includes('Perfect! I'))) {
-          return;
+
+        // Prevent duplicate reminders (same personName and date/dateOfBirth)
+        if (!reminderId && userContext && userContext.reminders) {
+          const newName = (aiResponse.updatedData.personName || '').trim().toLowerCase();
+          const newDate = (aiResponse.updatedData.dateOfBirth || aiResponse.updatedData.date || '').trim();
+          const duplicate = userContext.reminders.find(r => {
+            const rName = (r.personName || '').trim().toLowerCase();
+            const rDate = (r.dateOfBirth || r.date || '').trim();
+            return rName === newName && rDate === newDate;
+          });
+          if (duplicate) {
+            const errorMessage = {
+              id: Date.now() + 2,
+              type: 'ai',
+              content: '❌ You already have a reminder for this person and date. Please check your reminders or use a different name/date.'
+            };
+            setMessages(prev => [...prev, errorMessage]);
+            return;
+          }
         }
+
         // Save to Firebase
         try {
           await saveReminderToFirebase(aiResponse.updatedData);
+          
           const successMessage = {
-            id: Date.now() + 2,
-            type: 'ai',
+          id: Date.now() + 2,
+          type: 'ai',
             content: `✅ Perfect! I've ${reminderId ? 'updated' : 'saved'} the ${aiResponse.updatedData.reminderType || 'reminder'}! 🎉\n\nWant to add another reminder? Just tell me about it!`
-          };
+        };
           setMessages(prev => [...prev, successMessage]);
+        
           // Clear reminder data for new reminder
           if (!reminderId) {
-            setReminderData({
-              personName: '',
-              partnerName: '',
+        setReminderData({
+          personName: '',
+              title: '',
               date: '',
-              relationship: '',
+          relationship: '',
               reminderType: 'birthday',
-              note: ''
+              note: '',
+              location: '',
+              attendees: '',
+              amount: ''
             });
           }
         } catch (error) {

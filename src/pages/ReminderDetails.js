@@ -52,8 +52,18 @@ function ReminderDetails() {
             setMessageSize(data.aiMessageSize);
             setAiLoading(false);
           } else {
-            setAiMessage('');
+            // No saved message: generate and save on first open
+            setAiLoading(true);
+            const context = await aiService.getUserContext(uid);
+            const message = await aiService.generateDirectBirthdayMessage({ id, ...data }, context, messageSize);
+            setAiMessage(message);
             setAiLoading(false);
+            // Save to Firebase
+            await update(reminderRef, {
+              aiMessage: message,
+              aiMessageSize: messageSize
+            });
+            setReminder(prev => ({ ...prev, aiMessage: message, aiMessageSize: messageSize }));
           }
           // Load regen count
           const userRef = ref(database, `users/${uid}`);
@@ -91,10 +101,9 @@ function ReminderDetails() {
     const calculateCountdown = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
-      
-      // Ensure date is in MM/DD/YYYY format for consistent parsing
-      let dateString = reminder.dateOfBirth;
-      if (dateString && !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+      // Use correct date field for type
+      let dateString = reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth;
+      if (dateString && !/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.test(dateString)) {
         // Try to parse and convert to MM/DD/YYYY format
         try {
           const date = new Date(dateString);
@@ -108,29 +117,23 @@ function ReminderDetails() {
           console.error('Error parsing date for countdown:', error);
         }
       }
-      
+      if (!dateString || !dateString.includes('/')) return;
       const [month, day] = dateString.split('/');
-      
-      // Calculate this year's birthday occurrence using only month/day
-      let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-      
-      // If birthday has passed this year, calculate for next year
-      if (birthday < now) {
-        birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+      // Calculate this year's event occurrence using only month/day
+      let eventDate = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+      // If event has passed this year, calculate for next year
+      if (eventDate < now) {
+        eventDate = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
       }
-
-      const diff = birthday - now;
+      const diff = eventDate - now;
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
       setCountdown({ days, hours, minutes, seconds });
     };
-
     calculateCountdown();
     const interval = setInterval(calculateCountdown, 1000);
-
     return () => clearInterval(interval);
   }, [reminder]);
 
@@ -644,14 +647,18 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  new Date(
-                    new Date().getFullYear(),
-                    parseInt((reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth).split('/')[0]) - 1,
-                    parseInt((reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth).split('/')[1])
-                  ).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric'
-                  })
+                  (() => {
+                    let dateString = reminder.reminderType === 'anniversary' ? reminder.date : reminder.dateOfBirth;
+                    if (dateString && /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.test(dateString)) {
+                      const [month, day, year] = dateString.split('/');
+                      return new Date(year, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                    }
+                    return dateString || '';
+                  })()
                 )}
               </div>
             </div>
@@ -869,14 +876,14 @@ function ReminderDetails() {
             flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '28px' }}><FaRobot /></span>
+              <span style={{ fontSize: '28px' }}>{reminder.reminderType === 'anniversary' ? <FaHeart /> : <FaRobot />}</span>
             <h3 style={{
                 fontSize: '22px',
               fontWeight: '600',
               margin: '0',
               color: '#000'
             }}>
-              AI Message
+              {reminder.reminderType === 'anniversary' ? 'AI Anniversary Message' : 'AI Birthday Message'}
             </h3>
             </div>
             <div className="ai-controls" style={{
