@@ -114,7 +114,7 @@ app.post('/api/send-notification', async (req, res) => {
       },
       android: {
         notification: {
-          icon: '/logo.png',
+          icon: '/LOGO.png',
           color: '#FF6B6B',
           priority: 'high',
           sound: 'default',
@@ -132,8 +132,8 @@ app.post('/api/send-notification', async (req, res) => {
       },
       webpush: {
         notification: {
-          icon: '/logo.png',
-          badge: '/logo.png',
+          icon: '/LOGO.png',
+          badge: '/LOGO.png',
           requireInteraction: true,
           actions: [
             {
@@ -216,7 +216,7 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       },
       android: {
         notification: {
-          icon: '/logo.png',
+          icon: '/LOGO.png',
           color: '#FF6B6B',
           priority: 'high',
           sound: 'default',
@@ -234,8 +234,8 @@ app.post('/api/send-notification-to-users', async (req, res) => {
       },
       webpush: {
         notification: {
-          icon: '/logo.png',
-          badge: '/logo.png',
+          icon: '/LOGO.png',
+          badge: '/LOGO.png',
           requireInteraction: true,
           actions: [
             {

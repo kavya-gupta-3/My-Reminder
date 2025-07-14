@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![MyReminder Logo](public/logo.png)
+![MyReminder Logo](public/LOGO.png)
 
 **A modern, AI-powered birthday reminder app that ensures you never forget another special day!**
 

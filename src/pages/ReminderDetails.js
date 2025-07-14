@@ -538,15 +538,12 @@ function ReminderDetails() {
                       }}
                       autoFocus
                     />
-                    <button onClick={saveEdit} style={{ padding: '2px 6px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✓</button>
-                    <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                    <button onClick={saveEdit} style={{ padding: '2px 6px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}> </button>
+                    <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}> </button>
                   </div>
                 ) : (
-                  /* Display only month/day for current year birthday, not birth year */
-                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
-                  month: 'long',
-                    day: 'numeric'
-                  })
+                  // Always display MM/DD/YYYY
+                  reminder.dateOfBirth
                 )}
               </div>
             </div>

@@ -364,5 +364,31 @@ AVOID THESE FORMAL STYLES:
   }
 }
 
+// Helper to parse various date formats and return MM/DD/YYYY
+function normalizeDate(input) {
+  if (!input) return '';
+  // Try MM/DD/YYYY or MM/DD/YY
+  const mmddyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+  if (mmddyyyy.test(input)) {
+    const [, m, d, y] = input.match(mmddyyyy);
+    return `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y.length === 2 ? '19' + y : y}`;
+  }
+  // Try DD/MM/YYYY
+  const ddmmyyyy = /^(\d{1,2})-(\d{1,2})-(\d{2,4})$/;
+  if (ddmmyyyy.test(input)) {
+    const [, d, m, y] = input.match(ddmmyyyy);
+    return `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y.length === 2 ? '19' + y : y}`;
+  }
+  // Try '7 May 1984' or 'May 7, 1984'
+  const dateObj = new Date(input);
+  if (!isNaN(dateObj.getTime())) {
+    const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const d = dateObj.getDate().toString().padStart(2, '0');
+    const y = dateObj.getFullYear();
+    return `${m}/${d}/${y}`;
+  }
+  return input; // fallback
+}
+
 const aiService = new AIService();
 export default aiService; 
