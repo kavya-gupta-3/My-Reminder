@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { useNavigate } from 'react-router-dom';
-import { FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaComments } from 'react-icons/fa';
+import { FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaComments, FaHeart } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -63,52 +63,14 @@ function Dashboard() {
     
     const unsubscribe = onValue(remindersRef, async (snapshot) => {
       const data = snapshot.val();
+      let remindersArray = [];
       if (data) {
-        let remindersArray = Object.keys(data).map(key => ({
+        remindersArray = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
-        })).filter(reminder => {
-          // Only include reminders with a valid dateOfBirth in MM/DD or MM/DD/YYYY format
-          if (!reminder.dateOfBirth) return false;
-          const parts = reminder.dateOfBirth.split('/');
-          return parts.length >= 2 && parts[0] && parts[1] && !isNaN(parseInt(parts[0])) && !isNaN(parseInt(parts[1]));
-        });
-
-        // Modify sorting logic to prioritize running birthdays
-        remindersArray.sort((a, b) => {
-          const now = new Date();
-          const currentYear = now.getFullYear();
-
-          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format
-          const [monthA, dayA] = a.dateOfBirth.split('/');
-          const [monthB, dayB] = b.dateOfBirth.split('/');
-          
-          // Calculate this year's birthday occurrence
-          let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
-          let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
-          
-          // Check if the birthday is running (within 24 hours after the birthday)
-          const isRunningA = now >= birthdayA && now < new Date(birthdayA.getTime() + 24 * 60 * 60 * 1000);
-          const isRunningB = now >= birthdayB && now < new Date(birthdayB.getTime() + 24 * 60 * 60 * 1000);
-
-          // Prioritize running birthdays
-          if (isRunningA && !isRunningB) return -1;
-          if (!isRunningA && isRunningB) return 1;
-
-          // If both are running or neither, sort by closest date
-          if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
-          if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
-          
-          const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-          const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-          
-          return daysUntilA - daysUntilB;
-        });
-
-        setReminders(remindersArray);
-      } else {
-        setReminders([]);
+        }));
       }
+      setReminders(remindersArray);
       setRemindersLoading(false);
     }, (error) => {
       console.error('Error fetching reminders:', error);
@@ -385,39 +347,36 @@ function Dashboard() {
             margin: '0 auto'
           }}>
             {reminders.map((reminder) => {
-              // Calculate days until birthday - use only month/day, not birth year
               const now = new Date();
               const currentYear = now.getFullYear();
-              const [month, day] = reminder.dateOfBirth.split('/');
-              
-              // Calculate this year's birthday occurrence 
-              let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
-              
-              // If birthday has passed this year, calculate for next year
-              if (birthday < now) {
-                birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
-              }
-              
-              const diff = birthday.setHours(0,0,0,0) - now.setHours(0,0,0,0);
-              const daysUntil = Math.ceil(diff / (1000 * 60 * 60 * 24));
-              
               let icon = <FaBirthdayCake />;
-              if (daysUntil === 0) icon = <FaGift />;
-              else if (daysUntil <= 7) icon = <FaGift style={{ color: '#ffa726' }}/>;
-              else if (daysUntil <= 30) icon = <FaCalendarCheck style={{ color: '#4caf50' }}/>;
-
-
-
-                // Add visual effects for running birthday reminders
-                const runningStyle = {
-                  border: '2px solid #FFD700', // Gold border
-                  boxShadow: '0 0 10px #FFD700', // Gold glow
-                  animation: 'pulse 2s infinite', // Pulsing effect
-                };
-
-                // Apply styles conditionally
-                const reminderStyle = now >= birthday && now < new Date(birthday.getTime() + 24 * 60 * 60 * 1000) ? runningStyle : {};
-
+              let label = '';
+              let daysUntil = 0;
+              if (reminder.reminderType === 'anniversary') {
+                // Anniversary logic
+                if (!reminder.date) return null;
+                const [month, day] = reminder.date.split('/');
+                let anniversary = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+                if (anniversary < now) {
+                  anniversary = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+                }
+                const diff = anniversary.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+                daysUntil = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                icon = <FaHeart style={{ color: '#e91e63' }} />;
+                label = daysUntil === 0 ? '🎉 Today!' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`;
+              } else {
+                // Birthday logic
+                if (!reminder.dateOfBirth) return null;
+                const [month, day] = reminder.dateOfBirth.split('/');
+                let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+                if (birthday < now) {
+                  birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+                }
+                const diff = birthday.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+                daysUntil = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                icon = <FaBirthdayCake />;
+                label = daysUntil === 0 ? '🎉 Today!' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`;
+              }
               return (
                 <div
                   key={reminder.id}
@@ -434,8 +393,7 @@ function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     minHeight: '64px',
-                      width: '100%',
-                      ...reminderStyle
+                    width: '100%'
                   }}
                   onClick={() => {
                     if (reminder.reminderType === 'anniversary') {
@@ -472,7 +430,7 @@ function Dashboard() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        {reminder.personName}
+                        {reminder.personName}{reminder.reminderType === 'anniversary' && reminder.partnerName ? ` & ${reminder.partnerName}` : ''}
                       </h3>
                       <p style={{
                         color: '#666',
@@ -486,29 +444,24 @@ function Dashboard() {
                       </p>
                     </div>
                   </div>
-                  
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                     <p style={{
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        margin: '0 0 4px 0',
-                        color: daysUntil === 0 ? '#ff6b6b' : '#000'
-                      }}>
-                        {daysUntil === 0 ? '🎉 Today!' : 
-                         daysUntil === 1 ? 'Tomorrow' :
-                         `${daysUntil} days`}
-                      </p>
-                      <p style={{
-                        color: '#666',
-                        fontSize: '13px',
-                        margin: '0'
-                      }}>
-                        {/* Show only month/day for next occurrence, not birth year */}
-                        {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </p>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      margin: '0 0 4px 0',
+                      color: daysUntil === 0 ? '#ff6b6b' : '#000'
+                    }}>
+                      {label}
+                    </p>
+                    <p style={{
+                      color: '#666',
+                      fontSize: '13px',
+                      margin: '0'
+                    }}>
+                      {reminder.reminderType === 'anniversary'
+                        ? (reminder.date ? new Date(currentYear, parseInt(reminder.date.split('/')[0]) - 1, parseInt(reminder.date.split('/')[1])).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '')
+                        : (reminder.dateOfBirth ? new Date(currentYear, parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '')}
+                    </p>
                   </div>
                 </div>
               );
