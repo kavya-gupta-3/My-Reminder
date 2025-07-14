@@ -48,7 +48,7 @@ function LoginForm() {
         border: '2px solid #000'
       }}>
         <img 
-          src="/logo.png" 
+          src="/LOGO.png" 
                       alt="MyReminder Logo" 
           style={{ 
             width: '80px', 

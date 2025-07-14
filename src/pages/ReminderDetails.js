@@ -5,6 +5,15 @@ import aiService from '../services/aiService';
 import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt } from 'react-icons/fa';
 import './ReminderDetails.css';
 
+function formatDateMMDDYYYY(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('/');
+  if (parts.length < 3) return dateStr; // fallback
+  const [month, day, year] = parts;
+  // Pad month and day for display
+  return `${month.padStart(2, '0')}/${day.padStart(2, '0')}/${year}`;
+}
+
 function ReminderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -542,11 +551,7 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  /* Display only month/day for current year birthday, not birth year */
-                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
-                  month: 'long',
-                    day: 'numeric'
-                  })
+                  <span>{formatDateMMDDYYYY(reminder.dateOfBirth)}</span>
                 )}
               </div>
             </div>
