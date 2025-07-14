@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import NameForm from '../components/NameForm';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { useNavigate } from 'react-router-dom';
-import { FaComments, FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
+import { FaBirthdayCake, FaGift, FaCalendarCheck, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import { signOut } from 'firebase/auth';
 
 function Dashboard() {
@@ -61,74 +61,56 @@ function Dashboard() {
     
     setRemindersLoading(true);
     
-    const unsubscribe = onValue(remindersRef, (snapshot) => {
-      try {
-        const reminders = [];
-        if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            // Convert old format to new format
-            const reminder = {
-              id: childSnapshot.key,
-              personName: data.personName || data.title || '',
-              title: data.title || data.personName || '',
-              date: data.dateOfBirth || data.date || '',
-              relationship: data.relationship || '',
-              reminderType: data.reminderType || 'birthday',
-              note: data.note || '',
-              location: data.location || '',
-              attendees: data.attendees || '',
-              amount: data.amount || ''
-            };
-            reminders.push(reminder);
-          });
-        }
+    const unsubscribe = onValue(remindersRef, async (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        let remindersArray = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
 
-        // Modify sorting logic to prioritize running reminders
-        reminders.sort((a, b) => {
+        // Modify sorting logic to prioritize running birthdays
+        remindersArray.sort((a, b) => {
           const now = new Date();
           const currentYear = now.getFullYear();
 
-          // Parse dates correctly - date is in MM/DD/YYYY format
-          const [monthA, dayA] = a.date.split('/');
-          const [monthB, dayB] = b.date.split('/');
+          // Parse dates correctly - dateOfBirth is in MM/DD/YYYY format
+          const [monthA, dayA] = a.dateOfBirth.split('/');
+          const [monthB, dayB] = b.dateOfBirth.split('/');
           
-          // Calculate this year's occurrence
-          let dateA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
-          let dateB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
+          // Calculate this year's birthday occurrence
+          let birthdayA = new Date(currentYear, parseInt(monthA) - 1, parseInt(dayA));
+          let birthdayB = new Date(currentYear, parseInt(monthB) - 1, parseInt(dayB));
           
-          // Check if the reminder is running (within 24 hours after the date)
-          const isRunningA = now >= dateA && now < new Date(dateA.getTime() + 24 * 60 * 60 * 1000);
-          const isRunningB = now >= dateB && now < new Date(dateB.getTime() + 24 * 60 * 60 * 1000);
+          // Check if the birthday is running (within 24 hours after the birthday)
+          const isRunningA = now >= birthdayA && now < new Date(birthdayA.getTime() + 24 * 60 * 60 * 1000);
+          const isRunningB = now >= birthdayB && now < new Date(birthdayB.getTime() + 24 * 60 * 60 * 1000);
 
-          // Prioritize running reminders
+          // Prioritize running birthdays
           if (isRunningA && !isRunningB) return -1;
           if (!isRunningA && isRunningB) return 1;
 
           // If both are running or neither, sort by closest date
-          if (dateA < now) dateA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
-          if (dateB < now) dateB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
+          if (birthdayA < now) birthdayA = new Date(currentYear + 1, parseInt(monthA) - 1, parseInt(dayA));
+          if (birthdayB < now) birthdayB = new Date(currentYear + 1, parseInt(monthB) - 1, parseInt(dayB));
           
-          const daysUntilA = Math.ceil((dateA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-          const daysUntilB = Math.ceil((dateB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          const daysUntilA = Math.ceil((birthdayA.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+          const daysUntilB = Math.ceil((birthdayB.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
           
           return daysUntilA - daysUntilB;
         });
 
-        setReminders(reminders);
-      } catch (error) {
-        console.error('Error processing reminders:', error);
-      } finally {
-        setRemindersLoading(false);
+        setReminders(remindersArray);
+      } else {
+        setReminders([]);
       }
+      setRemindersLoading(false);
     }, (error) => {
       console.error('Error fetching reminders:', error);
       setRemindersLoading(false);
     });
 
-    return () => {
-      off(remindersRef, 'value', unsubscribe);
-    };
+    return () => off(remindersRef, 'value', unsubscribe);
   }, [user]);
 
   // Add logout handler
@@ -150,49 +132,6 @@ function Dashboard() {
       console.error('Logout error:', err);
       // Force reload even if signOut fails
       window.location.href = '/';
-    }
-  };
-
-  // Get icon based on reminder type
-  const getReminderIcon = (reminderType, daysUntil) => {
-    // Always show type-specific icons, not urgency-based icons
-    switch (reminderType) {
-      case 'birthday':
-        return <FaBirthdayCake style={{ color: '#ff6b6b' }} />;
-      case 'anniversary':
-        return <FaHeart style={{ color: '#e91e63' }} />;
-      case 'meeting':
-        return <FaBriefcase style={{ color: '#2196f3' }} />;
-      case 'bill':
-        return <FaMoneyBillWave style={{ color: '#4caf50' }} />;
-      case 'task':
-        return <FaCalendarCheck style={{ color: '#ff9800' }} />;
-      case 'custom':
-        return <FaBell style={{ color: '#9c27b0' }} />;
-      default:
-        return <FaBell style={{ color: '#666' }} />;
-    }
-  };
-
-  // Get display name for reminder
-  const getReminderDisplayName = (reminder) => {
-    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
-      return reminder.personName || 'Unknown Person';
-    } else {
-      return reminder.title || reminder.personName || 'Untitled';
-    }
-  };
-
-  // Get display subtitle for reminder
-  const getReminderSubtitle = (reminder) => {
-    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
-      return reminder.relationship || '';
-    } else if (reminder.reminderType === 'meeting') {
-      return reminder.location ? `📍 ${reminder.location}` : '';
-    } else if (reminder.reminderType === 'bill') {
-      return reminder.amount ? `💰 $${reminder.amount}` : '';
-    } else {
-      return reminder.note || '';
     }
   };
 
@@ -389,7 +328,7 @@ function Dashboard() {
           paddingRight: '20px',
           paddingLeft: '20px'
         }}>
-          My Reminder
+                      MyReminder
         </h1>
         <p style={{
           margin: '12px 0 0 0',
@@ -441,33 +380,49 @@ function Dashboard() {
             margin: '0 auto'
           }}>
             {reminders.map((reminder) => {
-              // Calculate days until reminder - use only month/day, not year
+              // Calculate days until birthday - use only month/day, not birth year
               const now = new Date();
               const currentYear = now.getFullYear();
-              const [month, day] = reminder.date.split('/');
+              const [month, day] = reminder.dateOfBirth.split('/');
               
-              // Calculate this year's occurrence 
-              let reminderDate = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+              // Calculate this year's birthday occurrence 
+              let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
               
-              // If date has passed this year, calculate for next year
-              if (reminderDate < now) {
-                reminderDate = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+              // If birthday has passed this year, calculate for next year
+              if (birthday < now) {
+                birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
               }
               
-              const diff = reminderDate.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+              const diff = birthday.setHours(0,0,0,0) - now.setHours(0,0,0,0);
               const daysUntil = Math.ceil(diff / (1000 * 60 * 60 * 24));
               
-              const icon = getReminderIcon(reminder.reminderType, daysUntil);
+              let icon = <FaBirthdayCake />;
+              if (daysUntil === 0) icon = <FaGift />;
+              else if (daysUntil <= 7) icon = <FaGift style={{ color: '#ffa726' }}/>;
+              else if (daysUntil <= 30) icon = <FaCalendarCheck style={{ color: '#4caf50' }}/>;
 
-              // Add visual effects for running reminders
-              const runningStyle = {
-                border: '2px solid #FFD700', // Gold border
-                boxShadow: '0 0 10px #FFD700', // Gold glow
-                animation: 'pulse 2s infinite', // Pulsing effect
+              // Helper to calculate the age they will turn on their next birthday
+              const getUpcomingAge = (dateOfBirth) => {
+                const [month, day, year] = dateOfBirth.split('/');
+                const birthDate = new Date(year, month - 1, day);
+                const now = new Date();
+                let age = now.getFullYear() - birthDate.getFullYear();
+                const thisYearBirthday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+                if (now >= thisYearBirthday) {
+                  age += 1;
+                }
+                return age;
               };
 
-              // Apply styles conditionally
-              const reminderStyle = now >= reminderDate && now < new Date(reminderDate.getTime() + 24 * 60 * 60 * 1000) ? runningStyle : {};
+                // Add visual effects for running birthday reminders
+                const runningStyle = {
+                  border: '2px solid #FFD700', // Gold border
+                  boxShadow: '0 0 10px #FFD700', // Gold glow
+                  animation: 'pulse 2s infinite', // Pulsing effect
+                };
+
+                // Apply styles conditionally
+                const reminderStyle = now >= birthday && now < new Date(birthday.getTime() + 24 * 60 * 60 * 1000) ? runningStyle : {};
 
               return (
                 <div
@@ -485,8 +440,8 @@ function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     minHeight: '64px',
-                    width: '100%',
-                    ...reminderStyle
+                      width: '100%',
+                      ...reminderStyle
                   }}
                   onClick={() => navigate(`/reminder/${reminder.id}`)}
                 >
@@ -517,7 +472,7 @@ function Dashboard() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        {getReminderDisplayName(reminder)}
+                        {reminder.personName}
                       </h3>
                       <p style={{
                         color: '#666',
@@ -527,7 +482,7 @@ function Dashboard() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        {getReminderSubtitle(reminder)}
+                        {reminder.relationship}
                       </p>
                     </div>
                   </div>
@@ -548,11 +503,11 @@ function Dashboard() {
                         fontSize: '13px',
                         margin: '0'
                       }}>
-                        {/* Show only month/day for next occurrence, not year */}
+                        {/* Show only month/day for next occurrence, not birth year */}
                         {new Date(currentYear, parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
-                        })}
+                        })} • Turns {getUpcomingAge(reminder.dateOfBirth)}
                       </p>
                   </div>
                 </div>
@@ -580,7 +535,7 @@ function Dashboard() {
         )}
       </section>
 
-      {/* Floating Chat Button */}
+      {/* Floating Add Button */}
       <button
         onClick={() => navigate('/chat')}
         style={{
@@ -593,7 +548,7 @@ function Dashboard() {
           backgroundColor: '#000',
           color: '#fff',
           border: '2px solid #000',
-          fontSize: '24px',
+          fontSize: '32px',
           fontWeight: '300',
           cursor: 'pointer',
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)',
@@ -611,12 +566,12 @@ function Dashboard() {
           e.target.style.transform = 'scale(1)';
           e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
         }}
-        aria-label="Chat with AI assistant"
+        aria-label="Add new reminder"
       >
         <FaComments />
       </button>
 
-      <style>{`
+      <style jsx>{`
         .dashboard-container {
           padding: 0 16px 100px 16px;
         }
@@ -636,11 +591,6 @@ function Dashboard() {
           header {
             padding: 20px 12px !important;
           }
-        }
-        @keyframes pulse {
-          0% { box-shadow: 0 0 10px #FFD700; }
-          50% { box-shadow: 0 0 20px #FFD700, 0 0 30px #FFD700; }
-          100% { box-shadow: 0 0 10px #FFD700; }
         }
       `}</style>
     </div>

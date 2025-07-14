@@ -49,7 +49,7 @@ function LoginForm() {
       }}>
         <img 
           src="/logo.png" 
-                      alt="My Reminder Logo" 
+                      alt="MyReminder Logo" 
           style={{ 
             width: '80px', 
             height: '80px', 
@@ -65,7 +65,7 @@ function LoginForm() {
           letterSpacing: '-0.02em',
           color: '#000'
         }}>
-                      My Reminder
+                      MyReminder
         </h1>
         
         <p style={{
@@ -110,7 +110,7 @@ function LoginForm() {
               e.target.style.color = '#fff';
             }}
           >
-            <FaGoogle style={{ fontSize: '18px', backgroundColor: 'transparent' }} />
+            <FaGoogle style={{ fontSize: '18px' }} />
             <span>Continue with Google</span>
           </button>
 

@@ -1,8 +1,8 @@
-# 🎂 My Reminder - Never Miss a Special Day
+# 🎂 MyReminder - Never Miss a Special Day
 
 <div align="center">
 
-![My Reminder Logo](public/logo.png)
+![MyReminder Logo](public/logo.png)
 
 **A modern, AI-powered birthday reminder app that ensures you never forget another special day!**
 
@@ -52,7 +52,7 @@
 
 ## 🚀 Live Demo
 
-Experience My Reminder now: **[https://myreminder.xyz/](https://myreminder.xyz/)**
+Experience MyReminder now: **[https://myreminder.xyz/](https://myreminder.xyz/)**
 
 ### Install as PWA:
 1. **Mobile (iOS/Android)**: Visit the link and tap "Add to Home Screen"

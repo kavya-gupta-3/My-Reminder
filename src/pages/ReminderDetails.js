@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { auth, database, ref, get, remove, update } from '../firebase';
 import aiService from '../services/aiService';
-import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt, FaHeart, FaBriefcase, FaMoneyBillWave, FaBell } from 'react-icons/fa';
+import { FaArrowLeft, FaBirthdayCake, FaEdit, FaRegClock, FaRegCommentDots, FaRobot, FaTrash, FaSyncAlt, FaShareAlt, FaCopy, FaWhatsapp, FaEnvelope, FaSms, FaPencilAlt } from 'react-icons/fa';
 import './ReminderDetails.css';
 
 function ReminderDetails() {
@@ -23,70 +23,12 @@ function ReminderDetails() {
   const [editingField, setEditingField] = useState(null);
   const [editValues, setEditValues] = useState({
     personName: '',
-    date: '',
+    dateOfBirth: '',
     note: ''
   });
 
   // Helper to get today's date string
   const getToday = () => new Date().toISOString().slice(0, 10);
-
-  // Get icon based on reminder type
-  const getReminderIcon = (reminderType) => {
-    switch (reminderType) {
-      case 'birthday':
-        return <FaBirthdayCake />;
-      case 'anniversary':
-        return <FaHeart />;
-      case 'meeting':
-        return <FaBriefcase />;
-      case 'bill':
-        return <FaMoneyBillWave />;
-      default:
-        return <FaBell />;
-    }
-  };
-
-  // Get reminder type display name
-  const getReminderTypeName = (reminderType) => {
-    switch (reminderType) {
-      case 'birthday':
-        return 'Birthday';
-      case 'anniversary':
-        return 'Anniversary';
-      case 'meeting':
-        return 'Meeting';
-      case 'bill':
-        return 'Bill';
-      case 'task':
-        return 'Task';
-      case 'custom':
-        return 'Event';
-      default:
-        return reminderType.charAt(0).toUpperCase() + reminderType.slice(1);
-    }
-  };
-
-  // Get display name for reminder
-  const getReminderDisplayName = (reminder) => {
-    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
-      return reminder.personName || 'Unknown Person';
-    } else {
-      return reminder.title || reminder.personName || 'Untitled';
-    }
-  };
-
-  // Get display subtitle for reminder
-  const getReminderSubtitle = (reminder) => {
-    if (reminder.reminderType === 'birthday' || reminder.reminderType === 'anniversary') {
-      return reminder.relationship || '';
-    } else if (reminder.reminderType === 'meeting') {
-      return reminder.location ? `📍 ${reminder.location}` : '';
-    } else if (reminder.reminderType === 'bill') {
-      return reminder.amount ? `💰 $${reminder.amount}` : '';
-    } else {
-      return reminder.note || '';
-    }
-  };
 
   // Load reminder, AI message, and regen count
   useEffect(() => {
@@ -102,20 +44,7 @@ function ReminderDetails() {
         const snapshot = await get(reminderRef);
         if (snapshot.exists()) {
           const data = snapshot.val();
-          // Convert old format to new format
-          const convertedData = {
-            id,
-            personName: data.personName || data.title || '',
-            title: data.title || data.personName || '',
-            date: data.dateOfBirth || data.date || '',
-            relationship: data.relationship || '',
-            reminderType: data.reminderType || 'birthday',
-            note: data.note || '',
-            location: data.location || '',
-            attendees: data.attendees || '',
-            amount: data.amount || ''
-          };
-          setReminder(convertedData);
+          setReminder({ id, ...data });
           // Load saved AI message if exists
           if (data.aiMessage && data.aiMessageSize) {
             setAiMessage(data.aiMessage);
@@ -123,7 +52,7 @@ function ReminderDetails() {
             setAiLoading(false);
           } else {
             // Generate and save if not exists
-            generateAndShowAIMessage(convertedData, messageSize);
+            generateAndShowAIMessage(data, messageSize);
           }
           // Load regen count
           const userRef = ref(database, `users/${uid}`);
@@ -161,17 +90,17 @@ function ReminderDetails() {
     const calculateCountdown = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
-      const [month, day] = reminder.date.split('/');
+      const [month, day] = reminder.dateOfBirth.split('/');
       
-      // Calculate this year's occurrence using only month/day
-      let reminderDate = new Date(currentYear, parseInt(month) - 1, parseInt(day));
+      // Calculate this year's birthday occurrence using only month/day
+      let birthday = new Date(currentYear, parseInt(month) - 1, parseInt(day));
       
-      // If date has passed this year, calculate for next year
-      if (reminderDate < now) {
-        reminderDate = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
+      // If birthday has passed this year, calculate for next year
+      if (birthday < now) {
+        birthday = new Date(currentYear + 1, parseInt(month) - 1, parseInt(day));
       }
 
-      const diff = reminderDate - now;
+      const diff = birthday - now;
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -208,20 +137,12 @@ function ReminderDetails() {
     return true;
   };
 
-  // Generate and display AI message using direct reminder message generation
+  // Generate and display AI message using direct birthday message generation
   const generateAndShowAIMessage = async (reminderData, size) => {
-    // Check localStorage first
-    const storedMessage = getStoredAIMessage(reminderData.id, size);
-    if (storedMessage && storedMessage.message) {
-      setAiMessage(storedMessage.message);
-      setAiLoading(false);
-      return;
-    }
-
     // Enforce regen limit
     const allowed = await checkAndUpdateRegenLimit();
     if (!allowed) {
-      setAiMessage('You have reached your daily limit for message generations. Please try again tomorrow.');
+      setAiMessage('You have reached your daily limit for birthday message generations. Please try again tomorrow.');
       setAiLoading(false);
       return;
     }
@@ -230,16 +151,14 @@ function ReminderDetails() {
       const uid = auth.currentUser?.uid;
       // Get user context
       const context = await aiService.getUserContext(uid);
-      // Use the new direct reminder message generation function
-      const message = await aiService.generateDirectReminderMessage(reminderData, context, size);
+      // Use the new direct birthday message generation function
+      const message = await aiService.generateDirectBirthdayMessage(reminderData, context, size);
       setAiMessage(message);
       setReminder(prev => ({
         ...prev,
         aiMessage: message,
         aiMessageSize: size
       }));
-      // Save to localStorage
-      saveAIMessageToStorage(reminderData.id, size, message);
     } catch (error) {
       setAiMessage('Error generating message. Please try again.');
     } finally {
@@ -250,13 +169,8 @@ function ReminderDetails() {
   // Regenerate AI message when messageSize changes
   useEffect(() => {
     if (!reminder) return;
-    // Check if we have a stored message for this size
-    const storedMessage = getStoredAIMessage(reminder.id, messageSize);
-    if (storedMessage && storedMessage.message) {
-      setAiMessage(storedMessage.message);
-      setAiLoading(false);
-    } else if (reminder.aiMessageSize !== messageSize) {
-      // Only regenerate if we don't have a stored message and the size changed
+    // Only regenerate if the current aiMessageSize does not match the selected size
+    if (reminder.aiMessageSize !== messageSize) {
       generateAndShowAIMessage(reminder, messageSize);
     } else if (reminder.aiMessage) {
       setAiMessage(reminder.aiMessage);
@@ -296,7 +210,7 @@ function ReminderDetails() {
     setEditingField(field);
     setEditValues({
       personName: reminder.personName,
-      date: reminder.date,
+      dateOfBirth: reminder.dateOfBirth,
       note: reminder.note || ''
     });
   };
@@ -305,7 +219,7 @@ function ReminderDetails() {
     setEditingField(null);
     setEditValues({
       personName: '',
-      date: '',
+      dateOfBirth: '',
       note: ''
     });
   };
@@ -316,9 +230,9 @@ function ReminderDetails() {
       const reminderRef = ref(database, `reminders/${uid}/${id}`);
       
       // Validate date format
-      if (editingField === 'date') {
+      if (editingField === 'dateOfBirth') {
         const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-        if (!dateRegex.test(editValues.date)) {
+        if (!dateRegex.test(editValues.dateOfBirth)) {
           alert('Please enter date in MM/DD/YYYY format');
           return;
         }
@@ -340,29 +254,16 @@ function ReminderDetails() {
     }
   };
 
-  // Get AI message from localStorage
-  const getStoredAIMessage = (reminderId, size) => {
-    try {
-      const key = `ai_message_${reminderId}_${size}`;
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error('Error getting stored AI message:', error);
-      return null;
+  const calculateAge = (dateOfBirth) => {
+    const [month, day, year] = dateOfBirth.split('/');
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
-  };
-
-  // Save AI message to localStorage
-  const saveAIMessageToStorage = (reminderId, size, message) => {
-    try {
-      const key = `ai_message_${reminderId}_${size}`;
-      localStorage.setItem(key, JSON.stringify({
-        message,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.error('Error saving AI message to storage:', error);
-    }
+    return age;
   };
 
   // Send message helpers
@@ -375,7 +276,7 @@ function ReminderDetails() {
     setShowShareFallback(false);
   };
   const handleEmail = () => {
-    window.open(`mailto:?subject=${getReminderTypeName(reminder.reminderType)}%20Message&body=${encodeURIComponent(aiMessage)}`);
+    window.open(`mailto:?subject=Birthday%20Message&body=${encodeURIComponent(aiMessage)}`);
     setShowShareFallback(false);
   };
   const handleSMS = () => {
@@ -388,7 +289,7 @@ function ReminderDetails() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `${getReminderTypeName(reminder.reminderType)} Message for ${reminder.personName}`,
+        title: `Birthday Message for ${reminder.personName}`,
         text: aiMessage,
         url: window.location.href
       }).catch(() => {}); // Suppress share cancel error
@@ -514,7 +415,7 @@ function ReminderDetails() {
           paddingRight: '68px',
           textAlign: 'center'
         }}>
-          {getReminderIcon(reminder.reminderType)} {getReminderDisplayName(reminder)}'s {getReminderTypeName(reminder.reminderType)}
+          <FaBirthdayCake style={{ marginRight: '16px' }} /> {reminder.personName}'s Reminder
         </h1>
       </header>
 
@@ -523,7 +424,7 @@ function ReminderDetails() {
         maxWidth: '800px',
         margin: '0 auto'
       }}>
-        {/* Reminder Info Card */}
+        {/* Birthday Info Card */}
         <div className="birthday-info-card" style={{
           backgroundColor: '#fff',
           color: '#333',
@@ -543,7 +444,7 @@ function ReminderDetails() {
               fontSize: '44px',
               marginRight: '20px'
             }}>
-              {getReminderIcon(reminder.reminderType)}
+              <FaBirthdayCake />
             </span>
             <div>
               <h2 style={{
@@ -576,7 +477,7 @@ function ReminderDetails() {
                   </div>
                 ) : (
                   <>
-                {getReminderDisplayName(reminder)}
+                {reminder.personName}
                     <FaPencilAlt 
                       onClick={() => startEditing('personName')}
                       style={{ 
@@ -596,7 +497,7 @@ function ReminderDetails() {
                 color: '#666',
                 margin: '0'
               }}>
-                {getReminderSubtitle(reminder)} • {getReminderTypeName(reminder.reminderType)}
+                {reminder.relationship} • Age {calculateAge(reminder.dateOfBirth)}
               </p>
             </div>
           </div>
@@ -616,11 +517,11 @@ function ReminderDetails() {
               textAlign: 'center',
               border: '1px solid #000'
             }}>
-              <div style={{ fontSize: '28px', marginBottom: '10px' }}>{getReminderIcon(reminder.reminderType)}</div>
+              <div style={{ fontSize: '28px', marginBottom: '10px' }}><FaBirthdayCake /></div>
               <div style={{ fontWeight: '600', marginBottom: '6px', color: '#000', fontSize: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                {getReminderTypeName(reminder.reminderType)}
+                Date
                 <FaPencilAlt 
-                  onClick={() => startEditing('date')}
+                  onClick={() => startEditing('dateOfBirth')}
                   style={{ 
                     fontSize: '14px', 
                     cursor: 'pointer', 
@@ -632,12 +533,12 @@ function ReminderDetails() {
                 />
               </div>
               <div style={{ color: '#666', fontSize: '15px' }}>
-                {editingField === 'date' ? (
+                {editingField === 'dateOfBirth' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                     <input
                       type="text"
-                      value={editValues.date}
-                      onChange={(e) => setEditValues({...editValues, date: e.target.value})}
+                      value={editValues.dateOfBirth}
+                      onChange={(e) => setEditValues({...editValues, dateOfBirth: e.target.value})}
                       placeholder="MM/DD/YYYY"
                       style={{
                         fontSize: '15px',
@@ -653,8 +554,8 @@ function ReminderDetails() {
                     <button onClick={cancelEditing} style={{ padding: '2px 6px', background: '#ff6b6b', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ) : (
-                  /* Display only month/day for current year occurrence, not year */
-                  new Date(new Date().getFullYear(), parseInt(reminder.date.split('/')[0]) - 1, parseInt(reminder.date.split('/')[1])).toLocaleDateString('en-US', {
+                  /* Display only month/day for current year birthday, not birth year */
+                  new Date(new Date().getFullYear(), parseInt(reminder.dateOfBirth.split('/')[0]) - 1, parseInt(reminder.dateOfBirth.split('/')[1])).toLocaleDateString('en-US', {
                   month: 'long',
                     day: 'numeric'
                   })
@@ -784,7 +685,7 @@ function ReminderDetails() {
             margin: '0 0 20px 0',
             color: '#000'
           }}>
-            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to {getReminderTypeName(reminder.reminderType)}</>}
+            {isToday ? "🎉 It's Today!" : <><FaRegClock style={{ marginRight: '10px' }} />Countdown to Event</>}
           </h3>
           <div className="countdown-grid" style={{
             display: 'grid',
@@ -882,7 +783,7 @@ function ReminderDetails() {
               margin: '0',
               color: '#000'
             }}>
-              AI {getReminderTypeName(reminder.reminderType)} Message
+              AI Message
             </h3>
             </div>
             <div className="ai-controls" style={{
