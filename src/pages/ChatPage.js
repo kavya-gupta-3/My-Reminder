@@ -257,6 +257,10 @@ function ChatPage() {
     if (extracted.personName && !newReminderData.personName) {
       newReminderData.personName = extracted.personName;
     }
+    // If user input contains 'anniversary', set reminderType to 'anniversary'
+    if (inputValue.toLowerCase().includes('anniversary')) {
+      newReminderData.reminderType = 'anniversary';
+    }
 
     const userMessage = {
       id: Date.now(),
@@ -278,6 +282,10 @@ function ChatPage() {
       );
 
       setReminderData(aiResponse.updatedData);
+      // If AI response has reminderType 'anniversary', set it in reminderData
+      if (aiResponse.updatedData.reminderType === 'anniversary') {
+        setReminderData(prev => ({ ...prev, reminderType: 'anniversary' }));
+      }
       
       const aiMessage = {
         id: Date.now() + 1,
