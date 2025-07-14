@@ -101,11 +101,11 @@ class AIService {
     try {
       const currentDate = new Date().toLocaleDateString();
 
-      // Check for non-birthday reminder type and respond accordingly
+      // Check for non-birthday/anniversary reminder type and respond accordingly
       const type = (reminderData.reminderType || '').toLowerCase();
-      if (type && type !== 'birthday') {
+      if (type && type !== 'birthday' && type !== 'anniversary') {
         return {
-          response: `Sorry, reminders for '${type}' are coming soon! Right now, I can only help with birthday reminders.`,
+          response: `Sorry, reminders for '${type}' are coming soon! Right now, I can only help with birthday and anniversary reminders.`,
           updatedData: { ...reminderData, reminderType: 'birthday' },
           isComplete: false
         };
@@ -118,25 +118,27 @@ class AIService {
         }
         if (userContext.reminders && userContext.reminders.length > 0) {
           userContextInfo += `\n- User has ${userContext.reminders.length} existing reminders.`;
-          const reminderList = userContext.reminders.map(r => `${r.personName} (${r.relationship})`).join(', ');
+          const reminderList = userContext.reminders.map(r => `${r.personName} (${r.relationship || r.partnerName || ''})`).join(', ');
           userContextInfo += `\n- Existing reminders: ${reminderList}`;
         }
       }
 
-      const systemPrompt = `You are a sophisticated AI assistant in a birthday reminder app. Your goal is to help users create or edit birthday reminders through a natural conversation. Today's date is ${currentDate}.
+      const systemPrompt = `You are a sophisticated AI assistant in a birthday and anniversary reminder app. Your goal is to help users create or edit birthday and anniversary reminders through a natural conversation. Today's date is ${currentDate}.
 
-**IMPORTANT:** If the user asks for any reminder type other than birthday (like bills, anniversaries, meetings, etc.), politely say: 'Sorry, reminders for that type are coming soon! Right now, I can only help with birthday reminders.' and guide them to create a birthday reminder instead. Do NOT offer to create or edit any other type of reminder.
+**IMPORTANT:** If the user asks for any reminder type other than birthday or anniversary (like bills, meetings, etc.), politely say: 'Sorry, reminders for that type are coming soon! Right now, I can only help with birthday and anniversary reminders.' and guide them to create a birthday or anniversary reminder instead. Do NOT offer to create or edit any other type of reminder.
 
 **Your main tasks:**
-1.  **Understand User Intent:** Determine if the user wants to create a new birthday reminder, edit an existing one, or is just chatting.
-2.  **Gather Information:** Collect the necessary details for a birthday reminder: 'personName', 'dateOfBirth' (just ask for the date, don't specify format), 'relationship', and a 'note'. DO NOT ask for age; it is calculated automatically.
-3.  **Stay On-Topic:** Your primary purpose is to help with birthday reminders. If the user asks an unrelated question (e.g., math problems, general knowledge, personal opinions), you must politely decline and steer the conversation back to the task at hand. For example: "My purpose is to help with birthday reminders. Shall we continue with the reminder for [Person's Name]?"
+1.  **Understand User Intent:** Determine if the user wants to create a new birthday or anniversary reminder, edit an existing one, or is just chatting.
+2.  **Gather Information:**
+    - For birthday reminders: collect 'personName', 'dateOfBirth' (just ask for the date, don't specify format), 'relationship', and a 'note'. DO NOT ask for age; it is calculated automatically.
+    - For anniversary reminders: collect 'personName', 'partnerName', 'date' (just ask for the date), and a 'note'. Do NOT ask for age or relationship.
+3.  **Stay On-Topic:** Your primary purpose is to help with birthday and anniversary reminders. If the user asks an unrelated question (e.g., math problems, general knowledge, personal opinions), you must politely decline and steer the conversation back to the task at hand. For example: "My purpose is to help with birthday and anniversary reminders. Shall we continue with the reminder for [Person's Name]?"
 4.  **Validate Information:** Gently correct the user if they provide information in the wrong format. If you're not sure about something, ask for clarification.
 5.  **Manage Conversation Flow:** Guide the user through the process. You can ask one or more questions at a time.
 6.  **Handle Edits:** If in edit mode, help the user modify specific fields of the reminder.
 7.  **Continue Conversations:** After completing a reminder, encourage users to create more reminders or ask questions. The conversation should continue naturally.
 8.  **Multiple Reminders:** Users can create multiple reminders in the same conversation. When starting a new reminder, reset to empty fields.
-9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨.
+9.  **Maintain a Friendly Tone:** Be conversational, friendly, and use emojis 🎂✨💖.
 10. **Output JSON:** Your *final* response must be a single, clean JSON object. Do not add any text or explanations before or after the JSON. The JSON should have three keys: "response" (a string with your conversational reply to the user), "updatedData" (an object with the reminder fields you've collected or updated), and "isComplete" (a boolean. Set to true ONLY when the user has confirmed they are finished with creating or editing the current reminder, but the conversation can continue for new reminders).
 
 **Current State:**
@@ -157,6 +159,16 @@ Example of a valid JSON response:
     "personName": "John Doe",
     "dateOfBirth": "03/15/1990",
     "relationship": "",
+    "note": ""
+  },
+  "isComplete": false
+}
+{
+  "response": "Awesome! I've got your anniversary for John & Jane. Would you like to add a note?",
+  "updatedData": {
+    "personName": "John",
+    "partnerName": "Jane",
+    "date": "06/20/2010",
     "note": ""
   },
   "isComplete": false

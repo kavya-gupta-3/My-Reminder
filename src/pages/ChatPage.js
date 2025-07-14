@@ -99,7 +99,7 @@ function ChatPage() {
         let initialMessage = {
           id: 1,
           type: 'ai',
-          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday reminders. Who would you like to set a birthday reminder for? You can add as many as you'd like!"
+          content: "Hi there! 🎉 I'm your My Reminder AI assistant. I can help you create birthday and anniversary reminders. Who would you like to set a reminder for? You can add as many as you'd like!"
         };
 
         // Load chat history if not in edit mode
