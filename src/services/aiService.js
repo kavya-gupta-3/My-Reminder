@@ -2,26 +2,86 @@ class AIService {
   // Helper function to convert various date formats to MM/DD/YYYY
   convertDateToMMDDYYYY(dateString) {
     if (!dateString) return dateString;
-    
+
+    // Normalize common month misspellings (no duplicate keys)
+    const monthMap = {
+      jan: 'january',
+      feb: 'february',
+      mar: 'march',
+      apr: 'april',
+      may: 'may',
+      jun: 'june',
+      jul: 'july',
+      aug: 'august',
+      sep: 'september',
+      sept: 'september',
+      oct: 'october',
+      nov: 'november',
+      nav: 'november',
+      navamber: 'november',
+      dec: 'december',
+      decembar: 'december',
+      decamber: 'december',
+      novamber: 'november',
+      janvary: 'january',
+      febuary: 'february',
+      agust: 'august',
+      agustus: 'august',
+      septembar: 'september',
+      octobar: 'october',
+      aprail: 'april',
+      marhc: 'march',
+      julay: 'july',
+      mayy: 'may',
+      mayi: 'may',
+    };
+
+    // Replace misspelled month names with correct ones
+    let normalized = dateString.toLowerCase();
+    Object.keys(monthMap).forEach(misspell => {
+      if (normalized.includes(misspell)) {
+        normalized = normalized.replace(new RegExp(misspell, 'g'), monthMap[misspell]);
+      }
+    });
+
     // If already in MM/DD/YYYY format, return as is
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
-      return dateString;
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalized)) {
+      return normalized;
     }
-    
+
+    // Try to parse 'DD month YYYY' or 'DD month' or 'month DD YYYY' or 'month DD'
+    const monthNames = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    let day, month, year;
+    let match;
+    // 1. DD month YYYY or DD month
+    match = normalized.match(/^(\d{1,2})\s+([a-z]+)(?:\s+(\d{4}))?$/);
+    if (match && monthNames.includes(match[2])) {
+      day = parseInt(match[1]);
+      month = monthNames.indexOf(match[2]) + 1;
+      year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
+      return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
+    }
+    // 2. month DD YYYY or month DD
+    match = normalized.match(/^([a-z]+)\s+(\d{1,2})(?:\s+(\d{4}))?$/);
+    if (match && monthNames.includes(match[1])) {
+      day = parseInt(match[2]);
+      month = monthNames.indexOf(match[1]) + 1;
+      year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
+      return `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
+    }
+
+    // Fallback: Try to parse the normalized date string
     try {
-      // Try to parse the date string
-      const date = new Date(dateString);
-      
-      // Check if the date is valid
+      const date = new Date(normalized);
       if (isNaN(date.getTime())) {
         return dateString; // Return original if parsing fails
       }
-      
-      // Format as MM/DD/YYYY
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const year = date.getFullYear();
-      
       return `${month}/${day}/${year}`;
     } catch (error) {
       console.error('Error converting date:', error);
@@ -231,9 +291,12 @@ Example of a valid JSON response for anniversary:
       try {
         const parsedResponse = JSON.parse(content);
         
-        // Convert dateOfBirth to MM/DD/YYYY format if it exists
+        // Convert dateOfBirth and date to MM/DD/YYYY format if they exist
         if (parsedResponse.updatedData && parsedResponse.updatedData.dateOfBirth) {
           parsedResponse.updatedData.dateOfBirth = this.convertDateToMMDDYYYY(parsedResponse.updatedData.dateOfBirth);
+        }
+        if (parsedResponse.updatedData && parsedResponse.updatedData.date) {
+          parsedResponse.updatedData.date = this.convertDateToMMDDYYYY(parsedResponse.updatedData.date);
         }
         
         return parsedResponse;
