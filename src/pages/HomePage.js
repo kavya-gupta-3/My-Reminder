@@ -90,7 +90,7 @@ function HomePage() {
             alignItems: 'center',
             height: '80px'
           }}>
-            <img src="/LOGO.png" alt="App Logo" style={{ height: '64px', width: '64px', objectFit: 'contain', display: 'block' }} />
+            <img src="/reminder.png" alt="App Logo" style={{ height: '64px', width: '64px', objectFit: 'contain', display: 'block' }} />
           </div>
           <h1 style={{
             fontSize: 'clamp(2rem, 6vw, 2.5rem)',
@@ -553,7 +553,7 @@ function HomePage() {
             gap: '10px',
             flexWrap: 'wrap'
           }}>
-            <FaBirthdayCake style={{ fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', color: '#fff' }} />
+            <img src="/reminder.png" alt="App Logo" style={{ height: '24px', width: '24px', objectFit: 'contain' }} />
             <h3 style={{
               fontSize: 'clamp(1.01rem, 3vw, 1.2rem)',
               fontWeight: '800',
