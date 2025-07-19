@@ -248,7 +248,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Live App**: [https://myreminder.xyz/](https://myreminder.xyz/)
 - **GitHub Repository**: [https://github.com/kavya-gupta-3/MyReminder](https://github.com/kavya-gupta-3/MyReminder)
-- **Backend API**: [https://myreminder.xyz/api](https://myreminder.xyz/api)
+- **Backend API**: [https://birthday-reminder-i1uf.onrender.com](https://birthday-reminder-i1uf.onrender.com)
 
 ## 📞 Support
 
