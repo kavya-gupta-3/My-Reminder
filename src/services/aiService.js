@@ -155,7 +155,7 @@ Context:
 Create a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
 
       // Use backend proxy
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -299,7 +299,7 @@ Example of editing response (preserving existing data):
 `;
       
       // Use backend proxy
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -437,7 +437,7 @@ Context:
 - Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}
 
 Create a message that feels like it's coming from a caring friend or family member.`;
-        const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+        const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -554,7 +554,7 @@ AVOID THESE FORMAL STYLES:
 
       const userPrompt = `Create a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
       
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

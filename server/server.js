@@ -279,10 +279,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
+// For Vercel serverless functions
+module.exports = app;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Firebase initialized: ${firebaseInitialized}`);
-  console.log(`OpenRouter configured: ${!!OPENROUTER_API_KEY}`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5001;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Firebase initialized: ${firebaseInitialized}`);
+    console.log(`OpenRouter configured: ${!!OPENROUTER_API_KEY}`);
+  });
+}

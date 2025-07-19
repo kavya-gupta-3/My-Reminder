@@ -26,7 +26,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
   },
   "eslintConfig": {
     "extends": [
@@ -51,5 +53,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "proxy": "http://localhost:5001"
+  "devDependencies": {
+    "vercel": "^44.5.0"
+  }
 }
