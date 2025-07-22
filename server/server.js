@@ -16,6 +16,11 @@ app.use(cors({
 
 app.use(express.json());
 
+// Health check route
+app.get('/', (req, res) => {
+  res.send('Server is live');
+});
+
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // Initialize Firebase Admin only if environment variables are available

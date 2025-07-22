@@ -1,12 +1,12 @@
-// /api/generate.js
+// /api/ai-message.js
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Only POST requests allowed' });
   }
 
   try {
-    const { model, messages, max_tokens, temperature } = req.body;
+    const { message } = req.body;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -15,23 +15,19 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model,
-        messages,
-        max_tokens,
-        temperature
-      }),
+        model: "mistralai/mistral-7b-instruct",
+        messages: [
+          { role: "system", content: "You are a helpful reminder assistant." },
+          { role: "user", content: message }
+        ]
+      })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenRouter Error:", errorText);
-      return res.status(500).json({ error: 'OpenRouter error', message: errorText });
-    }
-
     const data = await response.json();
-    res.status(200).json(data);
-  } catch (err) {
-    console.error("Internal Server Error:", err);
-    res.status(500).json({ error: 'Internal Server Error', message: err.message });
+    res.status(200).json({ reply: data.choices?.[0]?.message?.content || "No response." });
+  } catch (error) {
+    console.error("API error:", error);
+    res.status(500).json({ error: "AI processing error" });
   }
 }
+
