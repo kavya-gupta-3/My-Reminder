@@ -154,24 +154,14 @@ Context:
 
 Create a heartfelt birthday message that feels like it's coming from a caring friend or family member.`;
 
-      // Use backend proxy
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      // Use Vercel serverless function
+      const response = await fetch('/api/ai-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai/gpt-4o',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a friendly AI assistant that creates personalized birthday messages. You are warm, caring, and creative. You follow the rules strictly and create appropriate, celebratory messages.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
+          prompt,
           max_tokens: maxTokens,
           temperature: 0.8
         })
@@ -298,19 +288,16 @@ Example of editing response (preserving existing data):
 }
 `;
       
-      // Use backend proxy
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      // Use Vercel serverless function for chat
+      const response = await fetch('/api/ai-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'openai/gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...messages.map(msg => ({ role: msg.type === 'ai' ? 'assistant' : 'user', content: msg.content }))
-          ],
-          max_tokens: 400,
-          temperature: 0.5,
-          response_format: { "type": "json_object" },
+          prompt: systemPrompt,
+          messages: messages.map(msg => ({ role: msg.type === 'ai' ? 'assistant' : 'user', content: msg.content })),
+          reminderData,
+          isEditing,
+          userContext
         })
       });
 
@@ -437,15 +424,11 @@ Context:
 - Notes: ${reminderData.note || 'No specific notes'}${userContextInfo}
 
 Create a message that feels like it's coming from a caring friend or family member.`;
-        const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+        const response = await fetch('/api/ai-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'openai/gpt-4o',
-            messages: [
-              { role: 'system', content: 'You are a friendly AI assistant that creates personalized anniversary messages. You are warm, loving, and creative.' },
-              { role: 'user', content: prompt }
-            ],
+            prompt,
             max_tokens: 200,
             temperature: 1.2
           })
@@ -554,17 +537,15 @@ AVOID THESE FORMAL STYLES:
 
       const userPrompt = `Create a birthday message for ${reminderData.personName}${reminderData.relationship ? ` (${reminderData.relationship})` : ''}${reminderData.note ? `. Note: ${reminderData.note}` : ''}${userContextInfo}`;
       
-      const response = await fetch('https://birthday-reminder-i1uf.onrender.com/api/generate', {
+      const response = await fetch('/api/ai-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'openai/gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          max_tokens: 200,
-          temperature: 1.2
+          prompt: systemPrompt,
+          userPrompt,
+          reminderData,
+          userContext,
+          size
         })
       });
       
