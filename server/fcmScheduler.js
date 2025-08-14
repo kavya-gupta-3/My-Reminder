@@ -12,6 +12,14 @@ const db = admin.database();
 const app = express();
 const PORT = process.env.PORT || 5002;
 
+// Helper: Build deeplink for notifications
+function getNotificationLink(data) {
+  if (data && data.reminderId) {
+    return `https://myreminder.xyz/reminder/${data.reminderId}`;
+  }
+  return 'https://myreminder.xyz/';
+}
+
 // Helper: Send FCM with better notification content
 async function sendFCM(token, title, body, data = {}) {
   try {
@@ -60,10 +68,9 @@ async function sendFCM(token, title, body, data = {}) {
           ]
         },
         fcm_options: {
-          link: getNotificationLink(reminder)
+          link: getNotificationLink(data)
         }
-      },
-      token: token
+      }
     });
     console.log('Notification sent:', title, body);
   } catch (err) {
@@ -94,19 +101,34 @@ async function getAllUsersWithReminders() {
 
 // Helper: Calculate notification times with better scheduling
 function getNotificationTimes(dateString, reminderType = 'birthday') {
-  // dateString: MM/DD/YYYY
-  const [month, day, year] = dateString.split('/');
+  if (!dateString) return [];
   const now = new Date();
+
+  let normalized = dateString;
+  // If not in MM/DD/YYYY, try to parse and normalize
+  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(normalized)) {
+    const parsed = new Date(dateString);
+    if (isNaN(parsed.getTime())) return [];
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    const y = parsed.getFullYear();
+    normalized = `${m}/${d}/${y}`;
+  }
+
+  const [monthStr, dayStr, yearStr] = normalized.split('/');
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
+  if (isNaN(month) || isNaN(day)) return [];
+
   let eventDate = new Date(now.getFullYear(), month - 1, day);
   if (eventDate < now) eventDate = new Date(now.getFullYear() + 1, month - 1, day);
 
-  // Better notification times
   return [
     { label: '1 week', time: new Date(eventDate.getTime() - 7 * 24 * 60 * 60 * 1000) },
     { label: '1 day', time: new Date(eventDate.getTime() - 24 * 60 * 60 * 1000) },
     { label: '6 hours', time: new Date(eventDate.getTime() - 6 * 60 * 60 * 1000) },
     { label: '1 hour', time: new Date(eventDate.getTime() - 1 * 60 * 60 * 1000) },
-    { label: 'midnight', time: new Date(eventDate.setHours(0,0,0,0)) }
+    { label: 'midnight', time: new Date(new Date(eventDate).setHours(0,0,0,0)) }
   ];
 }
 
